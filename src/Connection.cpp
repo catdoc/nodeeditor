@@ -15,7 +15,7 @@
 #include "NodeDataModel.hpp"
 
 #include "ConnectionState.hpp"
-#include "ConnectionGeometry.hpp"
+//#include "ConnectionGeometry.hpp"
 #include "ConnectionGraphicsObject.hpp"
 
 using QtNodes::Connection;
@@ -26,17 +26,16 @@ using QtNodes::Node;
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::ConnectionGraphicsObject;
-using QtNodes::ConnectionGeometry;
+//using QtNodes::ConnectionGeometry;
 using QtNodes::TypeConverter;
 
 Connection::
-Connection(PortType portType,
-           Node& node,
+Connection(PortType  portType,
+           Node&     node,
            PortIndex portIndex)
   : _uid(QUuid::createUuid())
   , _outPortIndex(INVALID)
   , _inPortIndex(INVALID)
-  , _connectionState()
 {
   setNodeToPort(node, portType, portIndex);
 
@@ -45,20 +44,19 @@ Connection(PortType portType,
 
 
 Connection::
-Connection(Node& nodeIn,
-           PortIndex portIndexIn,
-           Node& nodeOut,
-           PortIndex portIndexOut,
+Connection(Node&         nodeIn,
+           PortIndex     portIndexIn,
+           Node&         nodeOut,
+           PortIndex     portIndexOut,
            TypeConverter typeConverter)
   : _uid(QUuid::createUuid())
   , _outNode(&nodeOut)
   , _inNode(&nodeIn)
   , _outPortIndex(portIndexOut)
   , _inPortIndex(portIndexIn)
-  , _connectionState()
   , _converter(std::move(typeConverter))
 {
-  setNodeToPort(nodeIn, PortType::In, portIndexIn);
+  setNodeToPort(nodeIn,  PortType::In,  portIndexIn);
   setNodeToPort(nodeOut, PortType::Out, portIndexOut);
 }
 
@@ -93,27 +91,27 @@ save() const
 
   if (_inNode && _outNode)
   {
-    connectionJson["in_id"] = _inNode->id().toString();
+    connectionJson["in_id"]    = _inNode->id().toString();
     connectionJson["in_index"] = _inPortIndex;
 
-    connectionJson["out_id"] = _outNode->id().toString();
+    connectionJson["out_id"]    = _outNode->id().toString();
     connectionJson["out_index"] = _outPortIndex;
 
     if (_converter)
     {
       auto getTypeJson = [this](PortType type)
-      {
-        QJsonObject typeJson;
-        NodeDataType nodeType = this->dataType(type);
-        typeJson["id"] = nodeType.id;
-        typeJson["name"] = nodeType.name;
+                         {
+                           QJsonObject typeJson;
+                           NodeDataType nodeType = this->dataType(type);
+                           typeJson["id"]   = nodeType.id;
+                           typeJson["name"] = nodeType.name;
 
-        return typeJson;
-      };
+                           return typeJson;
+                         };
 
       QJsonObject converterTypeJson;
 
-      converterTypeJson["in"] = getTypeJson(PortType::In);
+      converterTypeJson["in"]  = getTypeJson(PortType::In);
       converterTypeJson["out"] = getTypeJson(PortType::Out);
 
       connectionJson["converter"] = converterTypeJson;
@@ -144,7 +142,7 @@ void
 Connection::
 setRequiredPort(PortType dragging)
 {
-  _connectionState.setRequiredPort(dragging);
+  //_connectionState.setRequiredPort(dragging);
 
   switch (dragging)
   {
@@ -164,19 +162,19 @@ setRequiredPort(PortType dragging)
 }
 
 
-PortType
-Connection::
-requiredPort() const
-{
-  return _connectionState.requiredPort();
-}
+//PortType
+//Connection::
+//requiredPort() const
+//{
+  //return _connectionState.requiredPort();
+//}
 
 
 void
 Connection::
 setGraphicsObject(std::unique_ptr<ConnectionGraphicsObject>&& graphics)
 {
-  _connectionGraphicsObject = std::move(graphics);
+  //_connectionGraphicsObject = std::move(graphics);
 
   // This function is only called when the ConnectionGraphicsObject
   // is newly created. At this moment both end coordinates are (0, 0)
@@ -185,26 +183,26 @@ setGraphicsObject(std::unique_ptr<ConnectionGraphicsObject>&& graphics)
   // By moving the whole object to the Node Port position
   // we position both connection ends correctly.
 
-  if (requiredPort() != PortType::None)
-  {
+  //if (requiredPort() != PortType::None)
+  //{
 
-    PortType attachedPort = oppositePort(requiredPort());
+    //PortType attachedPort = oppositePort(requiredPort());
 
-    PortIndex attachedPortIndex = getPortIndex(attachedPort);
+    //PortIndex attachedPortIndex = getPortIndex(attachedPort);
 
-    auto node = getNode(attachedPort);
+    //auto node = getNode(attachedPort);
 
-    QTransform nodeSceneTransform =
-      node->nodeGraphicsObject().sceneTransform();
+    //QTransform nodeSceneTransform =
+      //node->nodeGraphicsObject().sceneTransform();
 
-    QPointF pos = node->nodeGeometry().portScenePosition(attachedPortIndex,
-                                                         attachedPort,
-                                                         nodeSceneTransform);
+    //QPointF pos = node->nodeGeometry().portScenePosition(attachedPortIndex,
+                                                         //attachedPort,
+                                                         //nodeSceneTransform);
 
-    _connectionGraphicsObject->setPos(pos);
-  }
+    //_connectionGraphicsObject->setPos(pos);
+  //}
 
-  _connectionGraphicsObject->move();
+  //_connectionGraphicsObject->move();
 }
 
 
@@ -236,8 +234,8 @@ getPortIndex(PortType portType) const
 
 void
 Connection::
-setNodeToPort(Node& node,
-              PortType portType,
+setNodeToPort(Node&     node,
+              PortType  portType,
               PortIndex portIndex)
 {
   bool wasIncomplete = !complete();
@@ -254,7 +252,8 @@ setNodeToPort(Node& node,
   _connectionState.setNoRequiredPort();
 
   updated(*this);
-  if (complete() && wasIncomplete) {
+  if (complete() && wasIncomplete)
+  {
     connectionCompleted(*this);
   }
 }
@@ -296,20 +295,20 @@ connectionState() const
 }
 
 
-ConnectionGeometry&
-Connection::
-connectionGeometry()
-{
-  return _connectionGeometry;
-}
+//ConnectionGeometry&
+//Connection::
+//connectionGeometry()
+//{
+  //return _connectionGeometry;
+//}
 
 
-ConnectionGeometry const&
-Connection::
-connectionGeometry() const
-{
-  return _connectionGeometry;
-}
+//ConnectionGeometry const&
+//Connection::
+//connectionGeometry() const
+//{
+  //return _connectionGeometry;
+//}
 
 
 Node*
@@ -381,15 +380,15 @@ dataType(PortType portType) const
   if (_inNode && _outNode)
   {
     auto const & model = (portType == PortType::In) ?
-                        _inNode->nodeDataModel() :
-                        _outNode->nodeDataModel();
-    PortIndex index = (portType == PortType::In) ? 
+                         _inNode->nodeDataModel() :
+                         _outNode->nodeDataModel();
+    PortIndex index = (portType == PortType::In) ?
                       _inPortIndex :
                       _outPortIndex;
 
     return model->dataType(portType, index);
   }
-  else 
+  else
   {
     Node* validNode;
     PortIndex index = INVALID;

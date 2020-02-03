@@ -6,34 +6,33 @@
 #include <QtWidgets/QStyleOptionGraphicsItem>
 #include <QtWidgets/QGraphicsView>
 
-#include "FlowScene.hpp"
-
-#include "Connection.hpp"
-#include "ConnectionGeometry.hpp"
 #include "ConnectionPainter.hpp"
 #include "ConnectionState.hpp"
-#include "ConnectionBlurEffect.hpp"
-
-#include "NodeGraphicsObject.hpp"
-
+#include "ConnectionStyle.hpp"
 #include "NodeConnectionInteraction.hpp"
+#include "NodeGeometry.hpp"
+#include "NodeGraphicsObject.hpp"
+#include "NodeGraphicsScene.hpp"
+#include "StyleCollection.hpp"
+#include "locateNode.hpp"
 
-#include "Node.hpp"
 
-using QtNodes::ConnectionGraphicsObject;
-using QtNodes::Connection;
-using QtNodes::FlowScene;
+namespace QtNodes
+{
 
 ConnectionGraphicsObject::
-ConnectionGraphicsObject(FlowScene &scene,
-                         Connection &connection)
+ConnectionGraphicsObject(NodeGraphicsScene & scene,
+                         ConnectionId connectionId)
   : _scene(scene)
-  , _connection(connection)
+  , _connectionId(connectionId)
+  , _connectionState(*this)
+  , _out{0, 0}
+  , _in{0, 0}
 {
   _scene.addItem(this);
 
-  setFlag(QGraphicsItem::ItemIsMovable, true);
-  setFlag(QGraphicsItem::ItemIsFocusable, true);
+  setFlag(QGraphicsItem::ItemIsMovable,    true);
+  setFlag(QGraphicsItem::ItemIsFocusable,  true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
 
   setAcceptHoverEvents(true);
@@ -51,11 +50,11 @@ ConnectionGraphicsObject::
 }
 
 
-QtNodes::Connection&
+ConnectionId
 ConnectionGraphicsObject::
-connection()
+connectionId() const
 {
-  return _connection;
+  return _connectionId;
 }
 
 
@@ -63,7 +62,24 @@ QRectF
 ConnectionGraphicsObject::
 boundingRect() const
 {
-  return _connection.connectionGeometry().boundingRect();
+  auto points = pointsC1C2();
+
+  // `normalized()` fixes inverted rects.
+  QRectF basicRect = QRectF(_out, _in).normalized();
+
+  QRectF c1c2Rect = QRectF(points.first, points.second).normalized();
+
+  QRectF commonRect = basicRect.united(c1c2Rect);
+
+  auto const & connectionStyle = StyleCollection::connectionStyle();
+  float const diam = connectionStyle.pointDiameter();
+  QPointF const cornerOffset(diam, diam);
+
+  // Expand rect by port circle diameter
+  commonRect.setTopLeft(commonRect.topLeft() - cornerOffset);
+  commonRect.setBottomRight(commonRect.bottomRight() + 2 * cornerOffset);
+
+  return commonRect;
 }
 
 
@@ -79,12 +95,38 @@ shape() const
   //return path;
 
 #else
-  auto const &geom =
-    _connection.connectionGeometry();
-
-  return ConnectionPainter::getPainterStroke(geom);
-
+  return ConnectionPainter::getPainterStroke(*this);
 #endif
+}
+
+
+QPointF const &
+ConnectionGraphicsObject::
+endPoint(PortType portType) const
+{
+  Q_ASSERT(portType != PortType::None);
+
+  return (portType == PortType::Out ?
+          _out :
+          _in);
+}
+
+
+void
+ConnectionGraphicsObject::
+setEndPoint(PortType portType, QPointF const & point)
+{
+  QPointF & p = endPoint(portType);
+  p = point;
+}
+
+
+void
+ConnectionGraphicsObject::
+moveEndPointBy(PortType portType, QPointF const & offset)
+{
+  QPointF & p = endPoint(portType);
+  p += offset;
 }
 
 
@@ -100,57 +142,80 @@ void
 ConnectionGraphicsObject::
 move()
 {
-  for(PortType portType: { PortType::In, PortType::Out } )
-  {
-    if (auto node = _connection.getNode(portType))
+  auto moveEnd =
+    [&](NodeId nodeId, PortType portType, PortIndex portIndex)
     {
-      auto const &nodeGraphics = node->nodeGraphicsObject();
+      if (nodeId == InvalidNodeId)
+        return;
 
-      auto const &nodeGeom = node->nodeGeometry();
+      NodeGraphicsObject * ngo =
+        _scene.nodeGraphicsObject(nodeId);
+
+      NodeGeometry nodeGeometry(*ngo);
 
       QPointF scenePos =
-        nodeGeom.portScenePosition(_connection.getPortIndex(portType),
-                                   portType,
-                                   nodeGraphics.sceneTransform());
+        nodeGeometry.portScenePosition(portType,
+                                       portIndex,
+                                       ngo->sceneTransform());
 
       QTransform sceneTransform = this->sceneTransform();
 
       QPointF connectionPos = sceneTransform.inverted().map(scenePos);
 
-      _connection.connectionGeometry().setEndPoint(portType,
-                                                   connectionPos);
+      this->setEndPoint(portType, connectionPos);
 
-      _connection.getConnectionGraphicsObject().setGeometryChanged();
-      _connection.getConnectionGraphicsObject().update();
-    }
-  }
+    };
 
+  moveEnd(std::get<0>(_connectionId), PortType::Out, std::get<1>(_connectionId));
+  moveEnd(std::get<2>(_connectionId), PortType::In, std::get<3>(_connectionId));
+
+  setGeometryChanged();
+  update();
 }
 
-void ConnectionGraphicsObject::lock(bool locked)
+
+void
+ConnectionGraphicsObject::
+lock(bool locked)
 {
-  setFlag(QGraphicsItem::ItemIsMovable, !locked);
-  setFlag(QGraphicsItem::ItemIsFocusable, !locked);
+  setFlag(QGraphicsItem::ItemIsMovable,    !locked);
+  setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
   setFlag(QGraphicsItem::ItemIsSelectable, !locked);
 }
 
 
-void
+ConnectionState const &
 ConnectionGraphicsObject::
-paint(QPainter* painter,
-      QStyleOptionGraphicsItem const* option,
-      QWidget*)
+connectionState() const
 {
-  painter->setClipRect(option->exposedRect);
+  return _connectionState;
+}
 
-  ConnectionPainter::paint(painter,
-                           _connection);
+
+ConnectionState &
+ConnectionGraphicsObject::
+connectionState()
+{
+  return _connectionState;
 }
 
 
 void
 ConnectionGraphicsObject::
-mousePressEvent(QGraphicsSceneMouseEvent* event)
+paint(QPainter * painter,
+      QStyleOptionGraphicsItem const * option,
+      QWidget *)
+{
+  painter->setClipRect(option->exposedRect);
+
+  ConnectionPainter::paint(painter,
+                           *this);
+}
+
+
+void
+ConnectionGraphicsObject::
+mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
   QGraphicsItem::mousePressEvent(event);
   //event->ignore();
@@ -159,34 +224,50 @@ mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void
 ConnectionGraphicsObject::
-mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
   prepareGeometryChange();
 
-  auto view = static_cast<QGraphicsView*>(event->widget());
-  auto node = locateNodeAt(event->scenePos(),
-                           _scene,
-                           view->transform());
-
-  auto &state = _connection.connectionState();
-
-  state.interactWithNode(node);
-  if (node)
+  auto view = static_cast<QGraphicsView *>(event->widget());
+  auto ngo = locateNodeAt(event->scenePos(),
+                          _scene,
+                          view->transform());
+  if (ngo)
   {
-    node->reactToPossibleConnection(state.requiredPort(),
-                                    _connection.dataType(oppositePort(state.requiredPort())),
-                                    event->scenePos());
+    _connectionState.interactWithNode(ngo->nodeId());
+
+    GraphModel const & model = ngo->scene().graphModel();
+
+    PortType knownPortType = oppositePort(_connectionState.requiredPort());
+
+    NodeId knownNodeId = (knownPortType == PortType::Out) ?
+                         std::get<0>(_connectionId) :
+                         std::get<2>(_connectionId);
+
+    PortIndex knownPortIndex = (knownPortType ==  PortType::Out) ?
+                               std::get<1>(_connectionId) :
+                               std::get<3>(_connectionId);
+
+    NodeDataType knownDataType =
+      model.portData(knownNodeId,
+                     knownPortType,
+                     knownPortIndex,
+                     PortRole::DataType).value<NodeDataType>();
+
+    ngo->nodeState().reactToPossibleConnection(_connectionState.requiredPort(),
+                                               knownDataType,
+                                               event->scenePos());
   }
 
   //-------------------
 
   QPointF offset = event->pos() - event->lastPos();
 
-  auto requiredPort = _connection.requiredPort();
+  auto requiredPort = _connectionState.requiredPort();
 
   if (requiredPort != PortType::None)
   {
-    _connection.connectionGeometry().moveEndPoint(requiredPort, offset);
+    this->moveEndPointBy(requiredPort, offset);
   }
 
   //-------------------
@@ -199,49 +280,97 @@ mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void
 ConnectionGraphicsObject::
-mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
   ungrabMouse();
   event->accept();
 
-  auto node = locateNodeAt(event->scenePos(), _scene,
-                           _scene.views()[0]->transform());
+  auto view = static_cast<QGraphicsView *>(event->widget());
 
-  NodeConnectionInteraction interaction(*node, _connection, _scene);
+  auto ngo = locateNodeAt(event->scenePos(),
+                          _scene,
+                          view->transform());
 
-  if (node && interaction.tryConnect())
+  NodeId nodeId = ngo ? ngo->nodeId() : InvalidNodeId;
+
+  NodeConnectionInteraction interaction(nodeId, _connectionId, _scene);
+
+  if (ngo && interaction.tryConnect())
   {
-    node->resetReactionToConnection();
+    ngo->nodeState().resetReactionToConnection();
   }
 
-  if (_connection.connectionState().requiresPort())
+  if (_connectionState.requiresPort())
   {
-    _scene.deleteConnection(_connection);
+    _scene.deleteConnection(_connectionId);
   }
 }
 
 
 void
 ConnectionGraphicsObject::
-hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+hoverEnterEvent(QGraphicsSceneHoverEvent * event)
 {
-  _connection.connectionGeometry().setHovered(true);
+  _connectionState.setHovered(true);
 
   update();
-  _scene.connectionHovered(connection(), event->screenPos());
+
+  // Signal
+  _scene.connectionHovered(connectionId(), event->screenPos());
+
   event->accept();
 }
 
 
 void
 ConnectionGraphicsObject::
-hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
 {
-  _connection.connectionGeometry().setHovered(false);
+  _connectionState.setHovered(false);
 
   update();
-  _scene.connectionHoverLeft(connection());
+
+  // Signal
+  _scene.connectionHoverLeft(connectionId());
+
   event->accept();
+}
+
+
+std::pair<QPointF, QPointF>
+ConnectionGraphicsObject::
+pointsC1C2() const
+{
+  const double defaultOffset = 200;
+
+  double xDistance = _in.x() - _out.x();
+
+  double horizontalOffset = qMin(defaultOffset, std::abs(xDistance));
+
+  double verticalOffset = 0;
+
+  double ratioX = 0.5;
+
+  if (xDistance <= 0)
+  {
+    double yDistance = _in.y() - _out.y() + 20;
+
+    double vector = yDistance < 0 ? -1.0 : 1.0;
+
+    verticalOffset = qMin(defaultOffset, std::abs(yDistance)) * vector;
+
+    ratioX = 1.0;
+  }
+
+  horizontalOffset *= ratioX;
+
+  QPointF c1(_out.x() + horizontalOffset,
+             _out.y() + verticalOffset);
+
+  QPointF c2(_in.x() - horizontalOffset,
+             _in.y() - verticalOffset);
+
+  return std::make_pair(c1, c2);
 }
 
 
@@ -259,3 +388,7 @@ addGraphicsEffect()
   //effect->setOffset(4, 4);
   //effect->setColor(QColor(Qt::gray).darker(800));
 }
+
+
+}
+

@@ -3,13 +3,14 @@
 #include <QtCore/QUuid>
 
 #include "PortType.hpp"
+#include "Definitions.hpp"
 
 class QPointF;
 
 namespace QtNodes
 {
 
-class Node;
+class ConnectionGraphicsObject;
 
 /// Stores currently draggind end.
 /// Remembers last hovered Node.
@@ -17,12 +18,29 @@ class ConnectionState
 {
 public:
 
-  ConnectionState(PortType port = PortType::None)
-    : _requiredPort(port)
+  /// Defines whether we construct a new connection
+  /// or it is already binding two nodes.
+  enum LooseEnd
+  {
+    Pending   = 0,
+    Connected = 1
+  };
+
+public:
+
+  ConnectionState(ConnectionGraphicsObject & cgo,
+                  PortType requiredPort = PortType::None)
+    : _cgo(cgo)
+    , _requiredPort(requiredPort)
+    , _connectedState(LooseEnd::Pending)
+    , _hovered(false)
   {}
 
-  ConnectionState(const ConnectionState&) = delete;
-  ConnectionState operator=(const ConnectionState&) = delete;
+  ConnectionState(ConnectionState const&) = delete;
+  ConnectionState(ConnectionState &&) = delete;
+
+  ConnectionState& operator=(ConnectionState const&) = delete;
+  ConnectionState& operator=(ConnectionState &&) = delete;
 
   ~ConnectionState();
 
@@ -40,13 +58,17 @@ public:
   void setNoRequiredPort()
   { _requiredPort = PortType::None; }
 
+  bool hovered() const { return _hovered; }
+  void setHovered(bool hovered) { _hovered = hovered; }
+
 public:
 
-  void interactWithNode(Node* node);
+  /// Caches NodeId for further interaction.
+  void interactWithNode(NodeId const node);
 
-  void setLastHoveredNode(Node* node);
+  void setLastHoveredNode(NodeId const node);
 
-  Node*
+  NodeId
   lastHoveredNode() const
   { return _lastHoveredNode; }
 
@@ -54,8 +76,15 @@ public:
 
 private:
 
+  ConnectionGraphicsObject & _cgo;
+
   PortType _requiredPort;
 
-  Node* _lastHoveredNode{nullptr};
+  LooseEnd _connectedState;
+
+  bool _hovered;
+
+  NodeId _lastHoveredNode{InvalidNodeId};
+
 };
 }

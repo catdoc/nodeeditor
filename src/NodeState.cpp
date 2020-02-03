@@ -12,67 +12,96 @@ using QtNodes::PortIndex;
 using QtNodes::Connection;
 
 NodeState::
-NodeState(std::unique_ptr<NodeDataModel> const &model)
-  : _inConnections(model->nPorts(PortType::In))
-  , _outConnections(model->nPorts(PortType::Out))
+NodeState(NodeGraphicsObject & ngo)
+  : _ngo(ngo)
+  , _hovered(false)
   , _reaction(NOT_REACTING)
   , _reactingPortType(PortType::None)
+  , _locked(false)
   , _resizing(false)
 {}
 
 
-std::vector<NodeState::ConnectionPtrSet> const &
+//std::vector<NodeState::ConnectionPtrSet> const &
+//NodeState::
+//getEntries(PortType portType) const
+//{
+//if (portType == PortType::In)
+//return _inConnections;
+//else
+//return _outConnections;
+//}
+
+
+//std::vector<NodeState::ConnectionPtrSet> &
+//NodeState::
+//getEntries(PortType portType)
+//{
+//if (portType == PortType::In)
+//return _inConnections;
+//else
+//return _outConnections;
+//}
+
+
+//NodeState::ConnectionPtrSet
+//NodeState::
+//connections(PortType portType, PortIndex portIndex) const
+//{
+//auto const &connections = getEntries(portType);
+
+//return connections[portIndex];
+//}
+
+
+//void
+//NodeState::
+//setConnection(PortType portType,
+//PortIndex portIndex,
+//Connection& connection)
+//{
+//auto &connections = getEntries(portType);
+
+//connections.at(portIndex).insert(std::make_pair(connection.id(),
+//&connection));
+//}
+
+
+//void
+//NodeState::
+//eraseConnection(PortType portType,
+//PortIndex portIndex,
+//QUuid id)
+//{
+//getEntries(portType)[portIndex].erase(id);
+//}
+
+
+void
 NodeState::
-getEntries(PortType portType) const
+setResizing(bool resizing)
 {
-  if (portType == PortType::In)
-    return _inConnections;
-  else
-    return _outConnections;
+  _resizing = resizing;
 }
 
 
-std::vector<NodeState::ConnectionPtrSet> &
+bool
 NodeState::
-getEntries(PortType portType)
+resizing() const
 {
-  if (portType == PortType::In)
-    return _inConnections;
-  else
-    return _outConnections;
-}
-
-
-NodeState::ConnectionPtrSet
-NodeState::
-connections(PortType portType, PortIndex portIndex) const
-{
-  auto const &connections = getEntries(portType);
-
-  return connections[portIndex];
+  return _resizing;
 }
 
 
 void
 NodeState::
-setConnection(PortType portType,
-              PortIndex portIndex,
-              Connection& connection)
+lock(bool locked)
 {
-  auto &connections = getEntries(portType);
+  _locked = locked;
 
-  connections.at(portIndex).insert(std::make_pair(connection.id(),
-                                               &connection));
-}
-
-
-void
-NodeState::
-eraseConnection(PortType portType,
-                PortIndex portIndex,
-                QUuid id)
-{
-  getEntries(portType)[portIndex].erase(id);
+  setFlag(QGraphicsItem::ItemIsMovable,    !locked);
+  setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
+  setFlag(QGraphicsItem::ItemIsSelectable, !locked);
 }
 
 
@@ -124,15 +153,30 @@ isReacting() const
 
 void
 NodeState::
-setResizing(bool resizing)
+reactToPossibleConnection(PortType reactingPortType,
+                          NodeDataType const & reactingDataType,
+                          QPointF const & scenePoint)
 {
-  _resizing = resizing;
+  QTransform const t = _nodeGraphicsObject->sceneTransform();
+
+  QPointF p = t.inverted().map(scenePoint);
+
+  _draggingPos = p;
+
+  setReaction(NodeState::REACTING,
+              reactingPortType,
+              reactingDataType);
+
+  _nodeGraphicsObject->update();
+
 }
 
 
-bool
+void
 NodeState::
-resizing() const
+resetReactionToConnection()
 {
-  return _resizing;
+  setReaction(NodeState::NOT_REACTING);
+  _nodeGraphicsObject->update();
 }
+

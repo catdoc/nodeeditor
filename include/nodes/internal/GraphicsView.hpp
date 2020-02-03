@@ -7,25 +7,24 @@
 namespace QtNodes
 {
 
-class FlowScene;
+class NodeGraphicsScene;
 
-class NODE_EDITOR_PUBLIC FlowView
+class NODE_EDITOR_PUBLIC GraphicsView
   : public QGraphicsView
 {
   Q_OBJECT
 public:
+  GraphicsView(QWidget *parent = Q_NULLPTR);
+  GraphicsView(NodeGraphicsScene *scene, QWidget *parent = Q_NULLPTR);
 
-  FlowView(QWidget *parent = Q_NULLPTR);
-  FlowView(FlowScene *scene, QWidget *parent = Q_NULLPTR);
-
-  FlowView(const FlowView&) = delete;
-  FlowView operator=(const FlowView&) = delete;
+  GraphicsView(const GraphicsView &) = delete;
+  GraphicsView operator=(const GraphicsView &) = delete;
 
   QAction* clearSelectionAction() const;
 
   QAction* deleteSelectionAction() const;
 
-  void setScene(FlowScene *scene);
+  void setScene(NodeGraphicsScene *scene);
 
 public Q_SLOTS:
 
@@ -49,13 +48,13 @@ protected:
 
   void mouseMoveEvent(QMouseEvent *event) override;
 
-  void drawBackground(QPainter* painter, const QRectF& r) override;
+  void drawBackground(QPainter* painter, const QRectF & r) override;
 
   void showEvent(QShowEvent *event) override;
 
 protected:
 
-  FlowScene * scene();
+  NodeGraphicsScene * scene();
 
 private:
 
@@ -64,6 +63,6 @@ private:
 
   QPointF _clickPos;
 
-  FlowScene* _scene;
+  NodeGraphicsScene* _scene;
 };
 }
