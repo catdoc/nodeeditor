@@ -1,13 +1,13 @@
 #include "ConnectionState.hpp"
 
-#include <iostream>
-
 #include <QtCore/QPointF>
 
 #include "ConnectionGraphicsObject.hpp"
+#include "NodeGraphicsObject.hpp"
 #include "NodeGraphicsScene.hpp"
 
-using QtNodes::ConnectionState;
+namespace QtNodes
+{
 
 ConnectionState::
 ~ConnectionState()
@@ -18,11 +18,11 @@ ConnectionState::
 
 void
 ConnectionState::
-interactWithNode(NodeId const node)
+interactWithNode(NodeId const nodeId)
 {
-  if (node != InvalidNode)
+  if (nodeId != InvalidNodeId)
   {
-    _lastHoveredNode = node;
+    _lastHoveredNode = nodeId;
   }
   else
   {
@@ -33,9 +33,9 @@ interactWithNode(NodeId const node)
 
 void
 ConnectionState::
-setLastHoveredNode(NodeId const node)
+setLastHoveredNode(NodeId const nodeId)
 {
-  _lastHoveredNode = node;
+  _lastHoveredNode = nodeId;
 }
 
 
@@ -43,9 +43,14 @@ void
 ConnectionState::
 resetLastHoveredNode()
 {
-  if (_lastHoveredNode != InvalidNode)
-    _lastHoveredNode->resetReactionToConnection();
+  if (_lastHoveredNode != InvalidNodeId)
+  {
+    auto & ngo = *_cgo.scene().nodeGraphicsObject(_lastHoveredNode);
+    ngo.nodeState().resetReactionToConnection();
+  }
 
-  _lastHoveredNode = nullptr;
+  _lastHoveredNode = InvalidNodeId;
 }
 
+
+}

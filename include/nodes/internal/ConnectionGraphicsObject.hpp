@@ -17,15 +17,14 @@ class NodeGraphicsScene;
 class ConnectionGeometry;
 
 /// Graphic Object for connection. Adds itself to scene
-class ConnectionGraphicsObject
-  : public QGraphicsObject
+class ConnectionGraphicsObject : public QGraphicsObject
 {
   Q_OBJECT
 
 public:
 
   ConnectionGraphicsObject(NodeGraphicsScene & scene,
-                           ConnectionId connectionId);
+                           ConnectionId const  connectionId);
 
   virtual ~ConnectionGraphicsObject();
 
@@ -40,12 +39,14 @@ public:
 
   ConnectionId connectionId() const;
 
+  /// Needed when working with detached connection.
+  void setConnectionId(ConnectionId const connectionId);
+
   QRectF boundingRect() const override;
 
   QPainterPath shape() const override;
 
   QPointF const & endPoint(PortType portType) const;
-  QPointF & endPoint(PortType portType);
   QPointF out() const { return _out; }
   QPointF in() const { return _in; }
 
@@ -60,8 +61,6 @@ public:
 
   /// Updates the position of both ends
   void move();
-
-  void lock(bool locked);
 
   ConnectionState const & connectionState() const;
   ConnectionState & connectionState();

@@ -8,11 +8,11 @@
 
 #include <QtCore/QRectF>
 #include <QtCore/QPointF>
+#include <QtCore/QDebug>
 
 #include <QtOpenGL>
 #include <QtWidgets>
 
-#include <QDebug>
 #include <iostream>
 #include <cmath>
 
@@ -379,8 +379,6 @@ drawBackground(QPainter* painter, const QRectF & r)
     };
 
   auto const & flowViewStyle = StyleCollection::flowViewStyle();
-
-  QBrush bBrush = backgroundBrush();
 
   QPen pfine(flowViewStyle.FineGridColor, 1.0);
 

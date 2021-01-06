@@ -85,7 +85,10 @@ public:
                    PortRole  role) const;
 
   virtual
-  bool removeConnection(ConnectionId const connectionId);
+  bool deleteConnection(ConnectionId const connectionId);
+
+  virtual
+  bool deleteNode(NodeId const nodeId);
 };
 
 }

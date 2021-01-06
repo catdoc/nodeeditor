@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtCore/QObject>
 #include <QtCore/QString>
 
 #include "Export.hpp"
@@ -30,5 +31,6 @@ public:
   /// Type for inner use
   virtual NodeDataType type() const = 0;
 };
+
 }
 Q_DECLARE_METATYPE(QtNodes::NodeDataType)

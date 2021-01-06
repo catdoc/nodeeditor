@@ -1,15 +1,10 @@
 #include "NodeState.hpp"
 
-#include "NodeDataModel.hpp"
+#include "NodeGraphicsObject.hpp"
 
-#include "Connection.hpp"
 
-using QtNodes::NodeState;
-using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
-using QtNodes::PortType;
-using QtNodes::PortIndex;
-using QtNodes::Connection;
+namespace QtNodes
+{
 
 NodeState::
 NodeState(NodeGraphicsObject & ngo)
@@ -17,7 +12,7 @@ NodeState(NodeGraphicsObject & ngo)
   , _hovered(false)
   , _reaction(NOT_REACTING)
   , _reactingPortType(PortType::None)
-  , _locked(false)
+  //, _locked(false)
   , _resizing(false)
 {}
 
@@ -93,16 +88,16 @@ resizing() const
 }
 
 
-void
-NodeState::
-lock(bool locked)
-{
-  _locked = locked;
+//void
+//NodeState::
+//lock(bool locked)
+//{
+//_locked = locked;
 
-  setFlag(QGraphicsItem::ItemIsMovable,    !locked);
-  setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
-  setFlag(QGraphicsItem::ItemIsSelectable, !locked);
-}
+//setFlag(QGraphicsItem::ItemIsMovable,    !locked);
+//setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
+//setFlag(QGraphicsItem::ItemIsSelectable, !locked);
+//}
 
 
 NodeState::ReactToConnectionState
@@ -157,7 +152,7 @@ reactToPossibleConnection(PortType reactingPortType,
                           NodeDataType const & reactingDataType,
                           QPointF const & scenePoint)
 {
-  QTransform const t = _nodeGraphicsObject->sceneTransform();
+  QTransform const t = _ngo.sceneTransform();
 
   QPointF p = t.inverted().map(scenePoint);
 
@@ -167,7 +162,7 @@ reactToPossibleConnection(PortType reactingPortType,
               reactingPortType,
               reactingDataType);
 
-  _nodeGraphicsObject->update();
+  _ngo.update();
 
 }
 
@@ -177,6 +172,9 @@ NodeState::
 resetReactionToConnection()
 {
   setReaction(NodeState::NOT_REACTING);
-  _nodeGraphicsObject->update();
+
+  _ngo.update();
 }
 
+
+}

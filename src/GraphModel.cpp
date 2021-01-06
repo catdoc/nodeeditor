@@ -180,7 +180,16 @@ setPortData(NodeId    nodeId,
 
 bool
 GraphModel::
-removeConnection(ConnectionId const connectionId)
+deleteConnection(ConnectionId const connectionId)
+{
+  //
+
+  return false;
+}
+
+bool
+GraphModel::
+deleteNode(NodeId const nodeId)
 {
   //
 

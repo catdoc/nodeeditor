@@ -2,7 +2,8 @@
 
 #include <QtCore/QUuid>
 
-#include "PortType.hpp"
+#include "Export.hpp"
+
 #include "Definitions.hpp"
 
 class QPointF;
@@ -14,7 +15,7 @@ class ConnectionGraphicsObject;
 
 /// Stores currently draggind end.
 /// Remembers last hovered Node.
-class ConnectionState
+class NODE_EDITOR_PUBLIC ConnectionState
 {
 public:
 
@@ -64,9 +65,9 @@ public:
 public:
 
   /// Caches NodeId for further interaction.
-  void interactWithNode(NodeId const node);
+  void interactWithNode(NodeId const nodeId);
 
-  void setLastHoveredNode(NodeId const node);
+  void setLastHoveredNode(NodeId const nodeId);
 
   NodeId
   lastHoveredNode() const

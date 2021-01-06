@@ -37,6 +37,7 @@ public:
 public:
 
   GraphModel const & graphModel() const;
+  GraphModel & graphModel();
 
 private:
 
@@ -51,9 +52,10 @@ private:
 
 public:
 
-  //std::shared_ptr<Connection> createConnection(PortType  connectedPort,
-  //Node &    node,
-  //PortIndex portIndex);
+  ConnectionGraphicsObject &
+  createConnection(NodeId const    nodeId,
+                   PortType const  connectedPort,
+                   PortIndex const portIndex);
 
   //std::shared_ptr<Connection> createConnection(Node &                nodeIn,
   //PortIndex             portIndexIn,
@@ -63,13 +65,14 @@ public:
 
   //std::shared_ptr<Connection> restoreConnection(QJsonObject const & connectionJson);
 
-  void deleteConnection(ConnectionId const connectionId);
+  std::unique_ptr<ConnectionGraphicsObject>
+  deleteConnection(ConnectionId const connectionId);
 
   //Node & createNode(std::unique_ptr<NodeDataModel> && dataModel);
 
   //Node & restoreNode(QJsonObject const & nodeJson);
 
-  void deleteConnection(Node & node);
+  void deleteNode(NodeId const nodeId);
 
   //DataModelRegistry & registry() const;
 
@@ -109,31 +112,15 @@ public:
 
   //void loadFromMemory(const QByteArray & data);
 
-  NodeGraphicsObject*
-  nodeGraphicsObject(NodeId nodeId)
-  {
-    NodeGraphicsObject * ngo = nullptr;
-    auto it = _nodeGraphicsObjects.find(nodeId);
-    if (it != _nodeGraphicsObjects.end())
-    {
-      ngo = it->second.get();
-    }
+  NodeGraphicsObject *
+  nodeGraphicsObject(NodeId nodeId);
 
-    return ngo;
-  }
+  ConnectionGraphicsObject *
+  connectionGraphicsObject(ConnectionId connectionId);
 
-  ConnectionGraphicsObject*
-  connectionGraphicsObject(ConnectionId connectionId)
-  {
-    ConnectionGraphicsObject * cgo = nullptr;
-    auto it = _connectionGraphicsObjects.find(connectionId);
-    if (it != _connectionGraphicsObjects.end())
-    {
-      cgo = it->second.get();
-    }
-
-    return cgo;
-  }
+  bool
+  insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
+                           ConnectionId connectionId);
 
 Q_SIGNALS:
 
@@ -150,24 +137,24 @@ Q_SIGNALS:
    */
   //void nodePlaced(Node &n);
 
-  void beforeNodeDeleted(NodeId const n);
+  void beforeNodeDeleted(NodeId const nodeId);
 
   //void connectionCreated(Connection const &c);
   //void connectionDeleted(Connection const &c);
 
   //void nodeMoved(Node& n, const QPointF& newLocation);
 
-  //void nodeDoubleClicked(Node& n);
+  void nodeDoubleClicked(NodeId const nodeId);
 
-  void connectionHovered(ConnectionId const connectionId, QPoint screenPos);
+  void connectionHovered(ConnectionId const connectionId, QPoint const screenPos);
 
-  //void nodeHovered(Node& n, QPoint screenPos);
+  void nodeHovered(NodeId const nodeId, QPoint const screenPos);
 
   void connectionHoverLeft(ConnectionId const connectionId);
 
-  //void nodeHoverLeft(Node& n);
+  void nodeHoverLeft(NodeId const nodeId);
 
-  //void nodeContextMenu(Node& n, const QPointF& pos);
+  void nodeContextMenu(NodeId const nodeId, QPointF const pos);
 
 private:
 

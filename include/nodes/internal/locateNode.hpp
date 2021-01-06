@@ -3,6 +3,8 @@
 #include <QtCore/QPointF>
 #include <QtGui/QTransform>
 
+#include "Export.hpp"
+
 namespace QtNodes
 {
 
@@ -11,6 +13,7 @@ class NodeGraphicsScene;
 
 
 NodeGraphicsObject*
+NODE_EDITOR_PUBLIC
 locateNodeAt(QPointF scenePoint,
              NodeGraphicsScene &scene,
              QTransform const & viewTransform);

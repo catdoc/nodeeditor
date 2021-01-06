@@ -1,6 +1,7 @@
 #include "NodeGraphicsScene.hpp"
 
-#include <deque>
+#include <queue>
+#include <iostream>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
@@ -43,22 +44,27 @@ traverseGraphAndPopulateGraphicsObjects()
 
   while (!allNodeIds.empty())
   {
-    std::deque<NodeId> fifo;
+    std::queue<NodeId> fifo;
 
     auto firstId = *allNodeIds.begin();
     allNodeIds.erase(firstId);
 
-    fifo.push_back(firstId);
+    fifo.push(firstId);
 
     while (!fifo.empty())
     {
       auto nodeId = fifo.front();
+      fifo.pop();
+
+      std::cout << "Create Node : " << nodeId << std::endl;
 
       _nodeGraphicsObjects[nodeId] =
         std::make_unique<NodeGraphicsObject>(*this, nodeId);
 
       unsigned int nOutPorts =
         _graphModel.nodeData(nodeId, NodeRole::NumberOfOutPorts).toUInt();
+
+      std::cout << "N Out ports : " << nOutPorts << std::endl;
 
       for (PortIndex index = 0; index < nOutPorts; ++index)
       {
@@ -69,7 +75,7 @@ traverseGraphAndPopulateGraphicsObjects()
 
         for (auto cn : connectedNodes)
         {
-          fifo.push_back(cn.second);
+          fifo.push(cn.second);
           allNodeIds.erase(cn.second);
 
           auto connectionId = std::make_tuple(nodeId, index, cn.second, cn.first);
@@ -81,6 +87,8 @@ traverseGraphAndPopulateGraphicsObjects()
       }
     } // while
   }
+
+  std::cout << "Scene construction finished" << std::endl;
 }
 
 
@@ -121,39 +129,48 @@ graphModel() const
 }
 
 
-//------------------------------------------------------------------------------
-
-
-#if 0
-std::shared_ptr<Connection>
+GraphModel &
 NodeGraphicsScene::
-createConnection(PortType  connectedPort,
-                 Node &    node,
-                 PortIndex portIndex)
+graphModel()
 {
-  auto connection = std::make_shared<Connection>(connectedPort, node, portIndex);
-
-  auto cgo = detail::make_unique<ConnectionGraphicsObject>(*this, *connection);
-
-  // after this function connection points are set to node port
-  connection->setGraphicsObject(std::move(cgo));
-
-  _connections[connection->id()] = connection;
-
-  // Note: this connection isn't truly created yet. It's only partially created.
-  // Thus, don't send the connectionCreated(...) signal.
-
-  connect(connection.get(),
-          &Connection::connectionCompleted,
-          this,
-          [this](Connection const & c) {
-      connectionCreated(c);
-    });
-
-  return connection;
+  return _graphModel;
 }
 
 
+//------------------------------------------------------------------------------
+
+
+ConnectionGraphicsObject &
+NodeGraphicsScene::
+createConnection(NodeId const    nodeId,
+                 PortType const  connectedPort,
+                 PortIndex const portIndex)
+{
+  // Construct an incomplete ConnectionId with one dangling end.
+  ConnectionId const connectionId =
+    (connectedPort == PortType::In) ?
+    std::make_tuple(InvalidNodeId, InvalidPortIndex, nodeId, portIndex) :
+    std::make_tuple(nodeId, portIndex, InvalidNodeId, InvalidPortIndex);
+
+  auto cgo = std::make_unique<ConnectionGraphicsObject>(*this, connectionId);
+
+  _connectionGraphicsObjects[connectionId] = std::move(cgo);
+
+  // Note: this connection isn't truly created yet.
+  // It has just one valid attached end.
+  // Thus, don't send the connectionCreated(...) signal.
+
+  //QObject::connect(connection.get(),
+  //&Connection::connectionCompleted,
+  //this,
+  //[this](Connection const & c)
+  //{ connectionCreated(c); });
+
+  return *_connectionGraphicsObjects[connectionId];
+}
+
+
+#if 0
 std::shared_ptr<Connection>
 NodeGraphicsScene::
 createConnection(Node &    nodeIn,
@@ -241,16 +258,23 @@ createConnection(Node &    nodeIn,
 //}
 
 
-void
+std::unique_ptr<ConnectionGraphicsObject>
 NodeGraphicsScene::
 deleteConnection(ConnectionId const connectionId)
 {
+  std::unique_ptr<ConnectionGraphicsObject> removed;
+
   auto it = _connectionGraphicsObjects.find(connectionId);
   if (it != _connectionGraphicsObjects.end())
   {
-    _graphModel.removeConnection(connectionId);
+    _graphModel.deleteConnection(connectionId);
+
+    removed = std::move(it->second);
+
     _connectionGraphicsObjects.erase(it);
   }
+
+  return removed;
 }
 
 
@@ -300,24 +324,17 @@ deleteConnection(ConnectionId const connectionId)
 
 void
 NodeGraphicsScene::
-deleteNode(Node & node)
+deleteNode(NodeId const nodeId)
 {
   // Signal
-  beforeNodeDeleted(node);
+  beforeNodeDeleted(nodeId);
 
-  for (auto portType: {PortType::In, PortType::Out})
+  auto it = _nodeGraphicsObjects.find(nodeId);
+  if (it != _nodeGraphicsObjects.end())
   {
-    auto nodeState = node.nodeState();
-    auto const & nodeEntries = nodeState.getEntries(portType);
-
-    for (auto & connections : nodeEntries)
-    {
-      for (auto const & pair : connections)
-        deleteConnection(*pair.second);
-    }
+    _graphModel.deleteNode(nodeId);
+    _nodeGraphicsObjects.erase(it);
   }
-
-  _nodes.erase(node.id());
 }
 
 
@@ -533,6 +550,46 @@ clearScene()
 //{
 //removeNode(*_nodes.begin()->second);
 //}
+}
+
+
+NodeGraphicsObject*
+NodeGraphicsScene::
+nodeGraphicsObject(NodeId nodeId)
+{
+  NodeGraphicsObject * ngo = nullptr;
+  auto it = _nodeGraphicsObjects.find(nodeId);
+  if (it != _nodeGraphicsObjects.end())
+  {
+    ngo = it->second.get();
+  }
+
+  return ngo;
+}
+
+
+ConnectionGraphicsObject*
+NodeGraphicsScene::
+connectionGraphicsObject(ConnectionId connectionId)
+{
+  ConnectionGraphicsObject * cgo = nullptr;
+  auto it = _connectionGraphicsObjects.find(connectionId);
+  if (it != _connectionGraphicsObjects.end())
+  {
+    cgo = it->second.get();
+  }
+
+  return cgo;
+}
+
+
+bool
+NodeGraphicsScene::
+insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
+                         ConnectionId const connectionId)
+{
+  // TODO: sanity check if such a connection id exists.
+  _connectionGraphicsObjects[connectionId] = std::move(cgo);
 }
 
 

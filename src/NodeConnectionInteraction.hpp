@@ -1,15 +1,17 @@
 #pragma once
 
-//#include "Node.hpp"
-//#include "Connection.hpp"
+#include <memory>
+
+#include <QtCore/QPointF>
+
 #include "Definitions.hpp"
 
 namespace QtNodes
 {
 
-class DataModelRegistry;
+class ConnectionGraphicsObject;
+class NodeGraphicsObject;
 class NodeGraphicsScene;
-class NodeDataModel;
 
 /// Class performs various operations on the Node and Connection pair.
 /// An instance should be created on the stack and destroyed when
@@ -17,9 +19,9 @@ class NodeDataModel;
 class NodeConnectionInteraction
 {
 public:
-  NodeConnectionInteraction(NodeId& node,
-                            ConnectionId& connection,
-                            NodeGraphicsScene& scene);
+  NodeConnectionInteraction(NodeGraphicsObject & ngo,
+                            ConnectionGraphicsObject & cgo,
+                            NodeGraphicsScene & scene);
 
   /// Can connect when following conditions are met:
   /// 1) Connection 'requires' a port
@@ -32,7 +34,6 @@ public:
   bool canConnect(PortIndex & portIndex) const;
 
   /// 1)   Check conditions from 'canConnect'
-  /// 1.5) If the connection is possible but a type conversion is needed, add a converter node to the scene, and connect it properly
   /// 2)   Assign node to required port in Connection
   /// 3)   Assign Connection to empty port in NodeState
   /// 4)   Adjust Connection geometry
@@ -62,10 +63,13 @@ private:
 
 private:
 
-  NodeId _nodeId;
+  NodeGraphicsObject & _ngo;
 
-  ConnectionId _connectionId;
+  ConnectionGraphicsObject & _cgo;
 
-  NodeGraphicsScene* _scene;
+  NodeGraphicsScene & _scene;
+
+  static std::unique_ptr<ConnectionGraphicsObject> _danglingConnection;
 };
+
 }

@@ -6,8 +6,6 @@
 #include <QtCore/QJsonValueRef>
 #include <QtCore/QJsonArray>
 
-#include <QDebug>
-
 #include "StyleCollection.hpp"
 
 using QtNodes::GraphicsViewStyle;

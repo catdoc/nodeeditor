@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include <QtCore/QPointF>
 #include <QtCore/QUuid>
 
 #include "Export.hpp"
@@ -13,7 +14,6 @@
 namespace QtNodes
 {
 
-class Connection;
 class NodeGraphicsObject;
 
 /// Contains vectors of connected input and output connections.
@@ -28,12 +28,12 @@ public:
     NOT_REACTING
   };
 
-  using ConnectionPtrSet =
-    std::unordered_map<QUuid, Connection*>;
+  //using ConnectionPtrSet =
+    //std::unordered_map<QUuid, Connection*>;
 
 public:
 
-  NodeState(NodeGraphicsObject const & ngo);
+  NodeState(NodeGraphicsObject & ngo);
 
 public:
 
@@ -72,9 +72,9 @@ public:
   bool
   resizing() const;
 
-  void lock(bool locked = true);
+  //void lock(bool locked = true);
 
-  void unlock() { lock(false); }
+  //void unlock() { lock(false); }
 
 public:
 

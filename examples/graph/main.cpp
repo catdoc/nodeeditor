@@ -49,7 +49,6 @@ main(int argc, char *argv[])
 
   GraphicsView view(scene);
 
-
   view.setWindowTitle("Simplest model-based graph");
   view.resize(800, 600);
   view.showNormal();

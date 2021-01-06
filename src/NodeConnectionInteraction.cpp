@@ -1,8 +1,7 @@
 #include "NodeConnectionInteraction.hpp"
 
 #include "ConnectionGraphicsObject.hpp"
-#include "DataModelRegistry.hpp"
-#include "NodeDataModel.hpp"
+#include "NodeGeometry.hpp"
 #include "NodeGraphicsObject.hpp"
 #include "NodeGraphicsScene.hpp"
 
@@ -10,14 +9,17 @@
 namespace QtNodes
 {
 
+std::unique_ptr<ConnectionGraphicsObject>
+NodeConnectionInteraction::_danglingConnection;
+
 
 NodeConnectionInteraction::
-NodeConnectionInteraction(NodeId const nodeId,
-                          ConnectionId const connectionId,
-                          NodeGraphicsScene& scene)
-  : _nodeId(nodeId)
-  , _connectionId(connectionId)
-  , _scene(&scene)
+NodeConnectionInteraction(NodeGraphicsObject & ngo,
+                          ConnectionGraphicsObject & cgo,
+                          NodeGraphicsScene &  scene)
+  : _ngo(ngo)
+  , _cgo(cgo)
+  , _scene(scene)
 {}
 
 
@@ -146,28 +148,33 @@ bool
 NodeConnectionInteraction::
 disconnect(PortType portToDisconnect) const
 {
-  return false;
-#if 0
-  PortIndex portIndex =
-    _connectionId->getPortIndex(portToDisconnect);
+  ConnectionId connectionId = _cgo.connectionId();
 
-  NodeState &state = _nodeId->nodeState();
+  // Fetch connection from the scene.
+  // Connection is removed from the graph inside.
+  _danglingConnection =
+    _scene.deleteConnection(connectionId);
 
-  // clear pointer to Connection in the NodeState
-  state.getEntries(portToDisconnect)[portIndex].clear();
+  ConnectionId newConnectionId = connectionId;
 
-  // 4) Propagate invalid data to IN node
-  _connectionId->propagateEmptyData();
+  if (portToDisconnect == PortType::Out)
+  {
+    std::get<0>(newConnectionId) = InvalidNodeId;
+    std::get<1>(newConnectionId) = InvalidPortIndex;
+  }
+  else
+  {
+    std::get<2>(newConnectionId) = InvalidNodeId;
+    std::get<3>(newConnectionId) = InvalidPortIndex;
+  }
 
-  // clear Connection side
-  _connectionId->clearNode(portToDisconnect);
+  _danglingConnection->setConnectionId(newConnectionId);
 
-  _connectionId->setRequiredPort(portToDisconnect);
+  _danglingConnection->connectionState().setRequiredPort(portToDisconnect);
 
-  _connectionId->getConnectionGraphicsObject().grabMouse();
+  _danglingConnection->grabMouse();
 
   return true;
-#endif
 }
 
 
@@ -177,7 +184,7 @@ PortType
 NodeConnectionInteraction::
 connectionRequiredPort() const
 {
-  auto const &state = _connectionId->connectionState();
+  auto const &state = _cgo.connectionState();
 
   return state.requiredPort();
 }
@@ -187,14 +194,9 @@ QPointF
 NodeConnectionInteraction::
 connectionEndScenePosition(PortType portType) const
 {
-  auto &go =
-    _connectionId->getConnectionGraphicsObject();
+  QPointF endPoint = _cgo.endPoint(portType);
 
-  ConnectionGeometry& geometry = _connectionId->connectionGeometry();
-
-  QPointF endPoint = geometry.getEndPoint(portType);
-
-  return go.mapToScene(endPoint);
+  return _cgo.mapToScene(endPoint);
 }
 
 
@@ -202,13 +204,12 @@ QPointF
 NodeConnectionInteraction::
 nodePortScenePosition(PortType portType, PortIndex portIndex) const
 {
-  NodeGeometry const &geom = _nodeId->nodeGeometry();
+  NodeGeometry geometry(_ngo);
 
-  QPointF p = geom.portScenePosition(portIndex, portType);
+  QPointF p =
+    geometry.portScenePosition(portType, portIndex, _ngo.sceneTransform());
 
-  NodeGraphicsObject& ngo = _nodeId->nodeGraphicsObject();
-
-  return ngo.sceneTransform().map(p);
+  return p;
 }
 
 
@@ -217,12 +218,11 @@ NodeConnectionInteraction::
 nodePortIndexUnderScenePoint(PortType portType,
                              QPointF const & scenePoint) const
 {
-  NodeGeometry const &nodeGeom = _nodeId->nodeGeometry();
+  NodeGeometry geometry(_ngo);
 
-  QTransform sceneTransform =
-    _nodeId->nodeGraphicsObject().sceneTransform();
+  QTransform sceneTransform = _ngo.sceneTransform();
 
-  PortIndex portIndex = nodeGeom.checkHitScenePoint(portType,
+  PortIndex portIndex = geometry.checkHitScenePoint(portType,
                                                     scenePoint,
                                                     sceneTransform);
   return portIndex;
@@ -233,14 +233,25 @@ bool
 NodeConnectionInteraction::
 nodePortIsEmpty(PortType portType, PortIndex portIndex) const
 {
-  NodeState const & nodeState = _nodeId->nodeState();
+  NodeState const & nodeState = _ngo.nodeState();
 
-  auto const & entries = nodeState.getEntries(portType);
+  GraphModel const & model = _ngo.scene().graphModel();
 
-  if (entries[portIndex].empty()) return true;
+  auto const & connectedNodes =
+    model.connectedNodes(_ngo.nodeId(), portType, portIndex);
 
-  const auto outPolicy = _nodeId->nodeDataModel()->portOutConnectionPolicy(portIndex);
-  return ( portType == PortType::Out && outPolicy == NodeDataModel::ConnectionPolicy::Many);
+  if (connectedNodes.empty())
+    return true;
+
+  ConnectionPolicy const outPolicy =
+    model.portData(_ngo.nodeId(),
+                   portType,
+                   portIndex,
+                   PortRole::ConnectionPolicy).value<ConnectionPolicy>();
+
+  return (portType == PortType::Out &&
+          outPolicy == ConnectionPolicy::Many);
+
 }
 
 

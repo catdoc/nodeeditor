@@ -22,7 +22,7 @@ namespace QtNodes
 
 ConnectionGraphicsObject::
 ConnectionGraphicsObject(NodeGraphicsScene & scene,
-                         ConnectionId connectionId)
+                         ConnectionId const  connectionId)
   : _scene(scene)
   , _connectionId(connectionId)
   , _connectionState(*this)
@@ -55,6 +55,14 @@ ConnectionGraphicsObject::
 connectionId() const
 {
   return _connectionId;
+}
+
+
+void
+ConnectionGraphicsObject::
+setConnectionId(ConnectionId const connectionId)
+{
+  _connectionId = connectionId;
 }
 
 
@@ -116,8 +124,10 @@ void
 ConnectionGraphicsObject::
 setEndPoint(PortType portType, QPointF const & point)
 {
-  QPointF & p = endPoint(portType);
-  p = point;
+  if (portType == PortType::In)
+    _in = point;
+  else
+    _out = point;
 }
 
 
@@ -125,8 +135,10 @@ void
 ConnectionGraphicsObject::
 moveEndPointBy(PortType portType, QPointF const & offset)
 {
-  QPointF & p = endPoint(portType);
-  p += offset;
+  if (portType == PortType::In)
+    _in += offset;
+  else
+    _out += offset;
 }
 
 
@@ -174,14 +186,14 @@ move()
 }
 
 
-void
-ConnectionGraphicsObject::
-lock(bool locked)
-{
-  setFlag(QGraphicsItem::ItemIsMovable,    !locked);
-  setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
-  setFlag(QGraphicsItem::ItemIsSelectable, !locked);
-}
+//void
+//ConnectionGraphicsObject::
+//lock(bool locked)
+//{
+//setFlag(QGraphicsItem::ItemIsMovable,    !locked);
+//setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
+//setFlag(QGraphicsItem::ItemIsSelectable, !locked);
+//}
 
 
 ConnectionState const &
@@ -291,13 +303,14 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
                           _scene,
                           view->transform());
 
-  NodeId nodeId = ngo ? ngo->nodeId() : InvalidNodeId;
-
-  NodeConnectionInteraction interaction(nodeId, _connectionId, _scene);
-
-  if (ngo && interaction.tryConnect())
+  if (ngo)
   {
-    ngo->nodeState().resetReactionToConnection();
+    NodeConnectionInteraction interaction(*ngo, *this, _scene);
+
+    if (interaction.tryConnect())
+    {
+      ngo->nodeState().resetReactionToConnection();
+    }
   }
 
   if (_connectionState.requiresPort())
