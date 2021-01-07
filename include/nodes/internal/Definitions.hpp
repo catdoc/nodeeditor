@@ -87,12 +87,12 @@ oppositePort(PortType port)
 }
 
 
-using PortIndex = std::size_t;
+using PortIndex = unsigned int;
 
 static constexpr PortIndex InvalidPortIndex =
   std::numeric_limits<PortIndex>::max();
 
-using NodeId = std::size_t;
+using NodeId = unsigned int;
 
 static constexpr NodeId InvalidNodeId =
   std::numeric_limits<NodeId>::max();

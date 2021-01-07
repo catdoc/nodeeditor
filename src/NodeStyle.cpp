@@ -128,10 +128,6 @@ QJsonDocument
 NodeStyle::
 toJson() const
 {
-  QJsonDocument document;
-
-  QJsonObject topLevelObject = document.object();
-
   QJsonObject obj;
 
   NODE_STYLE_WRITE_COLOR(obj, NormalBoundaryColor);
@@ -154,8 +150,9 @@ toJson() const
 
   NODE_STYLE_WRITE_FLOAT(obj, Opacity);
 
-  topLevelObject["NodeStyle"] = obj;
+  QJsonObject root;
+  root["NodeStyle"] = obj;
 
-  return document;
+  return QJsonDocument(root);
 }
 

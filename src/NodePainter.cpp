@@ -25,13 +25,13 @@ paint(QPainter * painter,
 
   drawConnectionPoints(painter, ngo);
 
-  drawFilledConnectionPoints(painter, ngo);
+  //drawFilledConnectionPoints(painter, ngo);
 
-  drawModelName(painter, ngo);
+  drawNodeCaption(painter, ngo);
 
   drawEntryLabels(painter, ngo);
 
-  drawResizeRect(painter, ngo);
+  //drawResizeRect(painter, ngo);
 
   //drawValidationRect(painter, ngo);
 
@@ -39,7 +39,7 @@ paint(QPainter * painter,
   // TODO: think about and implement custom painter delegate
   //if (auto painterDelegate = model->painterDelegate())
   //{
-    //painterDelegate->paint(painter, geom, model);
+  //painterDelegate->paint(painter, geom, model);
   //}
 }
 
@@ -56,9 +56,9 @@ drawNodeRect(QPainter * painter,
   NodeGeometry geom(ngo);
   QSize size = geom.recalculateSize(painter->font());
 
-
   QJsonDocument json =
     QJsonDocument::fromVariant(model.nodeData(nodeId, NodeRole::Style));
+
   NodeStyle nodeStyle(json);
 
   auto color = ngo.isSelected() ?
@@ -124,7 +124,7 @@ drawConnectionPoints(QPainter * painter,
                      NodeRole::NumberOfOutPorts :
                      NodeRole::NumberOfInPorts).toUInt();
 
-    for (unsigned int portIndex = 0; portIndex < n; ++portIndex)
+    for (PortIndex portIndex = 0; portIndex < n; ++portIndex)
     {
       QPointF p = geom.portNodePosition(portType, portIndex);
 
@@ -221,7 +221,7 @@ drawFilledConnectionPoints(QPainter * painter,
                      NodeRole::NumberOfOutPorts :
                      NodeRole::NumberOfInPorts).toUInt();
 
-    for (size_t portIndex = 0; portIndex < n; ++portIndex)
+    for (PortIndex portIndex = 0; portIndex < n; ++portIndex)
     {
       QPointF p = geom.portNodePosition(portType, portIndex);
 
@@ -257,8 +257,8 @@ drawFilledConnectionPoints(QPainter * painter,
 
 void
 NodePainter::
-drawModelName(QPainter * painter,
-              NodeGraphicsObject const & ngo)
+drawNodeCaption(QPainter * painter,
+                NodeGraphicsObject const & ngo)
 {
   GraphModel const & model = ngo.scene().graphModel();
   NodeId const nodeId = ngo.nodeId();
@@ -315,7 +315,7 @@ drawEntryLabels(QPainter * painter,
                      NodeRole::NumberOfOutPorts :
                      NodeRole::NumberOfInPorts).toUInt();
 
-    for (size_t portIndex = 0; portIndex < n; ++portIndex)
+    for (PortIndex portIndex = 0; portIndex < n; ++portIndex)
     {
       auto const & connectedNodes =
         model.connectedNodes(nodeId, portType, portIndex);
@@ -455,6 +455,8 @@ drawValidationRect(QPainter * painter,
     painter->drawText(position, errorMsg);
   }
 }
+
+
 #endif
 
 

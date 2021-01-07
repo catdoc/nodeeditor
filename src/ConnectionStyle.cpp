@@ -133,10 +133,6 @@ QJsonDocument
 ConnectionStyle::
 toJson() const
 {
-  QJsonDocument document;
-
-  QJsonObject topLevelObject = document.object();
-
   QJsonObject obj;
 
   CONNECTION_STYLE_WRITE_COLOR(obj, ConstructionColor);
@@ -151,9 +147,10 @@ toJson() const
 
   CONNECTION_STYLE_WRITE_BOOL(obj, UseDataDefinedColors);
 
-  topLevelObject["ConnectionStyle"] = obj;
+  QJsonObject root;
+  root["ConnectionStyle"] = obj;
 
-  return document;
+  return QJsonDocument(root);
 }
 
 

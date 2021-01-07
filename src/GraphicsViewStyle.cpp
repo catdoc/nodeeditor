@@ -92,17 +92,14 @@ QJsonDocument
 GraphicsViewStyle::
 toJson() const
 {
-  QJsonDocument document;
-
-  QJsonObject topLevelObject = document.object();
-
   QJsonObject obj;
 
   FLOW_VIEW_STYLE_WRITE_COLOR(obj, BackgroundColor);
   FLOW_VIEW_STYLE_WRITE_COLOR(obj, FineGridColor);
   FLOW_VIEW_STYLE_WRITE_COLOR(obj, CoarseGridColor);
 
-  topLevelObject["GraphicsViewStyle"] = obj;
+  QJsonObject root;
+  root["GraphicsViewStyle"] = obj;
 
-  return document;
+  return QJsonDocument(root);
 }

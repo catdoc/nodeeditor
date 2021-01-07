@@ -135,7 +135,7 @@ moveConnections() const
       size_t const n =
         model.nodeData(_nodeId, nodeRole).toUInt();
 
-      for (std::size_t portIndex = 0; portIndex < n; ++portIndex)
+      for (PortIndex portIndex = 0; portIndex < n; ++portIndex)
       {
         auto const & connectedNodes =
           model.connectedNodes(_nodeId, portType, portIndex);
@@ -205,13 +205,16 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
     NodeGeometry nodeGeometry(*this);
 
     // TODO do not pass sceneTransform
-    unsigned int const portIndex =
+    PortIndex const portIndex =
       nodeGeometry.checkHitScenePoint(portToCheck,
                                       event->scenePos(),
                                       sceneTransform());
 
     if (portIndex != InvalidPortIndex)
     {
+      qDebug() << "Port is valid :" << portIndex;
+      qDebug() << "Invalid Index :" << InvalidPortIndex;
+
       GraphModel const & model = _scene.graphModel();
 
       auto const & connectedNodes =

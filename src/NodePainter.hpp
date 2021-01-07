@@ -38,8 +38,8 @@ public:
                                   NodeGraphicsObject const & ngo);
 
   static
-  void drawModelName(QPainter * painter,
-                     NodeGraphicsObject const & ngo);
+  void drawNodeCaption(QPainter * painter,
+                       NodeGraphicsObject const & ngo);
 
   static
   void drawEntryLabels(QPainter * painter,
@@ -51,6 +51,6 @@ public:
 
   //static
   //void drawValidationRect(QPainter * painter,
-                          //NodeGraphicsObject const & ngo);
+  //NodeGraphicsObject const & ngo);
 };
 }
