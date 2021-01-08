@@ -16,6 +16,35 @@ ConnectionState::
 }
 
 
+PortType
+ConnectionState::
+requiredPort() const
+{
+  PortType t = PortType::None;
+
+  if (std::get<0>(_cgo.connectionId()) == InvalidNodeId)
+  {
+    t = PortType::Out;
+  }
+  else
+  {
+    t = PortType::In;
+  }
+
+  return t;
+}
+
+
+bool
+ConnectionState::
+requiresPort() const
+{
+  ConnectionId id = _cgo.connectionId();
+  return std::get<0>(id) == InvalidNodeId ||
+         std::get<2>(id) == InvalidNodeId;
+}
+
+
 void
 ConnectionState::
 interactWithNode(NodeId const nodeId)

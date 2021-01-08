@@ -151,8 +151,8 @@ recalculateSize(QFont const & font) const
 
 QPointF
 NodeGeometry::
-portNodePosition(PortType  portType,
-                 PortIndex index) const
+portNodePosition(PortType  const portType,
+                 PortIndex const index) const
 {
   auto const & nodeStyle = StyleCollection::nodeStyle();
 
@@ -199,8 +199,8 @@ portNodePosition(PortType  portType,
 
 QPointF
 NodeGeometry::
-portScenePosition(PortType  portType,
-                  PortIndex index,
+portScenePosition(PortType  const portType,
+                  PortIndex const index,
                   QTransform const & t) const
 {
   QPointF result = portNodePosition(portType, index);

@@ -39,12 +39,12 @@ public:
   /// Updates size if the QFontMetrics is changed
   QSize recalculateSize(QFont const & font) const;
 
-  QPointF portScenePosition(PortType portType,
-                            PortIndex index,
-                            QTransform const & t) const;
+  QPointF portNodePosition(PortType const portType,
+                           PortIndex const index) const;
 
-  QPointF portNodePosition(PortType portType,
-                           PortIndex index) const;
+  QPointF portScenePosition(PortType const portType,
+                            PortIndex const index,
+                            QTransform const & t) const;
 
   PortIndex checkHitScenePoint(PortType portType,
                                QPointF point,

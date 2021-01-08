@@ -100,15 +100,4 @@ static constexpr NodeId InvalidNodeId =
 using ConnectionId = std::tuple<NodeId, PortIndex,  // Port Out
                                 NodeId, PortIndex>; // Port In
 
-
-inline
-bool
-isPortValid(PortIndex index)
-{ return index != InvalidPortIndex; }
-
-inline
-bool
-isPortTypeValid(PortType portType)
-{ return portType != PortType::None; }
-
 }

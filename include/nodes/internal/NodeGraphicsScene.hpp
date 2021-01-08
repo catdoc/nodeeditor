@@ -68,6 +68,10 @@ public:
   std::unique_ptr<ConnectionGraphicsObject>
   deleteConnection(ConnectionId const connectionId);
 
+  bool
+  makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
+                      ConnectionId const newConnectionId);
+
   //Node & createNode(std::unique_ptr<NodeDataModel> && dataModel);
 
   //Node & restoreNode(QJsonObject const & nodeJson);
@@ -185,6 +189,8 @@ private:
   //std::unordered_map<QUuid, SharedConnection> _connections;
   //std::unordered_map<QUuid, UniqueNode>       _nodes;
   //std::shared_ptr<DataModelRegistry>          _registry;
+
+  std::unique_ptr<ConnectionGraphicsObject> _draftConnection;
 
 private Q_SLOTS:
 

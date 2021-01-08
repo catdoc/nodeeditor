@@ -6,6 +6,7 @@
 #include <QtWidgets/QStyleOptionGraphicsItem>
 #include <QtWidgets/QGraphicsView>
 
+#include "ConnectionIdUtils.hpp"
 #include "ConnectionPainter.hpp"
 #include "ConnectionState.hpp"
 #include "ConnectionStyle.hpp"
@@ -40,13 +41,55 @@ ConnectionGraphicsObject(NodeGraphicsScene & scene,
   // addGraphicsEffect();
 
   setZValue(-1.0);
+
+  initializePosition();
 }
 
 
 ConnectionGraphicsObject::
 ~ConnectionGraphicsObject()
 {
-  _scene.removeItem(this);
+  qDebug() << "Connection destructor ";
+
+  //_scene.removeItem(this);
+}
+
+
+void
+ConnectionGraphicsObject::
+initializePosition()
+{
+  // This function is only called when the ConnectionGraphicsObject
+  // is newly created. At this moment both end coordinates are (0, 0)
+  // in Connection G.O. coordinates. The position of the whole
+  // Connection G. O. in scene coordinate system is also (0, 0).
+  // By moving the whole object to the Node Port position
+  // we position both connection ends correctly.
+
+  if (_connectionState.requiredPort() != PortType::None)
+  {
+    PortType attachedPort = oppositePort(_connectionState.requiredPort());
+
+    PortIndex portIndex = getPortIndex(attachedPort, _connectionId);
+    NodeId nodeId = getNodeIndex(attachedPort, _connectionId);
+
+    NodeGraphicsObject * ngo =
+      _scene.nodeGraphicsObject(nodeId);
+
+    QTransform nodeSceneTransform =
+      ngo->sceneTransform();
+
+    NodeGeometry geometry(*ngo);
+
+    QPointF pos =
+      geometry.portScenePosition(attachedPort,
+                                 portIndex,
+                                 nodeSceneTransform);
+
+    this->setPos(pos);
+  }
+
+  move();
 }
 
 
@@ -154,6 +197,7 @@ void
 ConnectionGraphicsObject::
 move()
 {
+  qDebug() << "Move";
   auto moveEnd =
     [&](NodeId nodeId, PortType portType, PortIndex portIndex)
     {
@@ -218,6 +262,8 @@ paint(QPainter * painter,
       QStyleOptionGraphicsItem const * option,
       QWidget *)
 {
+  qDebug() << "Paint";
+
   painter->setClipRect(option->exposedRect);
 
   ConnectionPainter::paint(painter,
@@ -315,6 +361,7 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 
   if (_connectionState.requiresPort())
   {
+    qDebug() << "Unclick connection requiring port ";
     _scene.deleteConnection(_connectionId);
   }
 }

@@ -29,10 +29,8 @@ public:
 
 public:
 
-  ConnectionState(ConnectionGraphicsObject & cgo,
-                  PortType requiredPort = PortType::None)
+  ConnectionState(ConnectionGraphicsObject & cgo)
     : _cgo(cgo)
-    , _requiredPort(requiredPort)
     , _connectedState(LooseEnd::Pending)
     , _hovered(false)
   {}
@@ -47,17 +45,8 @@ public:
 
 public:
 
-  void setRequiredPort(PortType end)
-  { _requiredPort = end; }
-
-  PortType requiredPort() const
-  { return _requiredPort; }
-
-  bool requiresPort() const
-  { return _requiredPort != PortType::None; }
-
-  void setNoRequiredPort()
-  { _requiredPort = PortType::None; }
+  PortType requiredPort() const;
+  bool requiresPort() const;
 
   bool hovered() const { return _hovered; }
   void setHovered(bool hovered) { _hovered = hovered; }
@@ -78,8 +67,6 @@ public:
 private:
 
   ConnectionGraphicsObject & _cgo;
-
-  PortType _requiredPort;
 
   LooseEnd _connectedState;
 

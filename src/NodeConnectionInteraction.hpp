@@ -68,8 +68,6 @@ private:
   ConnectionGraphicsObject & _cgo;
 
   NodeGraphicsScene & _scene;
-
-  static std::unique_ptr<ConnectionGraphicsObject> _danglingConnection;
 };
 
 }

@@ -204,7 +204,6 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
   {
     NodeGeometry nodeGeometry(*this);
 
-    // TODO do not pass sceneTransform
     PortIndex const portIndex =
       nodeGeometry.checkHitScenePoint(portToCheck,
                                       event->scenePos(),
@@ -212,9 +211,6 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
 
     if (portIndex != InvalidPortIndex)
     {
-      qDebug() << "Port is valid :" << portIndex;
-      qDebug() << "Invalid Index :" << InvalidPortIndex;
-
       GraphModel const & model = _scene.graphModel();
 
       auto const & connectedNodes =
@@ -225,7 +221,7 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
       {
         auto const & cn = *connectedNodes.begin();
 
-        // Need "reversed" port version if enabled for both port types.
+        // Need "reversed" connectin id if enabled for both port types.
         ConnectionId connectionId =
           std::make_tuple(cn.first, cn.second, _nodeId, portIndex);
 
@@ -240,6 +236,8 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
       }
       else // initialize new Connection
       {
+        qDebug() << "Initialize new Connection";
+
         if (portToCheck == PortType::Out)
         {
           GraphModel const & model = _scene.graphModel();
@@ -261,13 +259,18 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
               _scene.deleteConnection(connectionId);
             }
           }
-        }
+        } // if port == out
 
-        // todo add to NodeGraphicsScene
-        ConnectionGraphicsObject & cgo =
-          _scene.createConnection(_nodeId, portToCheck, portIndex);
+        ConnectionId const newConnectionId =
+          (portToCheck == PortType::In) ?
+          std::make_tuple(InvalidNodeId, InvalidPortIndex, _nodeId, portIndex) :
+          std::make_tuple(_nodeId, portIndex, InvalidNodeId, InvalidPortIndex);
 
-        cgo.grabMouse();
+        auto uniqueCgo =
+          std::make_unique<ConnectionGraphicsObject>(_scene, newConnectionId);
+
+        _scene.makeDraftConnection(std::move(uniqueCgo),
+                                   newConnectionId);
       }
     }
   }

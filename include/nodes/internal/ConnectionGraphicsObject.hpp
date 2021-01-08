@@ -35,6 +35,8 @@ public:
 
 public:
 
+  void initializePosition();
+
   NodeGraphicsScene & scene() const { return _scene; }
 
   ConnectionId connectionId() const;

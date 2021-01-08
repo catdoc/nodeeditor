@@ -274,7 +274,35 @@ deleteConnection(ConnectionId const connectionId)
     _connectionGraphicsObjects.erase(it);
   }
 
+  if (_draftConnection &&
+      _draftConnection->connectionId() == connectionId)
+  {
+    removed = std::move(_draftConnection);
+  }
+
+  if (removed)
+    this->removeItem(removed.get());
+
   return removed;
+}
+
+
+bool
+NodeGraphicsScene::
+makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
+                    ConnectionId const newConnectionId)
+{
+  _draftConnection = std::move(cgo);
+
+  if (_draftConnection)
+  {
+    _draftConnection->setConnectionId(newConnectionId);
+    _draftConnection->grabMouse();
+
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -617,32 +645,36 @@ insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
 //}
 
 
-//void
-//NodeGraphicsScene::
-//load()
-//{
-//clearScene();
+#if 0
+void
+NodeGraphicsScene::
+load()
+{
+  clearScene();
 
-////-------------
+//-------------
 
-//QString fileName =
-//QFileDialog::getOpenFileName(nullptr,
-//tr("Open Flow Scene"),
-//QDir::homePath(),
-//tr("Flow Scene Files (*.flow)"));
+  QString fileName =
+    QFileDialog::getOpenFileName(nullptr,
+                                 tr("Open Flow Scene"),
+                                 QDir::homePath(),
+                                 tr("Flow Scene Files (*.flow)"));
 
-//if (!QFileInfo::exists(fileName))
-//return;
+  if (!QFileInfo::exists(fileName))
+    return;
 
-//QFile file(fileName);
+  QFile file(fileName);
 
-//if (!file.open(QIODevice::ReadOnly))
-//return;
+  if (!file.open(QIODevice::ReadOnly))
+    return;
 
-//QByteArray wholeFile = file.readAll();
+  QByteArray wholeFile = file.readAll();
 
-//loadFromMemory(wholeFile);
-//}
+  loadFromMemory(wholeFile);
+}
+
+
+#endif
 
 
 //QByteArray
@@ -681,26 +713,30 @@ insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
 //}
 
 
-//void
-//NodeGraphicsScene::
-//loadFromMemory(const QByteArray & data)
-//{
-//QJsonObject const jsonDocument = QJsonDocument::fromJson(data).object();
+#if 0
+void
+NodeGraphicsScene::
+loadFromMemory(const QByteArray & data)
+{
+  QJsonObject const jsonDocument = QJsonDocument::fromJson(data).object();
 
-//QJsonArray nodesJsonArray = jsonDocument["nodes"].toArray();
+  QJsonArray nodesJsonArray = jsonDocument["nodes"].toArray();
 
-//for (QJsonValueRef node : nodesJsonArray)
-//{
-//restoreNode(node.toObject());
-//}
+  for (QJsonValueRef node : nodesJsonArray)
+  {
+    restoreNode(node.toObject());
+  }
 
-//QJsonArray connectionJsonArray = jsonDocument["connections"].toArray();
+  QJsonArray connectionJsonArray = jsonDocument["connections"].toArray();
 
-//for (QJsonValueRef connection : connectionJsonArray)
-//{
-//restoreConnection(connection.toObject());
-//}
-//}
+  for (QJsonValueRef connection : connectionJsonArray)
+  {
+    restoreConnection(connection.toObject());
+  }
+}
+
+
+#endif
 
 
 //void

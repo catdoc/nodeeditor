@@ -9,10 +9,6 @@
 namespace QtNodes
 {
 
-std::unique_ptr<ConnectionGraphicsObject>
-NodeConnectionInteraction::_danglingConnection;
-
-
 NodeConnectionInteraction::
 NodeConnectionInteraction(NodeGraphicsObject & ngo,
                           ConnectionGraphicsObject & cgo,
@@ -150,11 +146,6 @@ disconnect(PortType portToDisconnect) const
 {
   ConnectionId connectionId = _cgo.connectionId();
 
-  // Fetch connection from the scene.
-  // Connection is removed from the graph inside.
-  _danglingConnection =
-    _scene.deleteConnection(connectionId);
-
   ConnectionId newConnectionId = connectionId;
 
   if (portToDisconnect == PortType::Out)
@@ -168,13 +159,14 @@ disconnect(PortType portToDisconnect) const
     std::get<3>(newConnectionId) = InvalidPortIndex;
   }
 
-  _danglingConnection->setConnectionId(newConnectionId);
+  // Fetch connection from the scene.
+  // Connection is removed from the graph inside.
 
-  _danglingConnection->connectionState().setRequiredPort(portToDisconnect);
+  std::unique_ptr<ConnectionGraphicsObject> uniqueCgo =
+    _scene.deleteConnection(connectionId);
 
-  _danglingConnection->grabMouse();
-
-  return true;
+  return _scene.makeDraftConnection(std::move(uniqueCgo),
+                                    newConnectionId);
 }
 
 
@@ -233,8 +225,6 @@ bool
 NodeConnectionInteraction::
 nodePortIsEmpty(PortType portType, PortIndex portIndex) const
 {
-  NodeState const & nodeState = _ngo.nodeState();
-
   GraphModel const & model = _ngo.scene().graphModel();
 
   auto const & connectedNodes =
