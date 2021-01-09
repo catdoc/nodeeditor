@@ -225,7 +225,7 @@ bool
 NodeConnectionInteraction::
 nodePortIsEmpty(PortType portType, PortIndex portIndex) const
 {
-  GraphModel const & model = _ngo.scene().graphModel();
+  GraphModel const & model = _ngo.nodeScene()->graphModel();
 
   auto const & connectedNodes =
     model.connectedNodes(_ngo.nodeId(), portType, portIndex);

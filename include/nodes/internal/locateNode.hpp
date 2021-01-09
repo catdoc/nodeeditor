@@ -5,17 +5,19 @@
 
 #include "Export.hpp"
 
+
+class QGraphicsScene;
+
 namespace QtNodes
 {
 
 class NodeGraphicsObject;
-class NodeGraphicsScene;
 
 
 NodeGraphicsObject*
 NODE_EDITOR_PUBLIC
 locateNodeAt(QPointF scenePoint,
-             NodeGraphicsScene &scene,
+             QGraphicsScene &scene,
              QTransform const & viewTransform);
 
 

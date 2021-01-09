@@ -49,7 +49,7 @@ NodePainter::
 drawNodeRect(QPainter * painter,
              NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
 
   NodeId const nodeId = ngo.nodeId();
 
@@ -103,7 +103,7 @@ NodePainter::
 drawConnectionPoints(QPainter * painter,
                      NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
   NodeId const nodeId = ngo.nodeId();
   NodeGeometry geom(ngo);
 
@@ -203,7 +203,7 @@ NodePainter::
 drawFilledConnectionPoints(QPainter * painter,
                            NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
   NodeId const nodeId = ngo.nodeId();
   NodeGeometry geom(ngo);
 
@@ -260,7 +260,7 @@ NodePainter::
 drawNodeCaption(QPainter * painter,
                 NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
   NodeId const nodeId = ngo.nodeId();
   NodeGeometry geom(ngo);
 
@@ -297,7 +297,7 @@ NodePainter::
 drawEntryLabels(QPainter * painter,
                 NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
   NodeId const nodeId = ngo.nodeId();
   NodeGeometry geom(ngo);
 
@@ -371,7 +371,7 @@ NodePainter::
 drawResizeRect(QPainter * painter,
                NodeGraphicsObject const & ngo)
 {
-  GraphModel const & model = ngo.scene().graphModel();
+  GraphModel const & model = ngo.nodeScene()->graphModel();
   NodeId const nodeId = ngo.nodeId();
   NodeGeometry geom(ngo);
 

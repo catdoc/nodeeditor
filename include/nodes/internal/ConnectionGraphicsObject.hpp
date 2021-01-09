@@ -37,7 +37,7 @@ public:
 
   void initializePosition();
 
-  NodeGraphicsScene & scene() const { return _scene; }
+  NodeGraphicsScene * nodeScene() const;
 
   ConnectionId connectionId() const;
 
@@ -88,8 +88,6 @@ private:
   void addGraphicsEffect();
 
 private:
-
-  NodeGraphicsScene & _scene;
 
   ConnectionId _connectionId;
 

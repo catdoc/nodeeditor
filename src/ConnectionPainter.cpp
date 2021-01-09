@@ -172,7 +172,7 @@ drawNormalLine(QPainter * painter,
 
   bool useGradientColor = false;
 
-  GraphModel const & graphModel = cgo.scene().graphModel();
+  GraphModel const & graphModel = cgo.nodeScene()->graphModel();
 
   if (connectionStyle.useDataDefinedColors())
   {

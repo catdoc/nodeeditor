@@ -3,8 +3,8 @@
 #include <vector>
 
 #include <QtCore/QList>
+#include <QtWidgets/QGraphicsScene>
 
-#include "NodeGraphicsScene.hpp"
 #include "NodeGraphicsObject.hpp"
 
 
@@ -13,7 +13,7 @@ namespace QtNodes
 
 NodeGraphicsObject*
 locateNodeAt(QPointF scenePoint,
-             NodeGraphicsScene &scene,
+             QGraphicsScene &scene,
              QTransform const & viewTransform)
 {
   // items under cursor

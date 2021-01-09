@@ -280,9 +280,6 @@ deleteConnection(ConnectionId const connectionId)
     removed = std::move(_draftConnection);
   }
 
-  if (removed)
-    this->removeItem(removed.get());
-
   return removed;
 }
 

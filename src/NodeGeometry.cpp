@@ -18,7 +18,7 @@ namespace QtNodes
 NodeGeometry::
 NodeGeometry(NodeGraphicsObject const & ngo)
   : _ngo(ngo)
-  , _graphModel(ngo.scene().graphModel())
+  , _graphModel(ngo.nodeScene()->graphModel())
   , _defaultInPortWidth(70)
   , _defaultOutPortWidth(70)
   , _entryHeight(20)
@@ -224,7 +224,7 @@ checkHitScenePoint(PortType portType,
 
   double const tolerance = 2.0 * nodeStyle.ConnectionPointDiameter;
 
-  auto & model = _ngo.scene().graphModel();
+  auto & model = _ngo.nodeScene()->graphModel();
 
   NodeId nodeId = _ngo.nodeId();
 

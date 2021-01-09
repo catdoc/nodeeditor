@@ -24,13 +24,12 @@ namespace QtNodes
 ConnectionGraphicsObject::
 ConnectionGraphicsObject(NodeGraphicsScene & scene,
                          ConnectionId const  connectionId)
-  : _scene(scene)
-  , _connectionId(connectionId)
+  : _connectionId(connectionId)
   , _connectionState(*this)
   , _out{0, 0}
   , _in{0, 0}
 {
-  _scene.addItem(this);
+  scene.addItem(this);
 
   setFlag(QGraphicsItem::ItemIsMovable,    true);
   setFlag(QGraphicsItem::ItemIsFocusable,  true);
@@ -51,7 +50,9 @@ ConnectionGraphicsObject::
 {
   qDebug() << "Connection destructor ";
 
-  //_scene.removeItem(this);
+  prepareGeometryChange();
+
+  scene()->removeItem(this);
 }
 
 
@@ -74,7 +75,7 @@ initializePosition()
     NodeId nodeId = getNodeIndex(attachedPort, _connectionId);
 
     NodeGraphicsObject * ngo =
-      _scene.nodeGraphicsObject(nodeId);
+      nodeScene()->nodeGraphicsObject(nodeId);
 
     QTransform nodeSceneTransform =
       ngo->sceneTransform();
@@ -90,6 +91,14 @@ initializePosition()
   }
 
   move();
+}
+
+
+NodeGraphicsScene *
+ConnectionGraphicsObject::
+nodeScene() const
+{
+  return dynamic_cast<NodeGraphicsScene*>(scene());
 }
 
 
@@ -113,6 +122,9 @@ QRectF
 ConnectionGraphicsObject::
 boundingRect() const
 {
+  if (!scene())
+    return QRectF();
+
   auto points = pointsC1C2();
 
   // `normalized()` fixes inverted rects.
@@ -138,6 +150,8 @@ QPainterPath
 ConnectionGraphicsObject::
 shape() const
 {
+  if (!scene())
+    return QPainterPath();
 #ifdef DEBUG_DRAWING
 
   //QPainterPath path;
@@ -197,6 +211,9 @@ void
 ConnectionGraphicsObject::
 move()
 {
+  if (!scene())
+    return;
+
   qDebug() << "Move";
   auto moveEnd =
     [&](NodeId nodeId, PortType portType, PortIndex portIndex)
@@ -205,7 +222,7 @@ move()
         return;
 
       NodeGraphicsObject * ngo =
-        _scene.nodeGraphicsObject(nodeId);
+        nodeScene()->nodeGraphicsObject(nodeId);
 
       NodeGeometry nodeGeometry(*ngo);
 
@@ -262,12 +279,14 @@ paint(QPainter * painter,
       QStyleOptionGraphicsItem const * option,
       QWidget *)
 {
+  if (!scene())
+    return;
+
   qDebug() << "Paint";
 
   painter->setClipRect(option->exposedRect);
 
-  ConnectionPainter::paint(painter,
-                           *this);
+  ConnectionPainter::paint(painter, *this);
 }
 
 
@@ -275,6 +294,14 @@ void
 ConnectionGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+  if (!scene())
+  {
+    event->ignore();
+    return;
+  }
+
+  qDebug() << "Mouse press";
+
   QGraphicsItem::mousePressEvent(event);
   //event->ignore();
 }
@@ -284,17 +311,25 @@ void
 ConnectionGraphicsObject::
 mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
+  if (!scene())
+  {
+    event->ignore();
+    return;
+  }
+
+  qDebug() << "Mouse move";
+
   prepareGeometryChange();
 
   auto view = static_cast<QGraphicsView *>(event->widget());
   auto ngo = locateNodeAt(event->scenePos(),
-                          _scene,
+                          *nodeScene(),
                           view->transform());
   if (ngo)
   {
     _connectionState.interactWithNode(ngo->nodeId());
 
-    GraphModel const & model = ngo->scene().graphModel();
+    GraphModel const & model = ngo->nodeScene()->graphModel();
 
     PortType knownPortType = oppositePort(_connectionState.requiredPort());
 
@@ -340,18 +375,20 @@ void
 ConnectionGraphicsObject::
 mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
+  qDebug() << "Mouse release";
+
   ungrabMouse();
   event->accept();
 
   auto view = static_cast<QGraphicsView *>(event->widget());
 
   auto ngo = locateNodeAt(event->scenePos(),
-                          _scene,
+                          *nodeScene(),
                           view->transform());
 
   if (ngo)
   {
-    NodeConnectionInteraction interaction(*ngo, *this, _scene);
+    NodeConnectionInteraction interaction(*ngo, *this, *nodeScene());
 
     if (interaction.tryConnect())
     {
@@ -362,7 +399,9 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
   if (_connectionState.requiresPort())
   {
     qDebug() << "Unclick connection requiring port ";
-    _scene.deleteConnection(_connectionId);
+    auto cgo = nodeScene()->deleteConnection(_connectionId);
+
+    cgo.release()->deleteLater();
   }
 }
 
@@ -376,7 +415,7 @@ hoverEnterEvent(QGraphicsSceneHoverEvent * event)
   update();
 
   // Signal
-  _scene.connectionHovered(connectionId(), event->screenPos());
+  nodeScene()->connectionHovered(connectionId(), event->screenPos());
 
   event->accept();
 }
@@ -386,12 +425,14 @@ void
 ConnectionGraphicsObject::
 hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
 {
+  qDebug() << "Hover leave";
+
   _connectionState.setHovered(false);
 
   update();
 
   // Signal
-  _scene.connectionHoverLeft(connectionId());
+  nodeScene()->connectionHoverLeft(connectionId());
 
   event->accept();
 }

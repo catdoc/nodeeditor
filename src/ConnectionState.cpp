@@ -12,7 +12,7 @@ namespace QtNodes
 ConnectionState::
 ~ConnectionState()
 {
-  resetLastHoveredNode();
+  //resetLastHoveredNode();
 }
 
 
@@ -74,7 +74,7 @@ resetLastHoveredNode()
 {
   if (_lastHoveredNode != InvalidNodeId)
   {
-    auto & ngo = *_cgo.scene().nodeGraphicsObject(_lastHoveredNode);
+    auto & ngo = *_cgo.nodeScene()->nodeGraphicsObject(_lastHoveredNode);
     ngo.nodeState().resetReactionToConnection();
   }
 

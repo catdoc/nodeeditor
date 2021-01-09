@@ -26,7 +26,7 @@ public:
 
 public:
 
-  NodeGraphicsScene & scene() const { return _scene; }
+  NodeGraphicsScene * nodeScene() const;
 
   NodeId nodeId() { return _nodeId; }
   NodeId nodeId() const { return _nodeId; }
@@ -74,8 +74,6 @@ private:
   void embedQWidget();
 
 private:
-
-  NodeGraphicsScene & _scene;
 
   NodeId _nodeId;
 
