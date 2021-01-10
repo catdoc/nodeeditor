@@ -49,10 +49,6 @@ ConnectionGraphicsObject::
 ~ConnectionGraphicsObject()
 {
   qDebug() << "Connection destructor ";
-
-  prepareGeometryChange();
-
-  scene()->removeItem(this);
 }
 
 
@@ -122,9 +118,6 @@ QRectF
 ConnectionGraphicsObject::
 boundingRect() const
 {
-  if (!scene())
-    return QRectF();
-
   auto points = pointsC1C2();
 
   // `normalized()` fixes inverted rects.
@@ -150,8 +143,6 @@ QPainterPath
 ConnectionGraphicsObject::
 shape() const
 {
-  if (!scene())
-    return QPainterPath();
 #ifdef DEBUG_DRAWING
 
   //QPainterPath path;
@@ -211,9 +202,6 @@ void
 ConnectionGraphicsObject::
 move()
 {
-  if (!scene())
-    return;
-
   qDebug() << "Move";
   auto moveEnd =
     [&](NodeId nodeId, PortType portType, PortIndex portIndex)
@@ -294,16 +282,8 @@ void
 ConnectionGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-  if (!scene())
-  {
-    event->ignore();
-    return;
-  }
-
-  qDebug() << "Mouse press";
-
   QGraphicsItem::mousePressEvent(event);
-  //event->ignore();
+  event->ignore();
 }
 
 
@@ -311,12 +291,6 @@ void
 ConnectionGraphicsObject::
 mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
-  if (!scene())
-  {
-    event->ignore();
-    return;
-  }
-
   qDebug() << "Mouse move";
 
   prepareGeometryChange();

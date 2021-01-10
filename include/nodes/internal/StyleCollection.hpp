@@ -1,8 +1,10 @@
 #pragma once
 
-#include "NodeStyle.hpp"
+#include "Export.hpp"
+
 #include "ConnectionStyle.hpp"
 #include "GraphicsViewStyle.hpp"
+#include "NodeStyle.hpp"
 
 namespace QtNodes
 {

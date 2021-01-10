@@ -20,6 +20,7 @@ public:
 
   using NodeId = QtNodes::NodeId;
   using NodeRole = QtNodes::NodeRole;
+  using PortIndex = QtNodes::PortIndex;
 
   /// @brief Returns the full set of unique Node Ids.
   /**
@@ -36,18 +37,14 @@ public:
    * opposite to the given `portType`.
    */
   virtual
-  std::unordered_map<PortIndex, NodeId>
+  std::unordered_set<std::pair<PortIndex, NodeId>>
   connectedNodes(NodeId    nodeId,
                  PortType  portType,
                  PortIndex index) const;
 
 
   virtual
-  void setConnectedNodes(NodeId    nodeId0,
-                         PortType  portType0,
-                         PortIndex index0,
-                         NodeId    nodeId1,
-                         PortIndex index1);
+  void addConnection(ConnectionId const connectionId);
 
   /// @brief Returns node-related data for requested NodeRole.
   /**
@@ -57,6 +54,7 @@ public:
   virtual
   QVariant nodeData(NodeId nodeId, NodeRole role) const;
 
+  virtual
   NodeFlags nodeFlags(NodeId nodeId) const;
 
   /// @brief Sets node properties.

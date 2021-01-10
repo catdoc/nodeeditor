@@ -58,6 +58,16 @@ NodeGraphicsObject(NodeGraphicsScene & scene,
 
   embedQWidget();
 
+  NodeGeometry geometry(*this);
+  geometry.recalculateSize();
+
+  //
+  GraphModel & model = nodeScene()->graphModel();
+  QPointF const pos =
+    model.nodeData(_nodeId, NodeRole::Position).value<QPointF>();
+
+  setPos(pos);
+
   // connect to the move signals to emit the move signals in NodeGraphicsScene
   //auto onMoveSlot = [this] { _scene.nodeMoved(_nodeId, pos()); };
 
@@ -69,7 +79,6 @@ NodeGraphicsObject(NodeGraphicsScene & scene,
 NodeGraphicsObject::
 ~NodeGraphicsObject()
 {
-  nodeScene()->removeItem(this);
 }
 
 
@@ -283,7 +292,7 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
           std::make_unique<ConnectionGraphicsObject>(*nodeScene, newConnectionId);
 
         nodeScene->makeDraftConnection(std::move(uniqueCgo),
-                                         newConnectionId);
+                                       newConnectionId);
       }
     }
   }

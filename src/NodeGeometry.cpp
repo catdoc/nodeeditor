@@ -74,12 +74,24 @@ boundingRect() const
 
   double addon = 4 * nodeStyle.ConnectionPointDiameter;
 
-  QSize size = recalculateSize();
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
 
   return QRectF(0 - addon,
                 0 - addon,
                 size.width() + 2 * addon,
                 size.height() + 2 * addon);
+}
+
+
+QSize
+NodeGeometry::
+size() const
+{
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
+
+  return size;
 }
 
 
@@ -123,13 +135,17 @@ recalculateSize() const
 
   width = std::max(width, captionWidth());
 
-  return QSize(width, height);
+  QSize size(width, height);
+
+  _graphModel.setNodeData(_ngo.nodeId(), NodeRole::Size, size);
+
+  return size;
 }
 
 
 QSize
 NodeGeometry::
-recalculateSize(QFont const & font) const
+recalculateSizeIfFontChanged(QFont const & font) const
 {
   QFontMetrics fontMetrics(font);
   QFont boldFont = font;
@@ -151,7 +167,7 @@ recalculateSize(QFont const & font) const
 
 QPointF
 NodeGeometry::
-portNodePosition(PortType  const portType,
+portNodePosition(PortType const  portType,
                  PortIndex const index) const
 {
   auto const & nodeStyle = StyleCollection::nodeStyle();
@@ -169,7 +185,8 @@ portNodePosition(PortType  const portType,
   // TODO: why?
   totalHeight += step / 2.0;
 
-  QSize size = recalculateSize();
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
 
   switch (portType)
   {
@@ -199,8 +216,8 @@ portNodePosition(PortType  const portType,
 
 QPointF
 NodeGeometry::
-portScenePosition(PortType  const portType,
-                  PortIndex const index,
+portScenePosition(PortType const     portType,
+                  PortIndex const    index,
                   QTransform const & t) const
 {
   QPointF result = portNodePosition(portType, index);
@@ -256,7 +273,8 @@ QRect
 NodeGeometry::
 resizeRect() const
 {
-  QSize size = recalculateSize();
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
 
   unsigned int rectSize = 7;
 
@@ -271,7 +289,8 @@ QPointF
 NodeGeometry::
 widgetPosition() const
 {
-  QSize size = recalculateSize();
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
 
   NodeId const nodeId = _ngo.nodeId();
   if (auto w = _graphModel.nodeData(nodeId, NodeRole::Widget).value<QWidget*>())
@@ -302,7 +321,8 @@ int
 NodeGeometry::
 equivalentWidgetHeight() const
 {
-  QSize size = recalculateSize();
+  QSize size =
+    _graphModel.nodeData(_ngo.nodeId(), NodeRole::Size).value<QSize>();
   //if (_dataModel->validationState() != NodeValidationState::Valid)
   //{
   //return height() - captionHeight() + validationHeight();

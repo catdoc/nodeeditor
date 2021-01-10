@@ -24,7 +24,7 @@ allNodeIds() const
 }
 
 
-std::unordered_map<PortIndex, NodeId>
+std::unordered_set<std::pair<PortIndex, NodeId>>
 GraphModel::
 connectedNodes(NodeId    nodeId,
                PortType  portType,
@@ -35,24 +35,15 @@ connectedNodes(NodeId    nodeId,
   Q_UNUSED(portIndex);
 
   // No connected nodes in the default implementation.
-  return std::unordered_map<PortIndex, NodeId>();
+  return std::unordered_set<std::pair<PortIndex, NodeId>>();
 }
 
 
 void
 GraphModel::
-setConnectedNodes(NodeId    nodeId0,
-                  PortType  portType0,
-                  PortIndex portIndex0,
-                  NodeId    nodeId1,
-                  PortIndex portIndex1)
+addConnection(ConnectionId const connectionId)
 {
-  Q_UNUSED(nodeId0);
-  Q_UNUSED(portType0);
-  Q_UNUSED(portIndex0);
-  //
-  Q_UNUSED(nodeId1);
-  Q_UNUSED(portIndex1);
+  Q_UNUSED(connectionId);
 }
 
 

@@ -2,14 +2,18 @@
 #include <nodes/GraphModel>
 #include <nodes/GraphicsView>
 #include <nodes/NodeGraphicsScene>
+#include <nodes/StyleCollection>
 
 #include <QtWidgets/QApplication>
+
+#include "CustomGraphModel.hpp"
 
 
 using QtNodes::ConnectionStyle;
 using QtNodes::GraphModel;
 using QtNodes::GraphicsView;
 using QtNodes::NodeGraphicsScene;
+using QtNodes::StyleCollection;
 
 static
 void
@@ -43,7 +47,12 @@ main(int argc, char *argv[])
 
   setStyle();
 
-  GraphModel graphModel;
+  //GraphModel graphModel;
+
+  CustomGraphModel graphModel;
+
+  graphModel.addNode();
+  graphModel.addNode();
 
   auto scene = new NodeGraphicsScene(graphModel);
 

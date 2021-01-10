@@ -21,11 +21,14 @@ NodePainter::
 paint(QPainter * painter,
       NodeGraphicsObject const & ngo)
 {
+  NodeGeometry geometry(ngo);
+  geometry.recalculateSizeIfFontChanged(painter->font());
+
   drawNodeRect(painter, ngo);
 
   drawConnectionPoints(painter, ngo);
 
-  //drawFilledConnectionPoints(painter, ngo);
+  drawFilledConnectionPoints(painter, ngo);
 
   drawNodeCaption(painter, ngo);
 
@@ -54,7 +57,7 @@ drawNodeRect(QPainter * painter,
   NodeId const nodeId = ngo.nodeId();
 
   NodeGeometry geom(ngo);
-  QSize size = geom.recalculateSize(painter->font());
+  QSize size = geom.size();
 
   QJsonDocument json =
     QJsonDocument::fromVariant(model.nodeData(nodeId, NodeRole::Style));
@@ -274,7 +277,7 @@ drawNodeCaption(QPainter * painter,
 
   QFontMetrics metrics(f);
   auto rect = metrics.boundingRect(name);
-  auto size = geom.recalculateSize(f);
+  QSize size = geom.size();
 
   QPointF position((size.width() - rect.width()) / 2.0,
                    (geom.verticalSpacing() + geom.entryHeight()) / 3.0);
@@ -305,7 +308,7 @@ drawEntryLabels(QPainter * painter,
     QJsonDocument::fromVariant(model.nodeData(nodeId, NodeRole::Style));
   NodeStyle nodeStyle(json);
 
-  QSize size = geom.recalculateSize(painter->font());
+  QSize size = geom.size();
 
   for (PortType portType: {PortType::Out, PortType::In})
   {

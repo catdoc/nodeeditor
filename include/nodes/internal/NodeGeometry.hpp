@@ -33,11 +33,13 @@ public:
 public:
   QRectF boundingRect() const;
 
+  QSize size() const;
+
   /// Updates size unconditionally
   QSize recalculateSize() const;
 
   /// Updates size if the QFontMetrics is changed
-  QSize recalculateSize(QFont const & font) const;
+  QSize recalculateSizeIfFontChanged(QFont const & font) const;
 
   QPointF portNodePosition(PortType const portType,
                            PortIndex const index) const;
@@ -77,7 +79,7 @@ private:
 private:
 
   NodeGraphicsObject const & _ngo;
-  GraphModel const & _graphModel;
+  GraphModel & _graphModel;
 
   // some variables are mutable because
   // we need to change drawing metrics

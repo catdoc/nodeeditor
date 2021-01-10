@@ -4,7 +4,7 @@ Plans
 1. Model-view approach.
 A specific graph representation is wrapped in a model that delivers the
 information to the framework. The graph could be stored as a set of
-pointers, table etc.
+pointers, table, etc.
 2. Headless mode. Graph Model works on its own without GUI rendering.
 3. Optional data propagation (data flow). 
 4. QML frontend.
@@ -26,12 +26,43 @@ We show generic nodes and connections and enable simple editing:
 - Dis- and Re-connecting nodes,
 
 
-`NodeGraphicsScene` stores the maps:
-- `map<Node, NodeGraphicsObject>`,
-- `map<pair<Node1, Node2>, Connection>`
+Node Geometry
+-----------------------------------------------------------------------
 
-each NodeGraphicsObject gets all the relevant information from the
-`GraphModel` (node position, colors etc).
+```                  vertical spacing
+                    /
+        port width                      port width
+       |          | |                | |         |
+
+0 _     _________________________________________    ___
+       /                 Caption                 \
+       |             ________________            |   ___  caption height
+       |             |               |           |
+       O In Name     |               |  Out Name O        entry
+       |             |               |           |   ___
+       |             |               |           |   ___  vertical spacing
+       |             |               |           |
+       O Another In  |               |  Out Name O
+       |             |               |           |
+       |             |               |           |
+       |             |               |           |
+       O             |               |           O
+       |             |               |           |
+       |             |_______________|           |
+       |                                         |
+       O                                         |
+       |                                         |
+       \_________________________________________/
+
+```
+
+
+`NodeGraphicsScene` stores the maps:
+- `map<NodeId, NodeGraphicsObject>`,
+- `map<ConnectionId, ConnectionGraphicsObject>`
+
+Each NodeGraphicsObject gets all the relevant information from the
+`GraphModel` (node position, styles, names and caption, etc).
 
 ```
 class FlowGraphicsScene : public QGraphicsScene
