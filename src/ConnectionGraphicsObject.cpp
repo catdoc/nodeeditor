@@ -39,7 +39,7 @@ ConnectionGraphicsObject(NodeGraphicsScene & scene,
 
   setAcceptHoverEvents(true);
 
-  // addGraphicsEffect();
+  //addGraphicsEffect();
 
   setZValue(-1.0);
 
