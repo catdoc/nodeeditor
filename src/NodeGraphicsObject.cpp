@@ -7,14 +7,12 @@
 #include <QtWidgets/QGraphicsEffect>
 
 #include "ConnectionGraphicsObject.hpp"
+#include "ConnectionIdUtils.hpp"
 #include "ConnectionState.hpp"
-
+#include "NodeConnectionInteraction.hpp"
 #include "NodeGeometry.hpp"
 #include "NodeGraphicsScene.hpp"
 #include "NodePainter.hpp"
-
-#include "NodeConnectionInteraction.hpp"
-
 #include "StyleCollection.hpp"
 
 using QtNodes::NodeGraphicsObject;
@@ -166,8 +164,6 @@ moveConnections() const
 
           auto cgo = nodeScene()->connectionGraphicsObject(connectionId);
 
-          qDebug() << "Move connections -----";
-
           // TODO: Directly move the connection's end?
           cgo->move();
         }
@@ -185,8 +181,6 @@ paint(QPainter * painter,
       QStyleOptionGraphicsItem const * option,
       QWidget *)
 {
-  qDebug() << "Node paint";
-
   painter->setClipRect(option->exposedRect);
 
   NodePainter::paint(painter, *this);
@@ -255,11 +249,12 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
                       *nodeScene);
 
         interaction.disconnect(portToCheck);
+
+        if (nodeScene->draftConnection())
+          nodeScene->draftConnection()->update();
       }
       else // initialize new Connection
       {
-        qDebug() << "Initialize new Connection";
-
         if (portToCheck == PortType::Out)
         {
           GraphModel const & model = nodeScene->graphModel();
@@ -283,16 +278,10 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
           }
         } // if port == out
 
-        ConnectionId const newConnectionId =
-          (portToCheck == PortType::In) ?
-          std::make_tuple(InvalidNodeId, InvalidPortIndex, _nodeId, portIndex) :
-          std::make_tuple(_nodeId, portIndex, InvalidNodeId, InvalidPortIndex);
+        ConnectionId const incompleteConnectionId =
+          makeIncompleteConnectionId(portToCheck, _nodeId, portIndex);
 
-        auto uniqueCgo =
-          std::make_unique<ConnectionGraphicsObject>(*nodeScene, newConnectionId);
-
-        nodeScene->makeDraftConnection(std::move(uniqueCgo),
-                                       newConnectionId);
+        nodeScene->makeDraftConnection(incompleteConnectionId);
       }
     }
   }
@@ -344,7 +333,6 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
   }
   else
   {
-    qDebug() << "Node mouse move";
     QGraphicsObject::mouseMoveEvent(event);
 
     if (event->lastPos() != event->pos())

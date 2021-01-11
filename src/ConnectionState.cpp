@@ -1,5 +1,6 @@
 #include "ConnectionState.hpp"
 
+#include <QtCore/QDebug>
 #include <QtCore/QPointF>
 
 #include "ConnectionGraphicsObject.hpp"
@@ -12,7 +13,7 @@ namespace QtNodes
 ConnectionState::
 ~ConnectionState()
 {
-  //resetLastHoveredNode();
+  resetLastHoveredNode();
 }
 
 

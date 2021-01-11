@@ -55,6 +55,10 @@ nodeData(NodeId nodeId, NodeRole role) const
 
   switch (role)
   {
+    case NodeRole::Type:
+      return QString("Default Node Type");
+      break;
+
     case NodeRole::Position:
       return QPointF(0, 0); // _position;
       break;
@@ -173,8 +177,6 @@ bool
 GraphModel::
 deleteConnection(ConnectionId const connectionId)
 {
-  //
-
   return false;
 }
 
@@ -182,8 +184,6 @@ bool
 GraphModel::
 deleteNode(NodeId const nodeId)
 {
-  //
-
   return false;
 }
 

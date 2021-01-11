@@ -1,58 +1,32 @@
 #include <nodes/ConnectionStyle>
-#include <nodes/GraphModel>
 #include <nodes/GraphicsView>
 #include <nodes/NodeGraphicsScene>
 #include <nodes/StyleCollection>
 
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QDesktopWidget>
 
 #include "CustomGraphModel.hpp"
 
 
 using QtNodes::ConnectionStyle;
-using QtNodes::GraphModel;
 using QtNodes::GraphicsView;
 using QtNodes::NodeGraphicsScene;
+using QtNodes::NodeRole;
 using QtNodes::StyleCollection;
-
-static
-void
-setStyle()
-{
-  ConnectionStyle::setConnectionStyle(
-    R"(
-  {
-    "ConnectionStyle": {
-      "ConstructionColor": "gray",
-      "NormalColor": "black",
-      "SelectedColor": "gray",
-      "SelectedHaloColor": "deepskyblue",
-      "HoveredColor": "deepskyblue",
-
-      "LineWidth": 3.0,
-      "ConstructionLineWidth": 2.0,
-      "PointDiameter": 10.0,
-
-      "UseDataDefinedColors": true
-    }
-  }
-  )");
-}
-
 
 int
 main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
 
-  setStyle();
-
-  //GraphModel graphModel;
-
   CustomGraphModel graphModel;
 
-  graphModel.addNode();
-  graphModel.addNode();
+  NodeId id1 = graphModel.addNode();
+  NodeId id2 = graphModel.addNode();
+
+  graphModel.setNodeData(id1, NodeRole::Position, QPointF(0, 0));
+  graphModel.setNodeData(id2, NodeRole::Position, QPointF(300, 300));
 
   auto scene = new NodeGraphicsScene(graphModel);
 
@@ -60,7 +34,10 @@ main(int argc, char *argv[])
 
   view.setWindowTitle("Simplest model-based graph");
   view.resize(800, 600);
+
+  view.move(QApplication::desktop()->screen()->rect().center() - view.rect().center());
   view.showNormal();
+  view.centerScene();
 
   return app.exec();
 }

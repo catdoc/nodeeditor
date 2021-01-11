@@ -26,6 +26,8 @@ public:
 
   void setScene(NodeGraphicsScene *scene);
 
+  void centerScene();
+
 public Q_SLOTS:
 
   void scaleUp();
@@ -54,7 +56,7 @@ protected:
 
 protected:
 
-  NodeGraphicsScene * scene();
+  NodeGraphicsScene * nodeScene();
 
 private:
 

@@ -31,7 +31,7 @@ public:
   //bool canConnect(PortIndex & portIndex,
   //TypeConverter & converter) const;
 
-  bool canConnect(PortIndex & portIndex) const;
+  bool canConnect(PortIndex * portIndex) const;
 
   /// 1)   Check conditions from 'canConnect'
   /// 2)   Assign node to required port in Connection

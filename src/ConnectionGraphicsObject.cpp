@@ -6,6 +6,8 @@
 #include <QtWidgets/QStyleOptionGraphicsItem>
 #include <QtWidgets/QGraphicsView>
 
+#include <QtCore/QDebug>
+
 #include "ConnectionIdUtils.hpp"
 #include "ConnectionPainter.hpp"
 #include "ConnectionState.hpp"
@@ -47,9 +49,7 @@ ConnectionGraphicsObject(NodeGraphicsScene & scene,
 
 ConnectionGraphicsObject::
 ~ConnectionGraphicsObject()
-{
-  qDebug() << "Connection destructor ";
-}
+{}
 
 
 void
@@ -68,7 +68,7 @@ initializePosition()
     PortType attachedPort = oppositePort(_connectionState.requiredPort());
 
     PortIndex portIndex = getPortIndex(attachedPort, _connectionId);
-    NodeId nodeId = getNodeIndex(attachedPort, _connectionId);
+    NodeId nodeId = getNodeId(attachedPort, _connectionId);
 
     NodeGraphicsObject * ngo =
       nodeScene()->nodeGraphicsObject(nodeId);
@@ -202,7 +202,6 @@ void
 ConnectionGraphicsObject::
 move()
 {
-  qDebug() << "Move";
   auto moveEnd =
     [&](NodeId nodeId, PortType portType, PortIndex portIndex)
     {
@@ -270,8 +269,6 @@ paint(QPainter * painter,
   if (!scene())
     return;
 
-  qDebug() << "Paint";
-
   painter->setClipRect(option->exposedRect);
 
   ConnectionPainter::paint(painter, *this);
@@ -291,8 +288,6 @@ void
 ConnectionGraphicsObject::
 mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
-  qDebug() << "Mouse move";
-
   prepareGeometryChange();
 
   auto view = static_cast<QGraphicsView *>(event->widget());
@@ -321,6 +316,7 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
                      knownPortIndex,
                      PortRole::DataType).value<NodeDataType>();
 
+    // Sets node's mouse dragging position in nodes coordinates.
     ngo->nodeState().reactToPossibleConnection(_connectionState.requiredPort(),
                                                knownDataType,
                                                event->scenePos());
@@ -349,12 +345,12 @@ void
 ConnectionGraphicsObject::
 mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
-  qDebug() << "Mouse release";
-
   ungrabMouse();
   event->accept();
 
   auto view = static_cast<QGraphicsView *>(event->widget());
+
+  Q_ASSERT(view);
 
   auto ngo = locateNodeAt(event->scenePos(),
                           *nodeScene(),
@@ -364,18 +360,13 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
   {
     NodeConnectionInteraction interaction(*ngo, *this, *nodeScene());
 
-    if (interaction.tryConnect())
-    {
-      ngo->nodeState().resetReactionToConnection();
-    }
+    interaction.tryConnect();
   }
 
   if (_connectionState.requiresPort())
   {
-    qDebug() << "Unclick connection requiring port ";
-    auto cgo = nodeScene()->deleteConnection(_connectionId);
-
-    cgo.release()->deleteLater();
+    // Resulting unique_ptr is not used and automatically deleted.
+    nodeScene()->deleteConnection(_connectionId);
   }
 }
 
@@ -399,8 +390,6 @@ void
 ConnectionGraphicsObject::
 hoverLeaveEvent(QGraphicsSceneHoverEvent * event)
 {
-  qDebug() << "Hover leave";
-
   _connectionState.setHovered(false);
 
   update();

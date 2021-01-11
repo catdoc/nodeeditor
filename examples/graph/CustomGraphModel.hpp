@@ -2,6 +2,7 @@
 
 #include <nodes/GraphModel>
 #include <nodes/StyleCollection>
+#include <nodes/ConnectionIdUtils>
 
 
 using ConnectionId = QtNodes::ConnectionId;
@@ -60,7 +61,7 @@ public:
     return _nodeIds;
   }
 
-  std::unordered_set<std::pair<PortIndex, NodeId>>
+  std::unordered_set<std::pair<NodeId, PortIndex>>
   connectedNodes(NodeId    nodeId,
                  PortType  portType,
                  PortIndex portIndex) const override
@@ -69,29 +70,37 @@ public:
     Q_UNUSED(portType);
     Q_UNUSED(portIndex);
 
-    // No connected nodes in the default implementation.
-    return std::unordered_set<std::pair<PortIndex, NodeId>>();
+    return _connectivity[std::make_tuple(nodeId, portType, portIndex)];
   }
 
-  void
-  addNode(NodeId const nodeId = InvalidNodeId)
+  NodeId
+  addNode(QString const nodeType = QString())
   {
-    if (nodeId == InvalidNodeId)
-    {
+    NodeId newId = _lastNodeId++;
       // Create new node.
+    _nodeIds.insert(newId);
 
-      _nodeIds.insert(_lastNodeId++);
-    }
-    else
-    {
-      _nodeIds.insert(nodeId);
-    }
+    return newId;
   }
 
   void
   addConnection(ConnectionId const connectionId) override
   {
-    Q_UNUSED(connectionId);
+    auto connect =
+      [&](PortType portType)
+      {
+        auto key = std::make_tuple(getNodeId(portType, connectionId),
+                                   portType,
+                                   getPortIndex(portType, connectionId));
+
+        PortType opposite = oppositePort(portType);
+
+        _connectivity[key].insert(std::make_pair(getNodeId(opposite, connectionId),
+                                                 getPortIndex(opposite, connectionId)));
+      };
+
+    connect(PortType::Out);
+    connect(PortType::In);
   }
 
   NodeFlags
@@ -109,6 +118,10 @@ public:
 
     switch (role)
     {
+      case NodeRole::Type:
+        return QString("Default Node Type");
+        break;
+
       case NodeRole::Position:
         return _nodeData[nodeId].pos;
         break;
@@ -242,7 +255,39 @@ public:
   bool
   deleteConnection(ConnectionId const connectionId) override
   {
-    return false;
+    bool disconnected = false;
+
+    auto disconnect =
+      [&](PortType portType)
+      {
+        auto key = std::make_tuple(getNodeId(portType, connectionId),
+                                   portType,
+                                   getPortIndex(portType, connectionId));
+        auto it = _connectivity.find(key);
+
+        if (it != _connectivity.end())
+        {
+          disconnected = true;
+
+          PortType opposite = oppositePort(portType);
+
+          auto oppositePair =
+            std::make_pair(getNodeId(opposite, connectionId),
+                           getPortIndex(opposite, connectionId));
+          it->second.erase(oppositePair);
+
+          if (it->second.empty())
+          {
+            _connectivity.erase(it);
+          }
+        }
+
+      };
+
+    disconnect(PortType::Out);
+    disconnect(PortType::In);
+
+    return disconnected;
   }
 
   bool
@@ -255,8 +300,9 @@ private:
 
   std::unordered_set<NodeId> _nodeIds;
 
+  mutable
   std::unordered_map<std::tuple<NodeId, PortType, PortIndex>,
-                     std::unordered_map<PortIndex, NodeId>>
+                     std::unordered_set<std::pair<NodeId, PortIndex>>>
   _connectivity;
 
   mutable std::unordered_map<NodeId, NodeData> _nodeData;

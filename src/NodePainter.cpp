@@ -234,7 +234,10 @@ drawFilledConnectionPoints(QPainter * painter,
       if (!connectedNodes.empty())
       {
         auto const & dataType =
-          model.portData(nodeId, portType, portIndex, PortRole::DataType).value<NodeDataType>();
+          model.portData(nodeId,
+                         portType,
+                         portIndex,
+                         PortRole::DataType).value<NodeDataType>();
 
         auto const & connectionStyle = StyleCollection::connectionStyle();
         if (connectionStyle.useDataDefinedColors())

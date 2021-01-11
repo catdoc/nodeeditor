@@ -79,6 +79,7 @@ void
 GraphicsView::setScene(NodeGraphicsScene *scene)
 {
   _scene = scene;
+
   QGraphicsView::setScene(_scene);
 
   // setup actions
@@ -95,6 +96,21 @@ GraphicsView::setScene(NodeGraphicsScene *scene)
   addAction(_deleteSelectionAction);
 }
 
+
+void
+GraphicsView::
+centerScene()
+{
+  if (_scene)
+  {
+    _scene->setSceneRect(QRectF());
+
+    QRectF sceneRect = _scene->sceneRect();
+
+    fitInView(sceneRect, Qt::KeepAspectRatio);
+    centerOn(sceneRect.center());
+  }
+}
 
 void
 GraphicsView::
@@ -403,8 +419,8 @@ showEvent(QShowEvent *event)
 
 NodeGraphicsScene *
 GraphicsView::
-scene()
+nodeScene()
 {
-  return _scene;
+  return dynamic_cast<NodeGraphicsScene*>(scene());
 }
 

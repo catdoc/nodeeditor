@@ -39,38 +39,53 @@ public:
   GraphModel const & graphModel() const;
   GraphModel & graphModel();
 
+  ConnectionGraphicsObject *
+  draftConnection() const;
+
 private:
 
   /// @brief Creates Node and Connection graphics objects.
-  /**
-   * 1. Get all the node ids.
-   * 2. Tranverse the graph visiting all nodes.
-   * 3. Create NodeGraphicsObjects.
-   * 4. Create ConnectionGraphicsObjects.
+  /** We perform depth-first graph traversal. The connections are
+   * created by checking non-empyt node's Out ports.
    */
   void traverseGraphAndPopulateGraphicsObjects();
 
 public:
 
-  ConnectionGraphicsObject &
-  createConnection(NodeId const    nodeId,
-                   PortType const  connectedPort,
-                   PortIndex const portIndex);
-
-  //std::shared_ptr<Connection> createConnection(Node &                nodeIn,
-  //PortIndex             portIndexIn,
-  //Node &                nodeOut,
-  //PortIndex             portIndexOut,
-  //TypeConverter const & converter = TypeConverter{});
+  /// Re-uses cached draft connection with the new Id.
+  /** Function inserts a new ConnectionId into theGraphModel.
+   */
+  void useDraftConnection(ConnectionId const connectionId);
 
   //std::shared_ptr<Connection> restoreConnection(QJsonObject const & connectionJson);
 
+  /// Deletes the object from the main connection object set.
+  /** The corresponding ConnectionId is removed from the GraphModel.
+   * The function returns a unique pointer to the graphics object. If
+   * the pointer is not stored somewhere, the object is automatically
+   * destroyed and removed from the scene.
+   */
   std::unique_ptr<ConnectionGraphicsObject>
   deleteConnection(ConnectionId const connectionId);
 
+  /// Caches ConnectionGraphicsObject to a "draft connection" variable.
+  /**
+   * The cached variable is designed to store a "draft" connection
+   * which has not been attached to both nodes yes. After a proper
+   * attachemed the variable is cleared an the ConnectionGraphicsObject
+   * reseives some proper valid ConnectionId. After that the object is
+   * inserted into the main set with connectinos.
+   * 
+   * If the passed connection pointer is empty, a new object is created
+   * automatically.
+   */
   bool
   makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
                       ConnectionId const newConnectionId);
+
+  /// Same function as before but creates Graphics object inside.
+  bool
+  makeDraftConnection(ConnectionId const newConnectionId);
 
   //Node & createNode(std::unique_ptr<NodeDataModel> && dataModel);
 
@@ -122,10 +137,6 @@ public:
   ConnectionGraphicsObject *
   connectionGraphicsObject(ConnectionId connectionId);
 
-  bool
-  insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
-                           ConnectionId connectionId);
-
 Q_SIGNALS:
 
   /**
@@ -162,15 +173,9 @@ Q_SIGNALS:
 
 private:
 
-  //using SharedConnection = std::shared_ptr<Connection>;
-  //using UniqueNode       = std::unique_ptr<Node>;
-
   // TODO shared pointer?
   GraphModel & _graphModel;
 
-
-  // TODO: unique or normal pointers?
-  // who owns graphic objects?
 
   using UniqueNodeGraphicsObject =
     std::unique_ptr<NodeGraphicsObject>;
@@ -186,8 +191,6 @@ private:
   _connectionGraphicsObjects;
 
 
-  //std::unordered_map<QUuid, SharedConnection> _connections;
-  //std::unordered_map<QUuid, UniqueNode>       _nodes;
   //std::shared_ptr<DataModelRegistry>          _registry;
 
   std::unique_ptr<ConnectionGraphicsObject> _draftConnection;
@@ -195,7 +198,6 @@ private:
 private Q_SLOTS:
 
   //void setupConnectionSignals(Connection const& c);
-
   //void sendConnectionCreatedToNodes(Connection const& c);
   //void sendConnectionDeletedToNodes(Connection const& c);
 };

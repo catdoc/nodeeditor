@@ -11,14 +11,15 @@ Q_NAMESPACE
 
 enum class NodeRole
 {
-  Position         = 0,
-  Size             = 1,
-  CaptionVisible   = 2,
-  Caption          = 3,
-  Style            = 4,
-  NumberOfInPorts  = 5,
-  NumberOfOutPorts = 6,
-  Widget           = 7,
+  Type             = 0,
+  Position         = 1,
+  Size             = 2,
+  CaptionVisible   = 3,
+  Caption          = 4,
+  Style            = 5,
+  NumberOfInPorts  = 6,
+  NumberOfOutPorts = 7,
+  Widget           = 8,
 };
 Q_ENUM_NS(NodeRole)
 
@@ -58,33 +59,6 @@ enum class PortType
   None = 2
 };
 Q_ENUM_NS(PortType)
-
-
-inline
-PortType
-oppositePort(PortType port)
-{
-  PortType result = PortType::None;
-
-  switch (port)
-  {
-    case PortType::In:
-      result = PortType::Out;
-      break;
-
-    case PortType::Out:
-      result = PortType::In;
-      break;
-
-    case PortType::None:
-      result = PortType::None;
-      break;
-
-    default:
-      break;
-  }
-  return result;
-}
 
 
 using PortIndex = unsigned int;

@@ -225,7 +225,7 @@ portScenePosition(PortType const     portType,
   return t.map(result);
 }
 
-
+// TODO check implementation
 PortIndex
 NodeGeometry::
 checkHitScenePoint(PortType portType,

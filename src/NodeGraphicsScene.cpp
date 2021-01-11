@@ -56,15 +56,11 @@ traverseGraphAndPopulateGraphicsObjects()
       auto nodeId = fifo.front();
       fifo.pop();
 
-      std::cout << "Create Node : " << nodeId << std::endl;
-
       _nodeGraphicsObjects[nodeId] =
         std::make_unique<NodeGraphicsObject>(*this, nodeId);
 
       unsigned int nOutPorts =
         _graphModel.nodeData(nodeId, NodeRole::NumberOfOutPorts).toUInt();
-
-      std::cout << "N Out ports : " << nOutPorts << std::endl;
 
       for (PortIndex index = 0; index < nOutPorts; ++index)
       {
@@ -137,9 +133,17 @@ graphModel()
 }
 
 
+ConnectionGraphicsObject *
+NodeGraphicsScene::
+draftConnection() const
+{
+  return _draftConnection.get();
+}
+
+
 //------------------------------------------------------------------------------
 
-
+#if 0
 ConnectionGraphicsObject &
 NodeGraphicsScene::
 createConnection(NodeId const    nodeId,
@@ -170,42 +174,26 @@ createConnection(NodeId const    nodeId,
 }
 
 
-#if 0
-std::shared_ptr<Connection>
+#endif
+
+
+void
 NodeGraphicsScene::
-createConnection(Node &    nodeIn,
-                 PortIndex portIndexIn,
-                 Node &    nodeOut,
-                 PortIndex portIndexOut,
-                 TypeConverter const & converter)
+useDraftConnection(ConnectionId const newConnectionId)
 {
-  auto connection =
-    std::make_shared<Connection>(nodeIn,
-                                 portIndexIn,
-                                 nodeOut,
-                                 portIndexOut,
-                                 converter);
+  qDebug() << "Start creating connection";
 
-  auto cgo = detail::make_unique<ConnectionGraphicsObject>(*this, *connection);
+  Q_ASSERT(_draftConnection);
 
-  nodeIn.nodeState().setConnection(PortType::In, portIndexIn, *connection);
-  nodeOut.nodeState().setConnection(PortType::Out, portIndexOut, *connection);
+  _draftConnection->setConnectionId(newConnectionId);
+  _connectionGraphicsObjects[newConnectionId] = std::move(_draftConnection);
 
-  // after this function connection points are set to node port
-  connection->setGraphicsObject(std::move(cgo));
+  _graphModel.addConnection(newConnectionId);
 
   // trigger data propagation
-  nodeOut.onDataUpdated(portIndexOut);
-
-  _connections[connection->id()] = connection;
-
-  connectionCreated(*connection);
-
-  return connection;
+  //nodeOut.onDataUpdated(portIndexOut);
+  //connectionCreated(*connection);
 }
-
-
-#endif
 
 
 //std::shared_ptr<Connection>
@@ -289,6 +277,9 @@ NodeGraphicsScene::
 makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
                     ConnectionId const newConnectionId)
 {
+  if (!cgo)
+    cgo = std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
+
   _draftConnection = std::move(cgo);
 
   if (_draftConnection)
@@ -300,6 +291,17 @@ makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
   }
 
   return false;
+}
+
+
+bool
+NodeGraphicsScene::
+makeDraftConnection(ConnectionId const newConnectionId)
+{
+  auto uniqueCgo =
+    std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
+
+  return makeDraftConnection(std::move(uniqueCgo), newConnectionId);
 }
 
 
@@ -605,16 +607,6 @@ connectionGraphicsObject(ConnectionId connectionId)
   }
 
   return cgo;
-}
-
-
-bool
-NodeGraphicsScene::
-insertDanglingConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
-                         ConnectionId const connectionId)
-{
-  // TODO: sanity check if such a connection id exists.
-  _connectionGraphicsObjects[connectionId] = std::move(cgo);
 }
 
 
