@@ -5,14 +5,14 @@
 #include <nodes/ConnectionIdUtils>
 
 
-using ConnectionId = QtNodes::ConnectionId;
+using ConnectionId     = QtNodes::ConnectionId;
 using ConnectionPolicy = QtNodes::ConnectionPolicy;
-using NodeFlag = QtNodes::NodeFlag;
-using NodeFlags = QtNodes::NodeFlags;
-using NodeId = QtNodes::NodeId;
-using PortIndex = QtNodes::PortIndex;
-using PortRole = QtNodes::PortRole;
-using PortType = QtNodes::PortType;
+using NodeFlag        = QtNodes::NodeFlag;
+using NodeFlags       = QtNodes::NodeFlags;
+using NodeId          = QtNodes::NodeId;
+using PortIndex       = QtNodes::PortIndex;
+using PortRole        = QtNodes::PortRole;
+using PortType        = QtNodes::PortType;
 using StyleCollection = QtNodes::StyleCollection;
 using QtNodes::InvalidNodeId;
 
@@ -25,8 +25,7 @@ struct hash<std::tuple<NodeId, PortType, PortIndex>>
 
   inline
   std::size_t
-
-  operator()(Key const& key) const
+  operator()(Key const &key) const
   {
     std::size_t h = 0;
     hash_combine(h,
@@ -35,6 +34,7 @@ struct hash<std::tuple<NodeId, PortType, PortIndex>>
                  std::get<2>(key));
     return h;
   }
+
 
 };
 }
@@ -61,9 +61,10 @@ public:
     return _nodeIds;
   }
 
+
   std::unordered_set<std::pair<NodeId, PortIndex>>
-  connectedNodes(NodeId    nodeId,
-                 PortType  portType,
+  connectedNodes(NodeId nodeId,
+                 PortType portType,
                  PortIndex portIndex) const override
   {
     Q_UNUSED(nodeId);
@@ -73,15 +74,17 @@ public:
     return _connectivity[std::make_tuple(nodeId, portType, portIndex)];
   }
 
+
   NodeId
   addNode(QString const nodeType = QString())
   {
     NodeId newId = _lastNodeId++;
-      // Create new node.
+    // Create new node.
     _nodeIds.insert(newId);
 
     return newId;
   }
+
 
   void
   addConnection(ConnectionId const connectionId) override
@@ -103,6 +106,7 @@ public:
     connect(PortType::In);
   }
 
+
   NodeFlags
   nodeFlags(NodeId nodeId) const override
   {
@@ -111,53 +115,59 @@ public:
     return NodeFlag::Resizable;
   }
 
+
   QVariant
   nodeData(NodeId nodeId, NodeRole role) const override
   {
     Q_UNUSED(nodeId);
 
+    QVariant result;
+
     switch (role)
     {
       case NodeRole::Type:
-        return QString("Default Node Type");
+        result = QString("Default Node Type");
         break;
 
       case NodeRole::Position:
-        return _nodeData[nodeId].pos;
+        result = _nodeData[nodeId].pos;
         break;
 
       case NodeRole::Size:
-        return _nodeData[nodeId].size;
+        result = _nodeData[nodeId].size;
         break;
 
       case NodeRole::CaptionVisible:
-        return true;
+        result = true;
         break;
 
       case NodeRole::Caption:
-        return QString("Node");
+        result = QString("Node");
         break;
 
       case NodeRole::Style:
-        {
-          auto style = StyleCollection::nodeStyle();
-          return style.toJson().toVariant();
-        }
-        break;
+      {
+        auto style = StyleCollection::nodeStyle();
+        result = style.toJson().toVariant();
+      }
+      break;
 
       case NodeRole::NumberOfInPorts:
-        return 1u;
+        result = 1u;
         break;
 
       case NodeRole::NumberOfOutPorts:
-        return 1u;
+        result = 1u;
         break;
 
       case NodeRole::Widget:
-        return QVariant();
+        result = QVariant();
         break;
     }
+
+    return result;
   }
+
 
   bool
   setNodeData(NodeId nodeId, NodeRole role, QVariant value) override
@@ -171,9 +181,13 @@ public:
     switch (role)
     {
       case NodeRole::Position:
+      {
         _nodeData[nodeId].pos = value.value<QPointF>();
+        auto p = _nodeData[nodeId].pos;
+
         result = true;
-        break;
+      }
+      break;
 
       case NodeRole::Size:
         _nodeData[nodeId].size = value.value<QSize>();
@@ -202,11 +216,12 @@ public:
     return result;
   }
 
+
   QVariant
-  portData(NodeId    nodeId,
-           PortType  portType,
+  portData(NodeId nodeId,
+           PortType portType,
            PortIndex portIndex,
-           PortRole  role) const override
+           PortRole role) const override
   {
     switch (role)
     {
@@ -238,11 +253,12 @@ public:
     return QVariant();
   }
 
+
   bool
-  setPortData(NodeId    nodeId,
-              PortType  portType,
+  setPortData(NodeId nodeId,
+              PortType portType,
               PortIndex portIndex,
-              PortRole  role) const override
+              PortRole role) const override
   {
     Q_UNUSED(nodeId);
     Q_UNUSED(portType);
@@ -251,6 +267,7 @@ public:
 
     return false;
   }
+
 
   bool
   deleteConnection(ConnectionId const connectionId) override
@@ -290,11 +307,13 @@ public:
     return disconnected;
   }
 
+
   bool
   deleteNode(NodeId const nodeId) override
   {
     return false;
   }
+
 
 private:
 

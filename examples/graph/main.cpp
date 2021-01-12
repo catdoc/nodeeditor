@@ -5,6 +5,7 @@
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QAction>
 
 #include "CustomGraphModel.hpp"
 
@@ -22,22 +23,47 @@ main(int argc, char *argv[])
 
   CustomGraphModel graphModel;
 
-  NodeId id1 = graphModel.addNode();
-  NodeId id2 = graphModel.addNode();
+  // Initialize two nodes.
+  {
+    NodeId id1 = graphModel.addNode();
+    NodeId id2 = graphModel.addNode();
 
-  graphModel.setNodeData(id1, NodeRole::Position, QPointF(0, 0));
-  graphModel.setNodeData(id2, NodeRole::Position, QPointF(300, 300));
+    graphModel.setNodeData(id1, NodeRole::Position, QPointF(0, 0));
+    graphModel.setNodeData(id2, NodeRole::Position, QPointF(300, 300));
+  }
 
   auto scene = new NodeGraphicsScene(graphModel);
 
   GraphicsView view(scene);
 
-  view.setWindowTitle("Simplest model-based graph");
+  // Setup context menu for creating new nodes.
+  view.setContextMenuPolicy(Qt::ActionsContextMenu);
+  QAction createNodeAction(QStringLiteral("Create Node"), &view);
+  QObject::connect(&createNodeAction, &QAction::triggered,
+                   [&]()
+                   {
+                     // Mouse position in scene coordinates.
+                     QPointF posView =
+                       view.mapToScene(view.mapFromGlobal(QCursor::pos()));
+
+
+                     NodeId const newId = graphModel.addNode();
+                     graphModel.setNodeData(newId,
+                                            NodeRole::Position,
+                                            posView);
+
+                     scene->createNode(newId);
+                   });
+  view.insertAction(view.actions().front(), &createNodeAction);
+
+
+  view.setWindowTitle("Simple Node Graph");
   view.resize(800, 600);
 
+  // Center window.
   view.move(QApplication::desktop()->screen()->rect().center() - view.rect().center());
   view.showNormal();
-  view.centerScene();
 
   return app.exec();
 }
+

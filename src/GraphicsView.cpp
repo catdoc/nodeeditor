@@ -29,12 +29,11 @@ GraphicsView(QWidget *parent)
   : QGraphicsView(parent)
   , _clearSelectionAction(Q_NULLPTR)
   , _deleteSelectionAction(Q_NULLPTR)
-  , _scene(Q_NULLPTR)
 {
   setDragMode(QGraphicsView::ScrollHandDrag);
   setRenderHint(QPainter::Antialiasing);
 
-  auto const & flowViewStyle = StyleCollection::flowViewStyle();
+  auto const &flowViewStyle = StyleCollection::flowViewStyle();
 
   setBackgroundBrush(flowViewStyle.BackgroundColor);
 
@@ -78,21 +77,21 @@ deleteSelectionAction() const
 void
 GraphicsView::setScene(NodeGraphicsScene *scene)
 {
-  _scene = scene;
-
-  QGraphicsView::setScene(_scene);
+  QGraphicsView::setScene(scene);
 
   // setup actions
   delete _clearSelectionAction;
   _clearSelectionAction = new QAction(QStringLiteral("Clear Selection"), this);
   _clearSelectionAction->setShortcut(Qt::Key_Escape);
-  connect(_clearSelectionAction, &QAction::triggered, _scene, &QGraphicsScene::clearSelection);
+  connect(_clearSelectionAction, &QAction::triggered,
+          scene, &QGraphicsScene::clearSelection);
   addAction(_clearSelectionAction);
 
   delete _deleteSelectionAction;
   _deleteSelectionAction = new QAction(QStringLiteral("Delete Selection"), this);
   _deleteSelectionAction->setShortcut(Qt::Key_Delete);
-  connect(_deleteSelectionAction, &QAction::triggered, this, &GraphicsView::deleteSelectedNodes);
+  connect(_deleteSelectionAction, &QAction::triggered,
+          this, &GraphicsView::deleteSelectedNodes);
   addAction(_deleteSelectionAction);
 }
 
@@ -101,26 +100,32 @@ void
 GraphicsView::
 centerScene()
 {
-  if (_scene)
+  if (scene())
   {
-    _scene->setSceneRect(QRectF());
+    scene()->setSceneRect(QRectF());
 
-    QRectF sceneRect = _scene->sceneRect();
+    QRectF sceneRect = scene()->sceneRect();
 
-    fitInView(sceneRect, Qt::KeepAspectRatio);
+    if (sceneRect.width() > this->rect().width() ||
+        sceneRect.height() > this->rect().height())
+    {
+      fitInView(sceneRect, Qt::KeepAspectRatio);
+    }
+
     centerOn(sceneRect.center());
   }
 }
+
 
 void
 GraphicsView::
 contextMenuEvent(QContextMenuEvent *event)
 {
-  //if (itemAt(event->pos()))
-  //{
-  //QGraphicsView::contextMenuEvent(event);
-  //return;
-  //}
+  if (itemAt(event->pos()))
+  {
+    QGraphicsView::contextMenuEvent(event);
+    return;
+  }
 
   //QMenu modelMenu;
 
@@ -165,37 +170,40 @@ contextMenuEvent(QContextMenuEvent *event)
 
   //treeView->expandAll();
 
-  //connect(treeView, &QTreeWidget::itemClicked,
-  //[&](QTreeWidgetItem *item, int)
-  //{
-  //QString modelName = item->data(0, Qt::UserRole).toString();
+#if 0
+  connect(treeView, &QTreeWidget::itemClicked,
+          [&](QTreeWidgetItem *item, int)
+          {
+            QString modelName = item->data(0, Qt::UserRole).toString();
 
-  //if (modelName == skipText)
-  //{
-  //return;
-  //}
+            if (modelName == skipText)
+            {
+              return;
+            }
 
-  //auto type = _scene->registry().create(modelName);
+            auto type = _scene->registry().create(modelName);
 
-  //if (type)
-  //{
-  //auto & node = _scene->createNode(std::move(type));
+            if (type)
+            {
+              auto &node = _scene->createNode(std::move(type));
 
-  //QPoint pos = event->pos();
+              QPoint pos = event->pos();
 
-  //QPointF posView = this->mapToScene(pos);
+              QPointF posView = this->mapToScene(pos);
 
-  //node.nodeGraphicsObject().setPos(posView);
+              node.nodeGraphicsObject().setPos(posView);
 
-  //_scene->nodePlaced(node);
-  //}
-  //else
-  //{
-  //qDebug() << "Model not found";
-  //}
+              _scene->nodePlaced(node);
+            }
+            else
+            {
+              qDebug() << "Model not found";
+            }
 
-  //modelMenu.close();
-  //});
+            modelMenu.close();
+          });
+
+#endif
 
   ////Setup filtering
   //connect(txtBox, &QLineEdit::textChanged,
@@ -275,10 +283,10 @@ deleteSelectedNodes()
   // Delete the selected connections first, ensuring that they won't be
   // automatically deleted when selected nodes are deleted (deleting a
   // node deletes some connections as well)
-  for (QGraphicsItem * item : _scene->selectedItems())
+  for (QGraphicsItem * item : scene()->selectedItems())
   {
     if (auto c = qgraphicsitem_cast<ConnectionGraphicsObject*>(item))
-      _scene->deleteConnection(c->connectionId());
+      nodeScene()->deleteConnection(c->connectionId());
   }
 
   // Delete the nodes; this will delete many of the connections.
@@ -286,10 +294,10 @@ deleteSelectedNodes()
   // otherwise qgraphicsitem_cast<NodeGraphicsObject*>(item) could be a
   // use-after-free when a selected connection is deleted by deleting
   // the node.
-  for (QGraphicsItem * item : _scene->selectedItems())
+  for (QGraphicsItem * item : scene()->selectedItems())
   {
     if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
-      _scene->deleteNode(n->nodeId());
+      nodeScene()->deleteNode(n->nodeId());
   }
 }
 
@@ -360,7 +368,7 @@ mouseMoveEvent(QMouseEvent *event)
 
 void
 GraphicsView::
-drawBackground(QPainter* painter, const QRectF & r)
+drawBackground(QPainter* painter, const QRectF &r)
 {
   QGraphicsView::drawBackground(painter, r);
 
@@ -380,7 +388,7 @@ drawBackground(QPainter* painter, const QRectF & r)
       for (int xi = int(left); xi <= int(right); ++xi)
       {
         QLineF line(xi * gridStep, bottom * gridStep,
-                    xi * gridStep, top * gridStep );
+                    xi * gridStep, top * gridStep);
 
         painter->drawLine(line);
       }
@@ -389,12 +397,12 @@ drawBackground(QPainter* painter, const QRectF & r)
       for (int yi = int(bottom); yi <= int(top); ++yi)
       {
         QLineF line(left * gridStep, yi * gridStep,
-                    right * gridStep, yi * gridStep );
+                    right * gridStep, yi * gridStep);
         painter->drawLine(line);
       }
     };
 
-  auto const & flowViewStyle = StyleCollection::flowViewStyle();
+  auto const &flowViewStyle = StyleCollection::flowViewStyle();
 
   QPen pfine(flowViewStyle.FineGridColor, 1.0);
 
@@ -412,8 +420,10 @@ void
 GraphicsView::
 showEvent(QShowEvent *event)
 {
-  _scene->setSceneRect(this->rect());
   QGraphicsView::showEvent(event);
+
+  scene()->setSceneRect(this->rect());
+  centerScene();
 }
 
 

@@ -2,7 +2,6 @@
 
 #include "Export.hpp"
 
-#include <limits>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -18,8 +17,8 @@ class NODE_EDITOR_PUBLIC GraphModel
 {
 public:
 
-  using NodeId = QtNodes::NodeId;
-  using NodeRole = QtNodes::NodeRole;
+  using NodeId    = QtNodes::NodeId;
+  using NodeRole  = QtNodes::NodeRole;
   using PortIndex = QtNodes::PortIndex;
 
   /// @brief Returns the full set of unique Node Ids.
@@ -29,7 +28,8 @@ public:
    * trace back to the model's internal representation of the node.
    */
   virtual
-  std::unordered_set<NodeId> allNodeIds() const;
+  std::unordered_set<NodeId>
+  allNodeIds() const;
 
   /// @brief Returns all connected Node Ids for given port.
   /**
@@ -38,13 +38,14 @@ public:
    */
   virtual
   std::unordered_set<std::pair<PortIndex, NodeId>>
-  connectedNodes(NodeId    nodeId,
-                 PortType  portType,
+  connectedNodes(NodeId nodeId,
+                 PortType portType,
                  PortIndex index) const;
 
 
   virtual
-  void addConnection(ConnectionId const connectionId);
+  void
+  addConnection(ConnectionId const connectionId);
 
   /// @brief Returns node-related data for requested NodeRole.
   /**
@@ -52,10 +53,12 @@ public:
    * Node Position etc.
    */
   virtual
-  QVariant nodeData(NodeId nodeId, NodeRole role) const;
+  QVariant
+  nodeData(NodeId nodeId, NodeRole role) const;
 
   virtual
-  NodeFlags nodeFlags(NodeId nodeId) const;
+  NodeFlags
+  nodeFlags(NodeId nodeId) const;
 
   /// @brief Sets node properties.
   /**
@@ -63,7 +66,8 @@ public:
    * Shyle, State, Node Position etc.
    */
   virtual
-  bool setNodeData(NodeId nodeId, NodeRole role, QVariant value);
+  bool
+  setNodeData(NodeId nodeId, NodeRole role, QVariant value);
 
   /// @brief Returns port-related data for requested NodeRole.
   /**
@@ -71,22 +75,26 @@ public:
    * Caption.
    */
   virtual
-  QVariant portData(NodeId    nodeId,
-                    PortType  portType,
-                    PortIndex index,
-                    PortRole  role) const;
+  QVariant
+  portData(NodeId nodeId,
+           PortType portType,
+           PortIndex index,
+           PortRole role) const;
 
   virtual
-  bool setPortData(NodeId    nodeId,
-                   PortType  portType,
-                   PortIndex index,
-                   PortRole  role) const;
+  bool
+  setPortData(NodeId nodeId,
+              PortType portType,
+              PortIndex index,
+              PortRole role) const;
 
   virtual
-  bool deleteConnection(ConnectionId const connectionId);
+  bool
+  deleteConnection(ConnectionId const connectionId);
 
   virtual
-  bool deleteNode(NodeId const nodeId);
+  bool
+  deleteNode(NodeId const nodeId);
 };
 
 }

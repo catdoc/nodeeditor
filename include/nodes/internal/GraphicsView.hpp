@@ -64,7 +64,5 @@ private:
   QAction* _deleteSelectionAction;
 
   QPointF _clickPos;
-
-  NodeGraphicsScene* _scene;
 };
 }

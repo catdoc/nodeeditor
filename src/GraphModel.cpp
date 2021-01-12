@@ -26,8 +26,8 @@ allNodeIds() const
 
 std::unordered_set<std::pair<PortIndex, NodeId>>
 GraphModel::
-connectedNodes(NodeId    nodeId,
-               PortType  portType,
+connectedNodes(NodeId nodeId,
+               PortType portType,
                PortIndex portIndex) const
 {
   Q_UNUSED(nodeId);
@@ -53,47 +53,51 @@ nodeData(NodeId nodeId, NodeRole role) const
 {
   Q_UNUSED(nodeId);
 
+  QVariant result;
+
   switch (role)
   {
     case NodeRole::Type:
-      return QString("Default Node Type");
+      result = QString("Default Node Type");
       break;
 
     case NodeRole::Position:
-      return QPointF(0, 0); // _position;
+      result = QPointF(0, 0); // _position;
       break;
 
     case NodeRole::Size:
-      return QSize(100, 100);
+      result = QSize(100, 100);
       break;
 
     case NodeRole::CaptionVisible:
-      return true;
+      result = true;
       break;
 
     case NodeRole::Caption:
-      return QString("Node");
+      result = QString("Node");
       break;
 
     case NodeRole::Style:
-      {
-        auto style = StyleCollection::nodeStyle();
-        return style.toJson().toVariant();
-      }
-      break;
+    {
+      auto style = StyleCollection::nodeStyle();
+      result = style.toJson().toVariant();
+    }
+    break;
 
     case NodeRole::NumberOfInPorts:
-      return 1u;
+      result = 1u;
       break;
 
     case NodeRole::NumberOfOutPorts:
-      return 1u;
+      result = 1u;
       break;
 
     case NodeRole::Widget:
-      return QVariant();
+      result = QVariant();
       break;
   }
+
+  return result;
 }
 
 
@@ -121,11 +125,14 @@ setNodeData(NodeId nodeId, NodeRole role, QVariant value)
 
 QVariant
 GraphModel::
-portData(NodeId    nodeId,
-         PortType  portType,
+portData(NodeId nodeId,
+         PortType portType,
          PortIndex portIndex,
-         PortRole  role) const
+         PortRole role) const
 {
+  Q_UNUSED(nodeId);
+  Q_UNUSED(portIndex);
+
   switch (role)
   {
     case PortRole::Data:
@@ -159,10 +166,10 @@ portData(NodeId    nodeId,
 
 bool
 GraphModel::
-setPortData(NodeId    nodeId,
-            PortType  portType,
+setPortData(NodeId nodeId,
+            PortType portType,
             PortIndex portIndex,
-            PortRole  role) const
+            PortRole role) const
 {
   Q_UNUSED(nodeId);
   Q_UNUSED(portType);
@@ -177,13 +184,18 @@ bool
 GraphModel::
 deleteConnection(ConnectionId const connectionId)
 {
+  Q_UNUSED(connectionId);
+
   return false;
 }
+
 
 bool
 GraphModel::
 deleteNode(NodeId const nodeId)
 {
+  Q_UNUSED(nodeId);
+
   return false;
 }
 

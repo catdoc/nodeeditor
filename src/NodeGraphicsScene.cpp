@@ -29,7 +29,7 @@ namespace QtNodes
 {
 
 NodeGraphicsScene::
-NodeGraphicsScene(GraphModel & graphModel)
+NodeGraphicsScene(GraphModel &graphModel)
   : _graphModel(graphModel)
 {
   traverseGraphAndPopulateGraphicsObjects();
@@ -83,8 +83,6 @@ traverseGraphAndPopulateGraphicsObjects()
       }
     } // while
   }
-
-  std::cout << "Scene construction finished" << std::endl;
 }
 
 
@@ -146,8 +144,8 @@ draftConnection() const
 #if 0
 ConnectionGraphicsObject &
 NodeGraphicsScene::
-createConnection(NodeId const    nodeId,
-                 PortType const  connectedPort,
+createConnection(NodeId const nodeId,
+                 PortType const connectedPort,
                  PortIndex const portIndex)
 {
   // Construct an incomplete ConnectionId with one dangling end.
@@ -274,7 +272,7 @@ deleteConnection(ConnectionId const connectionId)
 
 bool
 NodeGraphicsScene::
-makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
+makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
                     ConnectionId const newConnectionId)
 {
   if (!cgo)
@@ -347,6 +345,16 @@ makeDraftConnection(ConnectionId const newConnectionId)
 //nodeCreated(*nodePtr);
 //return *nodePtr;
 //}
+
+
+
+void
+NodeGraphicsScene::
+createNode(NodeId const nodeId)
+{
+  _nodeGraphicsObjects[nodeId] =
+    std::make_unique<NodeGraphicsObject>(*this, nodeId);
+}
 
 
 void
@@ -705,7 +713,7 @@ load()
 #if 0
 void
 NodeGraphicsScene::
-loadFromMemory(const QByteArray & data)
+loadFromMemory(const QByteArray &data)
 {
   QJsonObject const jsonDocument = QJsonDocument::fromJson(data).object();
 

@@ -92,6 +92,9 @@ public:
 
   //Node & restoreNode(QJsonObject const & nodeJson);
 
+  // NodeId must exist in GraphModel.
+  void createNode(NodeId const nodeId);
+
   void deleteNode(NodeId const nodeId);
 
   //DataModelRegistry & registry() const;
