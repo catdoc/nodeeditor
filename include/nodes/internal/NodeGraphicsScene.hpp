@@ -4,6 +4,7 @@
 #include <QtWidgets/QGraphicsScene>
 
 #include <functional>
+#include <memory>
 #include <tuple>
 #include <unordered_map>
 
