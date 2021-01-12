@@ -280,7 +280,6 @@ ConnectionGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
   QGraphicsItem::mousePressEvent(event);
-  event->ignore();
 }
 
 
@@ -345,6 +344,8 @@ void
 ConnectionGraphicsObject::
 mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
+  QGraphicsItem::mouseReleaseEvent(event);
+
   ungrabMouse();
   event->accept();
 
