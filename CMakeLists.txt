@@ -58,17 +58,17 @@ set(CPP_SOURCE_FILES
   #src/ConnectionGeometry.cpp
   #src/DataModelRegistry.cpp
   #src/Node.cpp
-  #src/NodeDataModel.cpp
+  src/BasicGraphicsScene.cpp
   src/ConnectionBlurEffect.cpp
   src/ConnectionGraphicsObject.cpp
   src/ConnectionPainter.cpp
   src/ConnectionState.cpp
   src/ConnectionStyle.cpp
-  src/BasicGraphicsScene.cpp
+  src/GraphModel.cpp
   src/GraphicsView.cpp
   src/GraphicsViewStyle.cpp
-  src/GraphModel.cpp
   src/NodeConnectionInteraction.cpp
+  src/NodeDataModel.cpp
   src/NodeGeometry.cpp
   src/NodeGraphicsObject.cpp
   src/NodePainter.cpp
