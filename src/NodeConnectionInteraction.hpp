@@ -11,7 +11,7 @@ namespace QtNodes
 
 class ConnectionGraphicsObject;
 class NodeGraphicsObject;
-class NodeGraphicsScene;
+class BasicGraphicsScene;
 
 /// Class performs various operations on the Node and Connection pair.
 /// An instance should be created on the stack and destroyed when
@@ -21,7 +21,7 @@ class NodeConnectionInteraction
 public:
   NodeConnectionInteraction(NodeGraphicsObject & ngo,
                             ConnectionGraphicsObject & cgo,
-                            NodeGraphicsScene & scene);
+                            BasicGraphicsScene & scene);
 
   /// Can connect when following conditions are met:
   /// 1) Connection 'requires' a port
@@ -67,7 +67,7 @@ private:
 
   ConnectionGraphicsObject & _cgo;
 
-  NodeGraphicsScene & _scene;
+  BasicGraphicsScene & _scene;
 };
 
 }

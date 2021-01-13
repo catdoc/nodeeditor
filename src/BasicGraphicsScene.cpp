@@ -1,4 +1,4 @@
-#include "NodeGraphicsScene.hpp"
+#include "BasicGraphicsScene.hpp"
 
 #include <queue>
 #include <iostream>
@@ -28,22 +28,22 @@
 namespace QtNodes
 {
 
-NodeGraphicsScene::
-NodeGraphicsScene(GraphModel &graphModel)
+BasicGraphicsScene::
+BasicGraphicsScene(GraphModel &graphModel)
   : _graphModel(graphModel)
 {
 
   connect(&_graphModel, &GraphModel::portsAboutToBeDeleted,
-          this, &NodeGraphicsScene::onPortsAboutToBeDeleted);
+          this, &BasicGraphicsScene::onPortsAboutToBeDeleted);
 
   connect(&_graphModel, &GraphModel::portsDeleted,
-          this, &NodeGraphicsScene::onPortsDeleted);
+          this, &BasicGraphicsScene::onPortsDeleted);
 
   connect(&_graphModel, &GraphModel::portsAboutToBeInserted,
-          this, &NodeGraphicsScene::onPortsAboutToBeInserted);
+          this, &BasicGraphicsScene::onPortsAboutToBeInserted);
 
   connect(&_graphModel, &GraphModel::portsInserted,
-          this, &NodeGraphicsScene::onPortsInserted);
+          this, &BasicGraphicsScene::onPortsInserted);
 
 
   traverseGraphAndPopulateGraphicsObjects();
@@ -51,7 +51,7 @@ NodeGraphicsScene(GraphModel &graphModel)
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 traverseGraphAndPopulateGraphicsObjects()
 {
   auto allNodeIds = _graphModel.allNodeIds();
@@ -101,7 +101,7 @@ traverseGraphAndPopulateGraphicsObjects()
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 onPortsAboutToBeDeleted(NodeId const   nodeId,
                         PortType const portType,
                         std::unordered_set<PortIndex> const & portIndexSet)
@@ -130,7 +130,7 @@ onPortsAboutToBeDeleted(NodeId const   nodeId,
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 onPortsDeleted(NodeId const   nodeId,
                PortType const portType,
                std::unordered_set<PortIndex> const & portIndexSet)
@@ -145,7 +145,7 @@ onPortsDeleted(NodeId const   nodeId,
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 onPortsAboutToBeInserted(NodeId const   nodeId,
                          PortType const portType,
                          std::unordered_set<PortIndex> const & portIndexSet)
@@ -155,7 +155,7 @@ onPortsAboutToBeInserted(NodeId const   nodeId,
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 onPortsInserted(NodeId const   nodeId,
                 PortType const portType,
                 std::unordered_set<PortIndex> const & portIndexSet)
@@ -164,8 +164,8 @@ onPortsInserted(NodeId const   nodeId,
 }
 
 
-//NodeGraphicsScene::
-//NodeGraphicsScene(std::shared_ptr<DataModelRegistry> registry,
+//BasicGraphicsScene::
+//BasicGraphicsScene(std::shared_ptr<DataModelRegistry> registry,
 //QObject *                          parent)
 //: QGraphicsScene(parent)
 //, _registry(std::move(registry))
@@ -173,28 +173,28 @@ onPortsInserted(NodeId const   nodeId,
 //setItemIndexMethod(QGraphicsScene::NoIndex);
 
 // This connection should come first
-//connect(this, &NodeGraphicsScene::connectionCreated, this, &NodeGraphicsScene::setupConnectionSignals);
-//connect(this, &NodeGraphicsScene::connectionCreated, this, &NodeGraphicsScene::sendConnectionCreatedToNodes);
-//connect(this, &NodeGraphicsScene::connectionDeleted, this, &NodeGraphicsScene::sendConnectionDeletedToNodes);
+//connect(this, &BasicGraphicsScene::connectionCreated, this, &BasicGraphicsScene::setupConnectionSignals);
+//connect(this, &BasicGraphicsScene::connectionCreated, this, &BasicGraphicsScene::sendConnectionCreatedToNodes);
+//connect(this, &BasicGraphicsScene::connectionDeleted, this, &BasicGraphicsScene::sendConnectionDeletedToNodes);
 //}
 
 
-//NodeGraphicsScene::
-//NodeGraphicsScene(QObject * parent)
-//: NodeGraphicsScene(std::make_shared<DataModelRegistry>(),
+//BasicGraphicsScene::
+//BasicGraphicsScene(QObject * parent)
+//: BasicGraphicsScene(std::make_shared<DataModelRegistry>(),
 //parent)
 //{}
 
 
-NodeGraphicsScene::
-~NodeGraphicsScene()
+BasicGraphicsScene::
+~BasicGraphicsScene()
 {
   clearScene();
 }
 
 
 GraphModel const &
-NodeGraphicsScene::
+BasicGraphicsScene::
 graphModel() const
 {
   return _graphModel;
@@ -202,7 +202,7 @@ graphModel() const
 
 
 GraphModel &
-NodeGraphicsScene::
+BasicGraphicsScene::
 graphModel()
 {
   return _graphModel;
@@ -210,7 +210,7 @@ graphModel()
 
 
 ConnectionGraphicsObject *
-NodeGraphicsScene::
+BasicGraphicsScene::
 draftConnection() const
 {
   return _draftConnection.get();
@@ -221,9 +221,9 @@ draftConnection() const
 
 #if 0
 ConnectionGraphicsObject &
-NodeGraphicsScene::
-createConnection(NodeId const    nodeId,
-                 PortType const  connectedPort,
+BasicGraphicsScene::
+createConnection(NodeId const nodeId,
+                 PortType const connectedPort,
                  PortIndex const portIndex)
 {
   // Construct an incomplete ConnectionId with one dangling end.
@@ -254,7 +254,7 @@ createConnection(NodeId const    nodeId,
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 useDraftConnection(ConnectionId const newConnectionId)
 {
   qDebug() << "Start creating connection";
@@ -273,7 +273,7 @@ useDraftConnection(ConnectionId const newConnectionId)
 
 
 //std::shared_ptr<Connection>
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //restoreConnection(QJsonObject const & connectionJson)
 //{
 //QUuid nodeInId  = QUuid(connectionJson["in_id"].toString());
@@ -323,7 +323,7 @@ useDraftConnection(ConnectionId const newConnectionId)
 
 
 std::unique_ptr<ConnectionGraphicsObject>
-NodeGraphicsScene::
+BasicGraphicsScene::
 deleteConnection(ConnectionId const connectionId)
 {
   std::unique_ptr<ConnectionGraphicsObject> removed;
@@ -349,7 +349,7 @@ deleteConnection(ConnectionId const connectionId)
 
 
 bool
-NodeGraphicsScene::
+BasicGraphicsScene::
 makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
                     ConnectionId const newConnectionId)
 {
@@ -371,7 +371,7 @@ makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
 
 
 bool
-NodeGraphicsScene::
+BasicGraphicsScene::
 makeDraftConnection(ConnectionId const newConnectionId)
 {
   auto uniqueCgo =
@@ -382,7 +382,7 @@ makeDraftConnection(ConnectionId const newConnectionId)
 
 
 //Node &
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //createNode(std::unique_ptr<NodeDataModel> && dataModel)
 //{
 //auto node = detail::make_unique<Node>(std::move(dataModel));
@@ -399,7 +399,7 @@ makeDraftConnection(ConnectionId const newConnectionId)
 
 
 //Node &
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //restoreNode(QJsonObject const & nodeJson)
 //{
 //QString modelName = nodeJson["model"].toObject()["name"].toString();
@@ -426,7 +426,7 @@ makeDraftConnection(ConnectionId const newConnectionId)
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 createNode(NodeId const nodeId)
 {
   _nodeGraphicsObjects[nodeId] =
@@ -435,7 +435,7 @@ createNode(NodeId const nodeId)
 
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 deleteNode(NodeId const nodeId)
 {
   // Signal
@@ -451,7 +451,7 @@ deleteNode(NodeId const nodeId)
 
 
 //DataModelRegistry &
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //registry() const
 //{
 //return *_registry;
@@ -459,7 +459,7 @@ deleteNode(NodeId const nodeId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //setRegistry(std::shared_ptr<DataModelRegistry> registry)
 //{
 //_registry = std::move(registry);
@@ -467,7 +467,7 @@ deleteNode(NodeId const nodeId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //iterateOverNodes(std::function<void(Node *)> const & visitor)
 //{
 //for (const auto & _node : _nodes)
@@ -478,7 +478,7 @@ deleteNode(NodeId const nodeId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //iterateOverNodeData(std::function<void(NodeDataModel *)> const & visitor)
 //{
 //for (const auto & _node : _nodes)
@@ -489,7 +489,7 @@ deleteNode(NodeId const nodeId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //iterateOverNodeDataDependentOrder(std::function<void(NodeDataModel *)> const & visitor)
 //{
 //std::set<QUuid> visitedNodesSet;
@@ -564,7 +564,7 @@ deleteNode(NodeId const nodeId)
 
 
 //QPointF
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //getNodePosition(const Node & node) const
 //{
 //return node.nodeGraphicsObject().pos();
@@ -572,7 +572,7 @@ deleteNode(NodeId const nodeId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //setNodePosition(Node & node, const QPointF & pos) const
 //{
 //node.nodeGraphicsObject().setPos(pos);
@@ -581,7 +581,7 @@ deleteNode(NodeId const nodeId)
 
 
 //QSizeF
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //getNodeSize(const Node & node) const
 //{
 //return QSizeF(node.nodeGeometry().width(), node.nodeGeometry().height());
@@ -589,7 +589,7 @@ deleteNode(NodeId const nodeId)
 
 
 //std::unordered_map<QUuid, std::unique_ptr<Node>> const &
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //nodes() const
 //{
 //return _nodes;
@@ -597,7 +597,7 @@ deleteNode(NodeId const nodeId)
 
 
 //std::unordered_map<QUuid, std::shared_ptr<Connection>> const &
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //connections() const
 //{
 //return _connections;
@@ -605,7 +605,7 @@ deleteNode(NodeId const nodeId)
 
 
 //std::vector<Node *>
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //allNodes() const
 //{
 //std::vector<Node *> nodes;
@@ -620,7 +620,7 @@ deleteNode(NodeId const nodeId)
 
 
 std::vector<NodeId>
-NodeGraphicsScene::
+BasicGraphicsScene::
 selectedNodes() const
 {
   QList<QGraphicsItem *> graphicsItems = selectedItems();
@@ -645,7 +645,7 @@ selectedNodes() const
 //------------------------------------------------------------------------------
 
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 clearScene()
 {
 //Manual node cleanup. Simply clearing the holding datastructures
@@ -666,7 +666,7 @@ clearScene()
 
 
 NodeGraphicsObject*
-NodeGraphicsScene::
+BasicGraphicsScene::
 nodeGraphicsObject(NodeId nodeId)
 {
   NodeGraphicsObject * ngo = nullptr;
@@ -681,7 +681,7 @@ nodeGraphicsObject(NodeId nodeId)
 
 
 ConnectionGraphicsObject*
-NodeGraphicsScene::
+BasicGraphicsScene::
 connectionGraphicsObject(ConnectionId connectionId)
 {
   ConnectionGraphicsObject * cgo = nullptr;
@@ -696,7 +696,7 @@ connectionGraphicsObject(ConnectionId connectionId)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //save() const
 //{
 //QString fileName =
@@ -721,7 +721,7 @@ connectionGraphicsObject(ConnectionId connectionId)
 
 #if 0
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 load()
 {
   clearScene();
@@ -752,7 +752,7 @@ load()
 
 
 //QByteArray
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //saveToMemory() const
 //{
 //QJsonObject sceneJson;
@@ -789,7 +789,7 @@ load()
 
 #if 0
 void
-NodeGraphicsScene::
+BasicGraphicsScene::
 loadFromMemory(const QByteArray &data)
 {
   QJsonObject const jsonDocument = QJsonDocument::fromJson(data).object();
@@ -814,19 +814,19 @@ loadFromMemory(const QByteArray &data)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //setupConnectionSignals(Connection const& c)
 //{
 //connect(&c,
 //&Connection::connectionMadeIncomplete,
 //this,
-//&NodeGraphicsScene::connectionDeleted,
+//&BasicGraphicsScene::connectionDeleted,
 //Qt::UniqueConnection);
 //}
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //sendConnectionCreatedToNodes(Connection const& c)
 //{
 //Node* from = c.getNode(PortType::Out);
@@ -841,7 +841,7 @@ loadFromMemory(const QByteArray &data)
 
 
 //void
-//NodeGraphicsScene::
+//BasicGraphicsScene::
 //sendConnectionDeletedToNodes(Connection const& c)
 //{
 //Node* from = c.getNode(PortType::Out);

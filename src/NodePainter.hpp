@@ -7,10 +7,10 @@
 namespace QtNodes
 {
 
+class BasicGraphicsScene;
 class GraphModel;
 class NodeGeometry;
 class NodeGraphicsObject;
-class NodeGraphicsScene;
 class NodeState;
 
 /// @ Lightweight class incapsulating paint code.

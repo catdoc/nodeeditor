@@ -7,7 +7,7 @@
 namespace QtNodes
 {
 
-class NodeGraphicsScene;
+class BasicGraphicsScene;
 
 class NODE_EDITOR_PUBLIC GraphicsView
   : public QGraphicsView
@@ -15,7 +15,7 @@ class NODE_EDITOR_PUBLIC GraphicsView
   Q_OBJECT
 public:
   GraphicsView(QWidget *parent = Q_NULLPTR);
-  GraphicsView(NodeGraphicsScene *scene, QWidget *parent = Q_NULLPTR);
+  GraphicsView(BasicGraphicsScene *scene, QWidget *parent = Q_NULLPTR);
 
   GraphicsView(const GraphicsView &) = delete;
   GraphicsView operator=(const GraphicsView &) = delete;
@@ -24,7 +24,7 @@ public:
 
   QAction* deleteSelectionAction() const;
 
-  void setScene(NodeGraphicsScene *scene);
+  void setScene(BasicGraphicsScene *scene);
 
   void centerScene();
 
@@ -56,7 +56,7 @@ protected:
 
 protected:
 
-  NodeGraphicsScene * nodeScene();
+  BasicGraphicsScene * nodeScene();
 
 private:
 

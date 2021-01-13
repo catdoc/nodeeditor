@@ -10,72 +10,97 @@ class QGraphicsProxyWidget;
 namespace QtNodes
 {
 
-class NodeGraphicsScene;
-class FlowItemEntry;
-
+class BasicGraphicsScene;
+class GraphModel;
 
 class NodeGraphicsObject : public QGraphicsObject
 {
   Q_OBJECT
 
 public:
-  NodeGraphicsObject(NodeGraphicsScene &scene,
+  NodeGraphicsObject(BasicGraphicsScene &scene,
                      NodeId node);
 
-  virtual ~NodeGraphicsObject();
+  virtual
+  ~NodeGraphicsObject();
 
 public:
 
-  NodeGraphicsScene * nodeScene() const;
+  GraphModel &
+  graphModel() const;
 
-  NodeId nodeId() { return _nodeId; }
-  NodeId nodeId() const { return _nodeId; }
+  BasicGraphicsScene *
+  nodeScene() const;
 
-  NodeState & nodeState() { return _nodeState; }
-  NodeState const & nodeState() const { return _nodeState; }
+  NodeId
+  nodeId() { return _nodeId; }
+  NodeId
+  nodeId() const { return _nodeId; }
 
-  QRectF boundingRect() const override;
+  NodeState &
+  nodeState() { return _nodeState; }
+  NodeState const &
+  nodeState() const { return _nodeState; }
 
-  void setGeometryChanged();
+  QRectF
+  boundingRect() const override;
+
+  void
+  setGeometryChanged();
 
   /// Visits all attached connections and corrects
   /// their corresponding end points.
-  void moveConnections() const;
+  void
+  moveConnections() const;
 
   enum { Type = UserType + 1 };
 
-  int type() const override { return Type; }
+  int
+  type() const override { return Type; }
 
 protected:
-  void paint(QPainter*                       painter,
-             QStyleOptionGraphicsItem const* option,
-             QWidget*                        widget = 0) override;
+  void
+  paint(QPainter*                       painter,
+        QStyleOptionGraphicsItem const* option,
+        QWidget*                        widget = 0) override;
 
-  QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+  QVariant
+  itemChange(GraphicsItemChange change, const QVariant &value) override;
 
-  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+  void
+  mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
-  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+  void
+  mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
-  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+  void
+  mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
-  void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+  void
+  hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
 
-  void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+  void
+  hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
-  void hoverMoveEvent(QGraphicsSceneHoverEvent *) override;
+  void
+  hoverMoveEvent(QGraphicsSceneHoverEvent *) override;
 
-  void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+  void
+  mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
-  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+  void
+  contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
 private:
 
-  void embedQWidget();
+  void
+  embedQWidget();
 
 private:
 
   NodeId _nodeId;
+
+  GraphModel &_graphModel;
 
   NodeState _nodeState;
 

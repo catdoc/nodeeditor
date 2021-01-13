@@ -9,6 +9,7 @@
 #include <QtCore/QVariant>
 
 #include "Definitions.hpp"
+#include "ConnectionIdHash.hpp"
 
 
 namespace QtNodes

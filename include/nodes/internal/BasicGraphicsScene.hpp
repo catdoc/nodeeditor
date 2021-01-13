@@ -26,17 +26,17 @@ class NodeGraphicsObject;
 class NodeStyle;
 
 /// Scene holds connections and nodes.
-class NODE_EDITOR_PUBLIC NodeGraphicsScene : public QGraphicsScene
+class NODE_EDITOR_PUBLIC BasicGraphicsScene : public QGraphicsScene
 {
   Q_OBJECT
 public:
 
-  NodeGraphicsScene(GraphModel & graphModel);
+  BasicGraphicsScene(GraphModel & graphModel);
 
-  ~NodeGraphicsScene();
+  ~BasicGraphicsScene();
 
   // Scenes without models are not supported
-  NodeGraphicsScene() = delete;
+  BasicGraphicsScene() = delete;
 
 public:
 

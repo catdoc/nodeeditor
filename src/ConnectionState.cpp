@@ -3,9 +3,9 @@
 #include <QtCore/QDebug>
 #include <QtCore/QPointF>
 
+#include "BasicGraphicsScene.hpp"
 #include "ConnectionGraphicsObject.hpp"
 #include "NodeGraphicsObject.hpp"
-#include "NodeGraphicsScene.hpp"
 
 namespace QtNodes
 {

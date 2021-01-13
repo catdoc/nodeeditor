@@ -12,10 +12,11 @@
 #include "ConnectionPainter.hpp"
 #include "ConnectionState.hpp"
 #include "ConnectionStyle.hpp"
+#include "GraphModel.hpp"
 #include "NodeConnectionInteraction.hpp"
 #include "NodeGeometry.hpp"
 #include "NodeGraphicsObject.hpp"
-#include "NodeGraphicsScene.hpp"
+#include "BasicGraphicsScene.hpp"
 #include "StyleCollection.hpp"
 #include "locateNode.hpp"
 
@@ -24,9 +25,10 @@ namespace QtNodes
 {
 
 ConnectionGraphicsObject::
-ConnectionGraphicsObject(NodeGraphicsScene & scene,
-                         ConnectionId const  connectionId)
+ConnectionGraphicsObject(BasicGraphicsScene &scene,
+                         ConnectionId const connectionId)
   : _connectionId(connectionId)
+  , _graphModel(scene.graphModel())
   , _connectionState(*this)
   , _out{0, 0}
   , _in{0, 0}
@@ -68,7 +70,7 @@ initializePosition()
     PortType attachedPort = oppositePort(_connectionState.requiredPort());
 
     PortIndex portIndex = getPortIndex(attachedPort, _connectionId);
-    NodeId nodeId = getNodeId(attachedPort, _connectionId);
+    NodeId nodeId       = getNodeId(attachedPort, _connectionId);
 
     NodeGraphicsObject * ngo =
       nodeScene()->nodeGraphicsObject(nodeId);
@@ -90,11 +92,19 @@ initializePosition()
 }
 
 
-NodeGraphicsScene *
+GraphModel &
+ConnectionGraphicsObject::
+graphModel() const
+{
+  return _graphModel;
+}
+
+
+BasicGraphicsScene *
 ConnectionGraphicsObject::
 nodeScene() const
 {
-  return dynamic_cast<NodeGraphicsScene*>(scene());
+  return dynamic_cast<BasicGraphicsScene*>(scene());
 }
 
 
@@ -127,7 +137,7 @@ boundingRect() const
 
   QRectF commonRect = basicRect.united(c1c2Rect);
 
-  auto const & connectionStyle = StyleCollection::connectionStyle();
+  auto const &connectionStyle = StyleCollection::connectionStyle();
   float const diam = connectionStyle.pointDiameter();
   QPointF const cornerOffset(diam, diam);
 
@@ -170,7 +180,7 @@ endPoint(PortType portType) const
 
 void
 ConnectionGraphicsObject::
-setEndPoint(PortType portType, QPointF const & point)
+setEndPoint(PortType portType, QPointF const &point)
 {
   if (portType == PortType::In)
     _in = point;
@@ -181,7 +191,7 @@ setEndPoint(PortType portType, QPointF const & point)
 
 void
 ConnectionGraphicsObject::
-moveEndPointBy(PortType portType, QPointF const & offset)
+moveEndPointBy(PortType portType, QPointF const &offset)
 {
   if (portType == PortType::In)
     _in += offset;
@@ -290,14 +300,12 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
   prepareGeometryChange();
 
   auto view = static_cast<QGraphicsView *>(event->widget());
-  auto ngo = locateNodeAt(event->scenePos(),
-                          *nodeScene(),
-                          view->transform());
+  auto ngo  = locateNodeAt(event->scenePos(),
+                           *nodeScene(),
+                           view->transform());
   if (ngo)
   {
     _connectionState.interactWithNode(ngo->nodeId());
-
-    GraphModel const & model = ngo->nodeScene()->graphModel();
 
     PortType knownPortType = oppositePort(_connectionState.requiredPort());
 
@@ -310,10 +318,10 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
                                std::get<3>(_connectionId);
 
     NodeDataType knownDataType =
-      model.portData(knownNodeId,
-                     knownPortType,
-                     knownPortIndex,
-                     PortRole::DataType).value<NodeDataType>();
+      _graphModel.portData(knownNodeId,
+                           knownPortType,
+                           knownPortIndex,
+                           PortRole::DataType).value<NodeDataType>();
 
     // Sets node's mouse dragging position in nodes coordinates.
     ngo->nodeState().reactToPossibleConnection(_connectionState.requiredPort(),
@@ -454,6 +462,4 @@ addGraphicsEffect()
   //effect->setColor(QColor(Qt::gray).darker(800));
 }
 
-
 }
-

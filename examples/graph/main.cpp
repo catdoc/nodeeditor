@@ -1,6 +1,6 @@
 #include <nodes/ConnectionStyle>
 #include <nodes/GraphicsView>
-#include <nodes/NodeGraphicsScene>
+#include <nodes/BasicGraphicsScene>
 #include <nodes/StyleCollection>
 
 #include <QtGui/QScreen>
@@ -12,7 +12,7 @@
 
 using QtNodes::ConnectionStyle;
 using QtNodes::GraphicsView;
-using QtNodes::NodeGraphicsScene;
+using QtNodes::BasicGraphicsScene;
 using QtNodes::NodeRole;
 using QtNodes::StyleCollection;
 
@@ -32,7 +32,7 @@ main(int argc, char *argv[])
     graphModel.setNodeData(id2, NodeRole::Position, QPointF(300, 300));
   }
 
-  auto scene = new NodeGraphicsScene(graphModel);
+  auto scene = new BasicGraphicsScene(graphModel);
 
   GraphicsView view(scene);
 

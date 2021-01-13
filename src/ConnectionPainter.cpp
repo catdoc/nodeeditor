@@ -7,7 +7,6 @@
 #include "Definitions.hpp"
 #include "GraphModel.hpp"
 #include "NodeData.hpp"
-#include "NodeGraphicsScene.hpp"
 #include "StyleCollection.hpp"
 
 
@@ -16,10 +15,10 @@ namespace QtNodes
 
 static
 QPainterPath
-cubicPath(ConnectionGraphicsObject const & connection)
+cubicPath(ConnectionGraphicsObject const &connection)
 {
-  QPointF const & in  = connection.endPoint(PortType::In);
-  QPointF const & out = connection.endPoint(PortType::Out);
+  QPointF const &in  = connection.endPoint(PortType::In);
+  QPointF const &out = connection.endPoint(PortType::Out);
 
   auto const c1c2 = connection.pointsC1C2();
 
@@ -34,11 +33,11 @@ cubicPath(ConnectionGraphicsObject const & connection)
 
 QPainterPath
 ConnectionPainter::
-getPainterStroke(ConnectionGraphicsObject const & connection)
+getPainterStroke(ConnectionGraphicsObject const &connection)
 {
   auto cubic = cubicPath(connection);
 
-  QPointF const & out = connection.endPoint(PortType::Out);
+  QPointF const &out = connection.endPoint(PortType::Out);
   QPainterPath result(out);
 
   unsigned segments = 20;
@@ -59,13 +58,13 @@ getPainterStroke(ConnectionGraphicsObject const & connection)
 static
 void
 debugDrawing(QPainter * painter,
-             ConnectionGraphicsObject const & cgo)
+             ConnectionGraphicsObject const &cgo)
 {
   Q_UNUSED(painter);
 
   {
-    QPointF const & out = geom.out();
-    QPointF const & in = geom.in();
+    QPointF const &out = geom.out();
+    QPointF const &in  = geom.in();
 
     auto const points = cgo.pointsC1C2();
 
@@ -94,13 +93,13 @@ debugDrawing(QPainter * painter,
 static
 void
 drawSketchLine(QPainter * painter,
-               ConnectionGraphicsObject const & cgo)
+               ConnectionGraphicsObject const &cgo)
 {
-  ConnectionState const & state = cgo.connectionState();
+  ConnectionState const &state = cgo.connectionState();
 
   if (state.requiresPort())
   {
-    auto const & connectionStyle =
+    auto const &connectionStyle =
       QtNodes::StyleCollection::connectionStyle();
 
     QPen pen;
@@ -122,15 +121,15 @@ drawSketchLine(QPainter * painter,
 static
 void
 drawHoveredOrSelected(QPainter * painter,
-                      ConnectionGraphicsObject const & cgo)
+                      ConnectionGraphicsObject const &cgo)
 {
-  bool const hovered = cgo.connectionState().hovered();
+  bool const hovered  = cgo.connectionState().hovered();
   bool const selected = cgo.isSelected();
 
   // drawn as a fat background
   if (hovered || selected)
   {
-    auto const & connectionStyle =
+    auto const &connectionStyle =
       QtNodes::StyleCollection::connectionStyle();
 
     double const lineWidth = connectionStyle.lineWidth();
@@ -154,16 +153,16 @@ drawHoveredOrSelected(QPainter * painter,
 static
 void
 drawNormalLine(QPainter * painter,
-               ConnectionGraphicsObject const & cgo)
+               ConnectionGraphicsObject const &cgo)
 {
-  ConnectionState const & state = cgo.connectionState();
+  ConnectionState const &state = cgo.connectionState();
 
   if (state.requiresPort())
     return;
 
   // colors
 
-  auto const & connectionStyle =
+  auto const &connectionStyle =
     QtNodes::StyleCollection::connectionStyle();
 
   QColor normalColorOut = connectionStyle.normalColor();
@@ -172,7 +171,7 @@ drawNormalLine(QPainter * painter,
 
   bool useGradientColor = false;
 
-  GraphModel const & graphModel = cgo.nodeScene()->graphModel();
+  GraphModel const &graphModel = cgo.graphModel();
 
   if (connectionStyle.useDataDefinedColors())
   {
@@ -245,8 +244,8 @@ drawNormalLine(QPainter * painter,
       QIcon icon(":convert.png");
 
       QPixmap pixmap = icon.pixmap(QSize(22, 22));
-      painter->drawPixmap(cubic.pointAtPercent(0.50) - QPoint(pixmap.width()/2,
-                                                              pixmap.height()/2),
+      painter->drawPixmap(cubic.pointAtPercent(0.50) - QPoint(pixmap.width() / 2,
+                                                              pixmap.height() / 2),
                           pixmap);
 
     }
@@ -271,7 +270,7 @@ drawNormalLine(QPainter * painter,
 void
 ConnectionPainter::
 paint(QPainter * painter,
-      ConnectionGraphicsObject const & cgo)
+      ConnectionGraphicsObject const &cgo)
 {
   drawHoveredOrSelected(painter, cgo);
 
@@ -284,7 +283,7 @@ paint(QPainter * painter,
 #endif
 
   // draw end points
-  auto const & connectionStyle =
+  auto const &connectionStyle =
     QtNodes::StyleCollection::connectionStyle();
 
   double const pointDiameter = connectionStyle.pointDiameter();

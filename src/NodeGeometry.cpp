@@ -8,7 +8,6 @@
 #include "Definitions.hpp"
 #include "GraphModel.hpp"
 #include "NodeGraphicsObject.hpp"
-#include "NodeGraphicsScene.hpp"
 #include "StyleCollection.hpp"
 
 namespace QtNodes
@@ -16,9 +15,9 @@ namespace QtNodes
 
 
 NodeGeometry::
-NodeGeometry(NodeGraphicsObject const & ngo)
+NodeGeometry(NodeGraphicsObject const &ngo)
   : _ngo(ngo)
-  , _graphModel(ngo.nodeScene()->graphModel())
+  , _graphModel(ngo.graphModel())
   , _defaultInPortWidth(70)
   , _defaultOutPortWidth(70)
   , _entryHeight(20)
@@ -69,8 +68,8 @@ boundingRect() const
 {
   NodeId nodeId = _ngo.nodeId();
 
-  auto const & style = _graphModel.nodeData(nodeId, NodeRole::Style);
-  auto const & nodeStyle = StyleCollection::nodeStyle();
+  auto const &style     = _graphModel.nodeData(nodeId, NodeRole::Style);
+  auto const &nodeStyle = StyleCollection::nodeStyle();
 
   double addon = 4 * nodeStyle.ConnectionPointDiameter;
 
@@ -145,7 +144,7 @@ recalculateSize() const
 
 QSize
 NodeGeometry::
-recalculateSizeIfFontChanged(QFont const & font) const
+recalculateSizeIfFontChanged(QFont const &font) const
 {
   QFontMetrics fontMetrics(font);
   QFont boldFont = font;
@@ -167,10 +166,10 @@ recalculateSizeIfFontChanged(QFont const & font) const
 
 QPointF
 NodeGeometry::
-portNodePosition(PortType const  portType,
+portNodePosition(PortType const portType,
                  PortIndex const index) const
 {
-  auto const & nodeStyle = StyleCollection::nodeStyle();
+  auto const &nodeStyle = StyleCollection::nodeStyle();
 
   unsigned int step = _entryHeight + _verticalSpacing;
 
@@ -191,20 +190,20 @@ portNodePosition(PortType const  portType,
   switch (portType)
   {
     case PortType::Out:
-      {
-        double x = size.width() + nodeStyle.ConnectionPointDiameter;
+    {
+      double x = size.width() + nodeStyle.ConnectionPointDiameter;
 
-        result = QPointF(x, totalHeight);
-        break;
-      }
+      result = QPointF(x, totalHeight);
+      break;
+    }
 
     case PortType::In:
-      {
-        double x = 0.0 - nodeStyle.ConnectionPointDiameter;
+    {
+      double x = 0.0 - nodeStyle.ConnectionPointDiameter;
 
-        result = QPointF(x, totalHeight);
-        break;
-      }
+      result = QPointF(x, totalHeight);
+      break;
+    }
 
     default:
       break;
@@ -216,23 +215,24 @@ portNodePosition(PortType const  portType,
 
 QPointF
 NodeGeometry::
-portScenePosition(PortType const     portType,
-                  PortIndex const    index,
-                  QTransform const & t) const
+portScenePosition(PortType const portType,
+                  PortIndex const index,
+                  QTransform const &t) const
 {
   QPointF result = portNodePosition(portType, index);
 
   return t.map(result);
 }
 
+
 // TODO check implementation
 PortIndex
 NodeGeometry::
 checkHitScenePoint(PortType portType,
                    QPointF const scenePoint,
-                   QTransform const & sceneTransform) const
+                   QTransform const &sceneTransform) const
 {
-  auto const & nodeStyle = StyleCollection::nodeStyle();
+  auto const &nodeStyle = StyleCollection::nodeStyle();
 
   PortIndex result = InvalidPortIndex;
 
@@ -241,15 +241,13 @@ checkHitScenePoint(PortType portType,
 
   double const tolerance = 2.0 * nodeStyle.ConnectionPointDiameter;
 
-  auto & model = _ngo.nodeScene()->graphModel();
-
   NodeId nodeId = _ngo.nodeId();
 
   size_t const n =
-    model.nodeData(nodeId,
-                   (portType == PortType::Out) ?
-                   NodeRole::NumberOfOutPorts :
-                   NodeRole::NumberOfInPorts).toUInt();
+    _graphModel.nodeData(nodeId,
+                         (portType == PortType::Out) ?
+                         NodeRole::NumberOfOutPorts :
+                         NodeRole::NumberOfInPorts).toUInt();
 
   for (unsigned int portIndex = 0; portIndex < n; ++portIndex)
   {

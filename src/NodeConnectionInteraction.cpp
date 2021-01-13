@@ -8,7 +8,7 @@
 #include "ConnectionIdUtils.hpp"
 #include "NodeGeometry.hpp"
 #include "NodeGraphicsObject.hpp"
-#include "NodeGraphicsScene.hpp"
+#include "BasicGraphicsScene.hpp"
 
 
 namespace QtNodes
@@ -17,7 +17,7 @@ namespace QtNodes
 NodeConnectionInteraction::
 NodeConnectionInteraction(NodeGraphicsObject & ngo,
                           ConnectionGraphicsObject & cgo,
-                          NodeGraphicsScene &  scene)
+                          BasicGraphicsScene &  scene)
   : _ngo(ngo)
   , _cgo(cgo)
   , _scene(scene)

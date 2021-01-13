@@ -18,11 +18,11 @@
 
 #include "ConnectionGraphicsObject.hpp"
 #include "NodeGraphicsObject.hpp"
-#include "NodeGraphicsScene.hpp"
+#include "BasicGraphicsScene.hpp"
 #include "StyleCollection.hpp"
 
 using QtNodes::GraphicsView;
-using QtNodes::NodeGraphicsScene;
+using QtNodes::BasicGraphicsScene;
 
 GraphicsView::
 GraphicsView(QWidget *parent)
@@ -51,8 +51,8 @@ GraphicsView(QWidget *parent)
 
 
 GraphicsView::
-GraphicsView(NodeGraphicsScene *scene, QWidget *parent)
-  : GraphicsView(parent) // delegating constructor
+GraphicsView(BasicGraphicsScene *scene, QWidget *parent)
+  : GraphicsView(parent)
 {
   setScene(scene);
 }
@@ -75,7 +75,7 @@ deleteSelectionAction() const
 
 
 void
-GraphicsView::setScene(NodeGraphicsScene *scene)
+GraphicsView::setScene(BasicGraphicsScene *scene)
 {
   QGraphicsView::setScene(scene);
 
@@ -427,10 +427,10 @@ showEvent(QShowEvent *event)
 }
 
 
-NodeGraphicsScene *
+BasicGraphicsScene *
 GraphicsView::
 nodeScene()
 {
-  return dynamic_cast<NodeGraphicsScene*>(scene());
+  return dynamic_cast<BasicGraphicsScene*>(scene());
 }
 

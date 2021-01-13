@@ -6,23 +6,24 @@
 #include <QtWidgets/QtWidgets>
 #include <QtWidgets/QGraphicsEffect>
 
+#include "BasicGraphicsScene.hpp"
 #include "ConnectionGraphicsObject.hpp"
 #include "ConnectionIdUtils.hpp"
-#include "ConnectionState.hpp"
+#include "GraphModel.hpp"
 #include "NodeConnectionInteraction.hpp"
 #include "NodeGeometry.hpp"
-#include "NodeGraphicsScene.hpp"
 #include "NodePainter.hpp"
 #include "StyleCollection.hpp"
 
-using QtNodes::NodeGraphicsObject;
-using QtNodes::NodeId;
-using QtNodes::NodeGraphicsScene;
+
+namespace QtNodes
+{
 
 NodeGraphicsObject::
-NodeGraphicsObject(NodeGraphicsScene & scene,
+NodeGraphicsObject(BasicGraphicsScene &scene,
                    NodeId nodeId)
   : _nodeId(nodeId)
+  , _graphModel(scene.graphModel())
   , _nodeState(*this)
   , _proxyWidget(nullptr)
 {
@@ -37,7 +38,7 @@ NodeGraphicsObject(NodeGraphicsScene & scene,
   setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
   // TODO: Take style from model.
-  auto const & nodeStyle = StyleCollection::nodeStyle();
+  auto const &nodeStyle = StyleCollection::nodeStyle();
 
   {
     auto effect = new QGraphicsDropShadowEffect;
@@ -60,13 +61,12 @@ NodeGraphicsObject(NodeGraphicsScene & scene,
   geometry.recalculateSize();
 
   //
-  GraphModel & model = nodeScene()->graphModel();
   QPointF const pos =
-    model.nodeData(_nodeId, NodeRole::Position).value<QPointF>();
+    _graphModel.nodeData(_nodeId, NodeRole::Position).value<QPointF>();
 
   setPos(pos);
 
-  // connect to the move signals to emit the move signals in NodeGraphicsScene
+  // connect to the move signals to emit the move signals in BasicGraphicsScene
   //auto onMoveSlot = [this] { _scene.nodeMoved(_nodeId, pos()); };
 
   //connect(this, &QGraphicsObject::xChanged, this, onMoveSlot);
@@ -76,15 +76,22 @@ NodeGraphicsObject(NodeGraphicsScene & scene,
 
 NodeGraphicsObject::
 ~NodeGraphicsObject()
+{}
+
+
+GraphModel &
+NodeGraphicsObject::
+graphModel() const
 {
+  return _graphModel;
 }
 
 
-NodeGraphicsScene *
+BasicGraphicsScene *
 NodeGraphicsObject::
 nodeScene() const
 {
-  return dynamic_cast<NodeGraphicsScene*>(scene());
+  return dynamic_cast<BasicGraphicsScene*>(scene());
 }
 
 
@@ -94,9 +101,7 @@ embedQWidget()
 {
   NodeGeometry geom(*this);
 
-  GraphModel const & model = nodeScene()->graphModel();
-
-  if (auto w = model.nodeData(_nodeId, NodeRole::Widget).value<QWidget*>())
+  if (auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget*>())
   {
     _proxyWidget = new QGraphicsProxyWidget(this);
 
@@ -141,20 +146,18 @@ void
 NodeGraphicsObject::
 moveConnections() const
 {
-  GraphModel const & model = nodeScene()->graphModel();
-
   auto moveConns =
-    [&model, this](PortType portType, NodeRole nodeRole)
+    [this](PortType portType, NodeRole nodeRole)
     {
       size_t const n =
-        model.nodeData(_nodeId, nodeRole).toUInt();
+        _graphModel.nodeData(_nodeId, nodeRole).toUInt();
 
       for (PortIndex portIndex = 0; portIndex < n; ++portIndex)
       {
-        auto const & connectedNodes =
-          model.connectedNodes(_nodeId, portType, portIndex);
+        auto const &connectedNodes =
+          _graphModel.connectedNodes(_nodeId, portType, portIndex);
 
-        for (auto & cn: connectedNodes)
+        for (auto &cn: connectedNodes)
         {
           // out node id, out port index, in node id, in port index.
           ConnectionId connectionId =
@@ -189,7 +192,7 @@ paint(QPainter * painter,
 
 QVariant
 NodeGraphicsObject::
-itemChange(GraphicsItemChange change, const QVariant & value)
+itemChange(GraphicsItemChange change, const QVariant &value)
 {
   if (change == ItemPositionChange && scene())
   {
@@ -214,7 +217,7 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
     scene()->clearSelection();
   }
 
-  NodeGraphicsScene * nodeScene = this->nodeScene();
+  BasicGraphicsScene * nodeScene = this->nodeScene();
 
   for (PortType portToCheck: {PortType::In, PortType::Out})
   {
@@ -227,15 +230,13 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
 
     if (portIndex != InvalidPortIndex)
     {
-      GraphModel const & model = nodeScene->graphModel();
-
-      auto const & connectedNodes =
-        model.connectedNodes(_nodeId, portToCheck, portIndex);
+      auto const &connectedNodes =
+        _graphModel.connectedNodes(_nodeId, portToCheck, portIndex);
 
       // Start dragging existing connection.
       if (!connectedNodes.empty() && portToCheck == PortType::In)
       {
-        auto const & cn = *connectedNodes.begin();
+        auto const &cn = *connectedNodes.begin();
 
         // Need "reversed" connectin id if enabled for both port types.
         ConnectionId connectionId =
@@ -257,18 +258,16 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
       {
         if (portToCheck == PortType::Out)
         {
-          GraphModel const & model = nodeScene->graphModel();
-
           auto const outPolicy =
-            model.portData(_nodeId,
-                           portToCheck,
-                           portIndex,
-                           PortRole::ConnectionPolicy).value<ConnectionPolicy>();
+            _graphModel.portData(_nodeId,
+                                 portToCheck,
+                                 portIndex,
+                                 PortRole::ConnectionPolicy).value<ConnectionPolicy>();
 
           if (!connectedNodes.empty() &&
               outPolicy == ConnectionPolicy::One)
           {
-            for (auto & cn : connectedNodes)
+            for (auto &cn : connectedNodes)
             {
               ConnectionId connectionId =
                 std::make_tuple(cn.first, cn.second, _nodeId, portIndex);
@@ -414,7 +413,7 @@ hoverMoveEvent(QGraphicsSceneHoverEvent * event)
 
   NodeGeometry geometry(*this);
 
-  if ((nodeScene()->graphModel().nodeFlags(_nodeId) | NodeFlag::Resizable) &&
+  if ((_graphModel.nodeFlags(_nodeId) | NodeFlag::Resizable) &&
       geometry.resizeRect().contains(QPoint(pos.x(), pos.y())))
   {
     setCursor(QCursor(Qt::SizeFDiagCursor));
@@ -445,3 +444,5 @@ contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
   nodeScene()->nodeContextMenu(_nodeId, mapToScene(event->pos()));
 }
 
+
+}
