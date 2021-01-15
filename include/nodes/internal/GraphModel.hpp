@@ -43,6 +43,14 @@ public:
                  PortIndex index) const;
 
 
+  /// Model decides if a conection with given connection Id possible.
+  /**
+   * The default implementation compares corresponding data types.
+   */
+  virtual
+  bool
+  connectionPossible(ConnectionId const connectionId);
+
   virtual
   void
   addConnection(ConnectionId const connectionId);

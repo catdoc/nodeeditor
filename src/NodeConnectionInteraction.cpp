@@ -68,35 +68,12 @@ canConnect(PortIndex * portIndex) const
 
   GraphModel & model = _ngo.nodeScene()->graphModel();
 
-  NodeDataType const connectionDataType =
-    model.portData(connectedNodeId,
-                   oppositePort(requiredPort),
-                   getPortIndex(oppositePort(requiredPort), _cgo.connectionId()),
-                   PortRole::DataType).value<NodeDataType>();
+  ConnectionId connectionId =
+    makeCompleteConnectionId(_cgo.connectionId(), // incomplete
+                             _ngo.nodeId(), // missing node id
+                             *portIndex); // missing port index
 
-  NodeDataType const targetDataType =
-    model.portData(_ngo.nodeId(),
-                   requiredPort,
-                   *portIndex,
-                   PortRole::DataType).value<NodeDataType>();
-
-  if (connectionDataType.id != targetDataType.id)
-  {
-    //if (requiredPort == PortType::In)
-    //{
-    //converter = _scene->registry().getTypeConverter(connectionDataType, candidateNodeDataType);
-    //}
-    //else if (requiredPort == PortType::Out)
-    //{
-    //converter = _scene->registry().getTypeConverter(candidateNodeDataType, connectionDataType);
-    //}
-
-    //return (converter != nullptr);
-
-    return false;
-  }
-
-  return true;
+  return model.connectionPossible(connectionId);
 }
 
 
@@ -142,9 +119,8 @@ tryConnect() const
   // Repaint old connected Node
   NodeGraphicsObject * oppositeNgo =
     _scene.nodeGraphicsObject(getNodeId(oppositePort(requiredPort),
-                              newConnectionId));
+                                        newConnectionId));
   oppositeNgo->update();
-
 
   // 5) Poke model to intiate data transfer
 

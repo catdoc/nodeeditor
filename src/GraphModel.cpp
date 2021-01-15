@@ -6,6 +6,8 @@
 #include <QtWidgets/QWidget>
 
 #include "ConnectionIdHash.hpp"
+#include "ConnectionIdUtils.hpp"
+#include "NodeData.hpp"
 #include "StyleCollection.hpp"
 
 
@@ -26,8 +28,8 @@ allNodeIds() const
 
 std::unordered_set<std::pair<PortIndex, NodeId>>
 GraphModel::
-connectedNodes(NodeId nodeId,
-               PortType portType,
+connectedNodes(NodeId    nodeId,
+               PortType  portType,
                PortIndex portIndex) const
 {
   Q_UNUSED(nodeId);
@@ -36,6 +38,34 @@ connectedNodes(NodeId nodeId,
 
   // No connected nodes in the default implementation.
   return std::unordered_set<std::pair<PortIndex, NodeId>>();
+}
+
+
+bool
+GraphModel::
+connectionPossible(ConnectionId const connectionId)
+{
+  NodeId nodeIdIn = getNodeId(PortType::In, connectionId);
+  PortIndex portIndexIn = getPortIndex(PortType::In, connectionId);
+
+  NodeDataType typeIn =
+    portData(nodeIdIn,
+             PortType::In,
+             portIndexIn,
+             PortRole::DataType).value<NodeDataType>();
+
+
+
+  NodeId nodeIdOut = getNodeId(PortType::Out, connectionId);
+  PortIndex portIndexOut = getPortIndex(PortType::Out, connectionId);
+
+  NodeDataType typeOut =
+    portData(nodeIdOut,
+             PortType::Out,
+             portIndexOut,
+             PortRole::DataType).value<NodeDataType>();
+
+  return (typeIn.id == typeOut.id);
 }
 
 
@@ -78,11 +108,11 @@ nodeData(NodeId nodeId, NodeRole role) const
       break;
 
     case NodeRole::Style:
-    {
-      auto style = StyleCollection::nodeStyle();
-      result = style.toJson().toVariant();
-    }
-    break;
+      {
+        auto style = StyleCollection::nodeStyle();
+        result = style.toJson().toVariant();
+      }
+      break;
 
     case NodeRole::NumberOfInPorts:
       result = 1u;
@@ -125,10 +155,10 @@ setNodeData(NodeId nodeId, NodeRole role, QVariant value)
 
 QVariant
 GraphModel::
-portData(NodeId nodeId,
-         PortType portType,
+portData(NodeId    nodeId,
+         PortType  portType,
          PortIndex portIndex,
-         PortRole role) const
+         PortRole  role) const
 {
   Q_UNUSED(nodeId);
   Q_UNUSED(portIndex);
@@ -166,10 +196,10 @@ portData(NodeId nodeId,
 
 bool
 GraphModel::
-setPortData(NodeId nodeId,
-            PortType portType,
+setPortData(NodeId    nodeId,
+            PortType  portType,
             PortIndex portIndex,
-            PortRole role) const
+            PortRole  role) const
 {
   Q_UNUSED(nodeId);
   Q_UNUSED(portType);
