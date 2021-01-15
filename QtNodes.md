@@ -16,6 +16,35 @@ Graph Model
 Graph Model references all the nodes and their interconnections.
 Nodes have input and output ports. We model directed graph.
 
+
+Port Removing and Insertion
+-----------------------------------------------------------------------
+
+Removing
+
+```
+  1      1
+
+  2      _
+     ->
+  3      3
+
+  4      4
+```
+
+Insertion
+
+```
+  1      1
+
+  _      2
+
+  2      3
+
+  3      4
+```
+
+
 Graph Visualization
 -----------------------------------------------------------------------
 

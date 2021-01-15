@@ -32,6 +32,20 @@ NodeGraphicsScene::
 NodeGraphicsScene(GraphModel &graphModel)
   : _graphModel(graphModel)
 {
+
+  connect(&_graphModel, &GraphModel::portsAboutToBeDeleted,
+          this, &NodeGraphicsScene::onPortsAboutToBeDeleted);
+
+  connect(&_graphModel, &GraphModel::portsDeleted,
+          this, &NodeGraphicsScene::onPortsDeleted);
+
+  connect(&_graphModel, &GraphModel::portsAboutToBeInserted,
+          this, &NodeGraphicsScene::onPortsAboutToBeInserted);
+
+  connect(&_graphModel, &GraphModel::portsInserted,
+          this, &NodeGraphicsScene::onPortsInserted);
+
+
   traverseGraphAndPopulateGraphicsObjects();
 }
 
@@ -83,6 +97,70 @@ traverseGraphAndPopulateGraphicsObjects()
       }
     } // while
   }
+}
+
+
+void
+NodeGraphicsScene::
+onPortsAboutToBeDeleted(NodeId const   nodeId,
+                        PortType const portType,
+                        std::unordered_set<PortIndex> const & portIndexSet)
+{
+  NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
+
+  if (node)
+  {
+    for (auto portIndex : portIndexSet)
+    {
+      auto const connectedNodes =
+        _graphModel.connectedNodes(nodeId, portType, portIndex);
+
+      for (auto cn : connectedNodes)
+      {
+        ConnectionId connectionId =
+          (portType == PortType::In) ?
+          std::make_tuple(cn.first, cn.second, nodeId, portIndex) :
+          std::make_tuple(nodeId, portIndex, cn.first, cn.second);
+
+        deleteConnection(connectionId);
+      }
+    }
+  }
+}
+
+
+void
+NodeGraphicsScene::
+onPortsDeleted(NodeId const   nodeId,
+               PortType const portType,
+               std::unordered_set<PortIndex> const & portIndexSet)
+{
+  NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
+
+  if (node)
+  {
+    node->update();
+  }
+}
+
+
+void
+NodeGraphicsScene::
+onPortsAboutToBeInserted(NodeId const   nodeId,
+                         PortType const portType,
+                         std::unordered_set<PortIndex> const & portIndexSet)
+{
+  // TODO
+}
+
+
+void
+NodeGraphicsScene::
+onPortsInserted(NodeId const   nodeId,
+                PortType const portType,
+                std::unordered_set<PortIndex> const & portIndexSet)
+{
+  // TODO
 }
 
 
@@ -144,8 +222,8 @@ draftConnection() const
 #if 0
 ConnectionGraphicsObject &
 NodeGraphicsScene::
-createConnection(NodeId const nodeId,
-                 PortType const connectedPort,
+createConnection(NodeId const    nodeId,
+                 PortType const  connectedPort,
                  PortIndex const portIndex)
 {
   // Construct an incomplete ConnectionId with one dangling end.
@@ -345,7 +423,6 @@ makeDraftConnection(ConnectionId const newConnectionId)
 //nodeCreated(*nodePtr);
 //return *nodePtr;
 //}
-
 
 
 void

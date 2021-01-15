@@ -121,11 +121,12 @@ makeIncompleteConnectionId(ConnectionId   connectionId,
   return connectionId;
 }
 
+
 inline
 ConnectionId
-makeCompleteConnectionId(ConnectionId incompleteConnectionId,
-    NodeId const nodeId,
-    PortIndex const portIndex)
+makeCompleteConnectionId(ConnectionId    incompleteConnectionId,
+                         NodeId const    nodeId,
+                         PortIndex const portIndex)
 {
   if (std::get<0>(incompleteConnectionId) == InvalidNodeId)
   {

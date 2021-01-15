@@ -35,6 +35,9 @@ public:
 
   ~NodeGraphicsScene();
 
+  // Scenes without models are not supported
+  NodeGraphicsScene() = delete;
+
 public:
 
   GraphModel const & graphModel() const;
@@ -50,6 +53,28 @@ private:
    * created by checking non-empyt node's Out ports.
    */
   void traverseGraphAndPopulateGraphicsObjects();
+
+private Q_SLOTS:
+
+  void
+  onPortsAboutToBeDeleted(NodeId const   nodeId,
+                          PortType const portType,
+                          std::unordered_set<PortIndex> const & portIndexSet);
+
+  void
+  onPortsDeleted(NodeId const   nodeId,
+                 PortType const portType,
+                 std::unordered_set<PortIndex> const & portIndexSet);
+
+  void
+  onPortsAboutToBeInserted(NodeId const   nodeId,
+                           PortType const portType,
+                           std::unordered_set<PortIndex> const & portIndexSet);
+
+  void
+  onPortsInserted(NodeId const   nodeId,
+                  PortType const portType,
+                  std::unordered_set<PortIndex> const & portIndexSet);
 
 public:
 
@@ -76,7 +101,7 @@ public:
    * attachemed the variable is cleared an the ConnectionGraphicsObject
    * reseives some proper valid ConnectionId. After that the object is
    * inserted into the main set with connectinos.
-   * 
+   *
    * If the passed connection pointer is empty, a new object is created
    * automatically.
    */

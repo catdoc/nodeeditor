@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <QtCore/QObject>
 #include <QtCore/QVariant>
 
 #include "Definitions.hpp"
@@ -13,8 +14,9 @@
 namespace QtNodes
 {
 
-class NODE_EDITOR_PUBLIC GraphModel
+class NODE_EDITOR_PUBLIC GraphModel : public QObject
 {
+  Q_OBJECT
 public:
 
   using NodeId    = QtNodes::NodeId;
@@ -38,10 +40,14 @@ public:
    */
   virtual
   std::unordered_set<std::pair<PortIndex, NodeId>>
-  connectedNodes(NodeId nodeId,
-                 PortType portType,
+  connectedNodes(NodeId    nodeId,
+                 PortType  portType,
                  PortIndex index) const;
 
+
+  virtual
+  bool
+  connectionExists(ConnectionId const connectionId) const;
 
   /// Model decides if a conection with given connection Id possible.
   /**
@@ -54,6 +60,11 @@ public:
   virtual
   void
   addConnection(ConnectionId const connectionId);
+
+  virtual
+  bool
+  nodeExists(NodeId const nodeId) const;
+
 
   /// @brief Returns node-related data for requested NodeRole.
   /**
@@ -84,17 +95,17 @@ public:
    */
   virtual
   QVariant
-  portData(NodeId nodeId,
-           PortType portType,
+  portData(NodeId    nodeId,
+           PortType  portType,
            PortIndex index,
-           PortRole role) const;
+           PortRole  role) const;
 
   virtual
   bool
-  setPortData(NodeId nodeId,
-              PortType portType,
+  setPortData(NodeId    nodeId,
+              PortType  portType,
               PortIndex index,
-              PortRole role) const;
+              PortRole  role) const;
 
   virtual
   bool
@@ -103,6 +114,52 @@ public:
   virtual
   bool
   deleteNode(NodeId const nodeId);
+
+Q_SIGNALS:
+
+  void
+  connectionDeleted(ConnectionId const connectionId);
+
+  void
+  nodeDeleted(NodeId const NodeId);
+
+
+  /**
+   * Signal emitted when model is about to remove port-related data.
+   * Clients must destroy existing connections to these ports.
+   */
+  void
+  portsAboutToBeDeleted(NodeId const   nodeId,
+                        PortType const portType,
+                        std::unordered_set<PortIndex> const & portIndexSet);
+
+  /**
+   * Signal emitted when model no longer has the old data associated
+   * with the given port indices.
+   */
+  void
+  portsDeleted(NodeId const   nodeId,
+               PortType const portType,
+               std::unordered_set<PortIndex> const & portIndexSet);
+
+  /**
+   * Signal emitted when model is about to create new port-related
+   * data.
+   */
+  void
+  portsAboutToBeInserted(NodeId const   nodeId,
+                         PortType const portType,
+                         std::unordered_set<PortIndex> const & portIndexSet);
+
+  /**
+   * Signal emitted when model is ready to provide the new data for
+   * just creted ports. Clients must re-draw the nodes, move existing
+   * conection ends to their new positions.
+   */
+  void
+  portsInserted(NodeId const   nodeId,
+                PortType const portType,
+                std::unordered_set<PortIndex> const & portIndexSet);
 };
 
 }

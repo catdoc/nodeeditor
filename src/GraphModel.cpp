@@ -36,8 +36,19 @@ connectedNodes(NodeId    nodeId,
   Q_UNUSED(portType);
   Q_UNUSED(portIndex);
 
+
   // No connected nodes in the default implementation.
   return std::unordered_set<std::pair<PortIndex, NodeId>>();
+}
+
+
+bool
+GraphModel::
+connectionExists(ConnectionId const connectionId) const
+{
+  Q_UNUSED(connectionId);
+
+  return false;
 }
 
 
@@ -53,8 +64,6 @@ connectionPossible(ConnectionId const connectionId)
              PortType::In,
              portIndexIn,
              PortRole::DataType).value<NodeDataType>();
-
-
 
   NodeId nodeIdOut = getNodeId(PortType::Out, connectionId);
   PortIndex portIndexOut = getPortIndex(PortType::Out, connectionId);
@@ -74,6 +83,16 @@ GraphModel::
 addConnection(ConnectionId const connectionId)
 {
   Q_UNUSED(connectionId);
+}
+
+
+bool
+GraphModel::
+nodeExists(NodeId const nodeId) const
+{
+  Q_UNUSED(nodeId);
+
+  return false;
 }
 
 
@@ -216,6 +235,13 @@ deleteConnection(ConnectionId const connectionId)
 {
   Q_UNUSED(connectionId);
 
+  if (connectionExists(connectionId))
+  {
+    Q_EMIT connectionDeleted(connectionId);
+
+    return true;
+  }
+
   return false;
 }
 
@@ -225,6 +251,13 @@ GraphModel::
 deleteNode(NodeId const nodeId)
 {
   Q_UNUSED(nodeId);
+
+  if (nodeExists(nodeId))
+  {
+    Q_EMIT nodeDeleted(nodeId);
+
+    return true;
+  }
 
   return false;
 }

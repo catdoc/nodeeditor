@@ -52,7 +52,7 @@ GraphicsView(QWidget *parent)
 
 GraphicsView::
 GraphicsView(NodeGraphicsScene *scene, QWidget *parent)
-  : GraphicsView(parent)
+  : GraphicsView(parent) // delegating constructor
 {
   setScene(scene);
 }
