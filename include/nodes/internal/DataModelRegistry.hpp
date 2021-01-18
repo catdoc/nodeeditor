@@ -132,13 +132,13 @@ private:
 
   template <typename T, typename = void>
   struct HasStaticMethodName
-      : std::false_type
+    : std::false_type
   {};
 
   template <typename T>
-  struct HasStaticMethodName<T,
-          typename std::enable_if<std::is_same<decltype(T::Name()), QString>::value>::type>
-      : std::true_type
+  struct HasStaticMethodName<T, typename std::enable_if<std::is_same_t<decltype(T::Name()),
+                                                                       QString>::value>>
+    : std::true_type
   {};
 
   template <typename ModelType>
@@ -176,7 +176,6 @@ private:
   template <typename CreatorResult>
   using compute_model_type_t = typename UnwrapUniquePtr<CreatorResult>::type;
 };
-
 
 
 }
