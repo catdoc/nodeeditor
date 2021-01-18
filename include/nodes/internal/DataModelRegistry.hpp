@@ -74,7 +74,6 @@ public:
     registerModel<ModelType>(std::move(creator), category);
   }
 
-
   template<typename ModelType>
   void
   registerModel(RegistryItemCreator creator,
@@ -96,7 +95,6 @@ public:
     registerModel(std::forward<ModelCreator>(creator), category);
   }
 
-
 #if 0
   void
   registerTypeConverter(TypeConverterId const &id,
@@ -104,6 +102,7 @@ public:
   {
     _registeredTypeConverters[id] = std::move(typeConverter);
   }
+
 #endif
 
 
