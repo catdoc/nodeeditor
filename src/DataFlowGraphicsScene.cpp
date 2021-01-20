@@ -5,43 +5,31 @@
 
 #include <QtWidgets/QGraphicsSceneMoveEvent>
 #include <QtWidgets/QFileDialog>
-#include <QtCore/QByteArray>
-#include <QtCore/QBuffer>
-#include <QtCore/QDataStream>
-#include <QtCore/QFile>
 
+#include <QtCore/QBuffer>
+#include <QtCore/QByteArray>
+#include <QtCore/QDataStream>
+#include <QtCore/QDebug>
+#include <QtCore/QFile>
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 #include <QtCore/QtGlobal>
-#include <QtCore/QDebug>
 
-#include "Node.hpp"
-#include "NodeGraphicsObject.hpp"
-
-#include "NodeGraphicsObject.hpp"
 #include "ConnectionGraphicsObject.hpp"
-
-#include "Connection.hpp"
-
-#include "FlowView.hpp"
 #include "DataModelRegistry.hpp"
+#include "GraphicsView.hpp"
+#include "NodeGraphicsObject.hpp"
 
-using QtNodes::Connection;
-using QtNodes::DataModelRegistry;
-using QtNodes::DataFlowGraphicsScene;
-using QtNodes::Node;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeGraphicsObject;
-using QtNodes::PortIndex;
-using QtNodes::PortType;
-using QtNodes::TypeConverter;
+namespace QtNodes
+{
 
 
 DataFlowGraphicsScene::
 DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
-                      std::shared_ptr<DataModelRegistry> modelRegistry)
-  : BasicGraphicsScene(graphModel)
+                      std::shared_ptr<DataModelRegistry> modelRegistry,
+                      QObject * parent)
+  : BasicGraphicsScene(graphModel, parent)
   , _graphModel(graphModel)
   , _modelRegistry(modelRegistry)
 {
@@ -67,7 +55,7 @@ DataModelRegistry &
 DataFlowGraphicsScene::
 registry() const
 {
-  return _registry;
+  return *_modelRegistry;
 }
 
 
@@ -75,7 +63,7 @@ void
 DataFlowGraphicsScene::
 setRegistry(std::shared_ptr<DataModelRegistry> registry)
 {
-  _registry = registry;
+  _modelRegistry = registry;
 }
 
 
@@ -181,54 +169,57 @@ restoreNode(QJsonObject const& nodeJson)
 }
 
 
+#endif
+
 void
 DataFlowGraphicsScene::
 save() const
 {
-  QString fileName =
-    QFileDialog::getSaveFileName(nullptr,
-                                 tr("Open Flow Scene"),
-                                 QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+  //QString fileName =
+    //QFileDialog::getSaveFileName(nullptr,
+                                 //tr("Open Flow Scene"),
+                                 //QDir::homePath(),
+                                 //tr("Flow Scene Files (*.flow)"));
 
-  if (!fileName.isEmpty())
-  {
-    if (!fileName.endsWith("flow", Qt::CaseInsensitive))
-      fileName += ".flow";
+  //if (!fileName.isEmpty())
+  //{
+    //if (!fileName.endsWith("flow", Qt::CaseInsensitive))
+      //fileName += ".flow";
 
-    QFile file(fileName);
-    if (file.open(QIODevice::WriteOnly))
-    {
-      file.write(saveToMemory());
-    }
-  }
+    //QFile file(fileName);
+    //if (file.open(QIODevice::WriteOnly))
+    //{
+      //file.write(saveToMemory());
+    //}
+  //}
 }
-
 
 void
 DataFlowGraphicsScene::
 load()
 {
-  QString fileName =
-    QFileDialog::getOpenFileName(nullptr,
-                                 tr("Open Flow Scene"),
-                                 QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+  //QString fileName =
+    //QFileDialog::getOpenFileName(nullptr,
+                                 //tr("Open Flow Scene"),
+                                 //QDir::homePath(),
+                                 //tr("Flow Scene Files (*.flow)"));
 
-  if (!QFileInfo::exists(fileName))
-    return;
+  //if (!QFileInfo::exists(fileName))
+    //return;
 
-  QFile file(fileName);
+  //QFile file(fileName);
 
-  if (!file.open(QIODevice::ReadOnly))
-    return;
+  //if (!file.open(QIODevice::ReadOnly))
+    //return;
 
-  clearScene();
+  //clearScene();
 
-  QByteArray wholeFile = file.readAll();
+  //QByteArray wholeFile = file.readAll();
 
-  loadFromMemory(wholeFile);
+  //loadFromMemory(wholeFile);
 }
+
+#if 0
 
 
 QByteArray
@@ -292,34 +283,4 @@ loadFromMemory(const QByteArray& data)
 #endif
 
 
-
-
-void
-DataFlowGraphicsScene::
-sendConnectionCreatedToNodes(Connection const& c)
-{
-  Node* from = c.getNode(PortType::Out);
-  Node* to   = c.getNode(PortType::In);
-
-  Q_ASSERT(from != nullptr);
-  Q_ASSERT(to != nullptr);
-
-  from->nodeDataModel()->outputConnectionCreated(c);
-  to->nodeDataModel()->inputConnectionCreated(c);
 }
-
-
-void
-DataFlowGraphicsScene::
-sendConnectionDeletedToNodes(Connection const& c)
-{
-  Node* from = c.getNode(PortType::Out);
-  Node* to   = c.getNode(PortType::In);
-
-  Q_ASSERT(from != nullptr);
-  Q_ASSERT(to != nullptr);
-
-  from->nodeDataModel()->outputConnectionDeleted(c);
-  to->nodeDataModel()->inputConnectionDeleted(c);
-}
-

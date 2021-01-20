@@ -64,6 +64,8 @@ set(CPP_SOURCE_FILES
   src/ConnectionPainter.cpp
   src/ConnectionState.cpp
   src/ConnectionStyle.cpp
+  src/DataFlowGraphModel.cpp
+  src/DataFlowGraphicsScene.cpp
   src/GraphModel.cpp
   src/GraphicsView.cpp
   src/GraphicsViewStyle.cpp

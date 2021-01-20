@@ -1,4 +1,4 @@
-#pragma ones
+#pragma once
 
 #include "Export.hpp"
 #include "GraphModel.hpp"
@@ -15,6 +15,7 @@ public:
   using PortIndex = QtNodes::PortIndex;
 
 public:
+
 };
 
 

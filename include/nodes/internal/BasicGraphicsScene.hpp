@@ -31,7 +31,8 @@ class NODE_EDITOR_PUBLIC BasicGraphicsScene : public QGraphicsScene
   Q_OBJECT
 public:
 
-  BasicGraphicsScene(GraphModel & graphModel);
+  BasicGraphicsScene(GraphModel & graphModel,
+                     QObject *    parent = nullptr);
 
   ~BasicGraphicsScene();
 
@@ -92,10 +93,6 @@ public:
 
 public:
 
-  //void save() const;
-
-  //void load();
-
   NodeGraphicsObject *
   nodeGraphicsObject(NodeId nodeId);
 
@@ -155,9 +152,9 @@ private Q_SLOTS:
 
   void setupConnectionSignals(ConnectionId const connectionId);
 
-  void sendConnectionCreatedToNodes(ConnectionId const connectionId)
+  void sendConnectionCreatedToNodes(ConnectionId const connectionId);
 
-  void sendConnectionDeletedToNodes(Connection const connectionId);
+  void sendConnectionDeletedToNodes(ConnectionId const connectionId);
 
 
 private:

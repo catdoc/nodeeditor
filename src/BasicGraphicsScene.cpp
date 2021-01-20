@@ -29,8 +29,10 @@ namespace QtNodes
 {
 
 BasicGraphicsScene::
-BasicGraphicsScene(GraphModel &graphModel)
-  : _graphModel(graphModel)
+BasicGraphicsScene(GraphModel &graphModel,
+                   QObject *   parent)
+  : QGraphicsScene(parent)
+  , _graphModel(graphModel)
 {
 
   connect(&_graphModel, &GraphModel::portsAboutToBeDeleted,
@@ -51,6 +53,7 @@ BasicGraphicsScene(GraphModel &graphModel)
 
   connect(this, &BasicGraphicsScene::connectionCreated,
           this, &BasicGraphicsScene::sendConnectionCreatedToNodes);
+
   connect(this, &BasicGraphicsScene::connectionDeleted,
           this, &BasicGraphicsScene::sendConnectionDeletedToNodes);
 
@@ -180,12 +183,12 @@ setupConnectionSignals(ConnectionId const connectionId)
   ConnectionGraphicsObject * cgo =
     connectionGraphicsObject(connectionId);
 
-  if (cgo)
-  {
-    connect(cgo, &ConnectionGraphicsObject::connectionMadeIncomplete,
-            this, &BasicGraphicsScene::connectionDeleted,
-            Qt::UniqueConnection);
-  }
+  //if (cgo)
+  //{
+  //connect(cgo, &ConnectionGraphicsObject::connectionMadeIncomplete,
+  //this, &BasicGraphicsScene::connectionDeleted,
+  //Qt::UniqueConnection);
+  //}
 }
 
 

@@ -13,7 +13,6 @@
 #include "Export.hpp"
 #include "NodeDataModel.hpp"
 #include "QStringStdHash.hpp"
-#include "TypeConverter.hpp"
 
 namespace QtNodes
 {
@@ -58,7 +57,7 @@ public:
   void registerModel(RegistryItemCreator creator,
                      QString const &category = "Nodes")
   {
-    const QString name = computeName<ModelType>(HasStaticMethodName<ModelType>{}, creator);
+    QString const name = computeName<ModelType>(HasStaticMethodName<ModelType>{}, creator);
     if (!_registeredItemCreators.count(name))
     {
       _registeredItemCreators[name] = std::move(creator);
@@ -74,26 +73,26 @@ public:
     registerModel<ModelType>(std::move(creator), category);
   }
 
-  template<typename ModelType>
-  void
-  registerModel(RegistryItemCreator creator,
-                QString const &category = "Nodes");
-  {
-    registerModel<ModelType>(std::move(creator), category);
-  }
+  //template<typename ModelType>
+  //void
+  //registerModel(RegistryItemCreator creator,
+                //QString const &category = "Nodes")
+  //{
+    //registerModel<ModelType>(std::move(creator), category);
+  //}
 
-  template <typename ModelCreator>
-  void registerModel(ModelCreator&& creator, QString const& category = "Nodes")
-  {
-    using ModelType = compute_model_type_t<decltype(creator())>;
-    registerModel<ModelType>(std::forward<ModelCreator>(creator), category);
-  }
+  //template <typename ModelCreator>
+  //void registerModel(ModelCreator&& creator, QString const& category = "Nodes")
+  //{
+    //using ModelType = compute_model_type_t<decltype(creator())>;
+    //registerModel<ModelType>(std::forward<ModelCreator>(creator), category);
+  //}
 
-  template <typename ModelCreator>
-  void registerModel(QString const& category, ModelCreator&& creator)
-  {
-    registerModel(std::forward<ModelCreator>(creator), category);
-  }
+  //template <typename ModelCreator>
+  //void registerModel(QString const& category, ModelCreator&& creator)
+  //{
+    //registerModel(std::forward<ModelCreator>(creator), category);
+  //}
 
 #if 0
   void
@@ -152,8 +151,8 @@ private:
   {};
 
   template <typename T>
-  struct HasStaticMethodName<T, typename std::enable_if<std::is_same_t<decltype(T::Name()),
-                                                                       QString>::value>>
+  struct HasStaticMethodName<T, typename std::enable_if<std::is_same<decltype(T::Name()),
+                                                                     QString>::value>::type>
     : std::true_type
   {};
 

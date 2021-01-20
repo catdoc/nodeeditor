@@ -3,14 +3,23 @@
 #include "BasicGraphicsScene.hpp"
 #include "DataFlowGraphModel.hpp"
 #include "DataModelRegistry.hpp"
+#include "Export.hpp"
 
 
-class DataFlowGraphicsScene : public BasicGraphicsScene
+namespace QtNodes
 {
+
+class NODE_EDITOR_PUBLIC DataFlowGraphicsScene
+  : public BasicGraphicsScene
+{
+  Q_OBJECT
 public:
 
   DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
-                        std::shared_ptr<DataModelRegistry> modelRegistry);
+                        std::shared_ptr<DataModelRegistry> modelRegistry,
+                        QObject * parent = nullptr);
+
+  ~DataFlowGraphicsScene();
 
 public:
 
@@ -20,6 +29,13 @@ public:
 public:
 
   std::vector<NodeId> selectedNodes() const;
+
+
+public Q_SLOTS:
+
+  void save() const;
+
+  void load();
 
 
   //std::shared_ptr<Connection> restoreConnection(QJsonObject const & connectionJson);
@@ -38,6 +54,9 @@ public:
 private:
 
   DataFlowGraphModel & _graphModel;
+
   std::shared_ptr<DataModelRegistry> _modelRegistry;
 
 };
+
+}

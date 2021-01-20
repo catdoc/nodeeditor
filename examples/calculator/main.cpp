@@ -1,14 +1,13 @@
-#include <nodes/NodeData>
-#include <nodes/FlowScene>
-#include <nodes/FlowView>
 #include <nodes/ConnectionStyle>
-#include <nodes/TypeConverter>
+#include <nodes/DataFlowGraphModel>
+#include <nodes/DataFlowGraphicsScene>
+#include <nodes/DataModelRegistry>
+#include <nodes/GraphicsView>
+#include <nodes/NodeData>
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QMenuBar>
-
-#include <nodes/DataModelRegistry>
 
 #include "NumberSourceDataModel.hpp"
 #include "NumberDisplayDataModel.hpp"
@@ -16,16 +15,12 @@
 #include "SubtractionModel.hpp"
 #include "MultiplicationModel.hpp"
 #include "DivisionModel.hpp"
-#include "ModuloModel.hpp"
-#include "Converters.hpp"
 
-
-using QtNodes::DataModelRegistry;
-using QtNodes::FlowScene;
-using QtNodes::FlowView;
 using QtNodes::ConnectionStyle;
-using QtNodes::TypeConverter;
-using QtNodes::TypeConverterId;
+using QtNodes::DataFlowGraphModel;
+using QtNodes::DataFlowGraphicsScene;
+using QtNodes::DataModelRegistry;
+using QtNodes::GraphicsView;
 
 static std::shared_ptr<DataModelRegistry>
 registerDataModels()
@@ -43,17 +38,13 @@ registerDataModels()
 
   ret->registerModel<DivisionModel>("Operators");
 
-  ret->registerModel<ModuloModel>("Operators");
+  //ret->registerTypeConverter(std::make_pair(DecimalData().type(),
+  //IntegerData().type()),
+  //TypeConverter{DecimalToIntegerConverter()});
 
-  ret->registerTypeConverter(std::make_pair(DecimalData().type(),
-                                            IntegerData().type()),
-                             TypeConverter{DecimalToIntegerConverter()});
-
-
-
-  ret->registerTypeConverter(std::make_pair(IntegerData().type(),
-                                            DecimalData().type()),
-                             TypeConverter{IntegerToDecimalConverter()});
+  //ret->registerTypeConverter(std::make_pair(IntegerData().type(),
+  //DecimalData().type()),
+  //TypeConverter{IntegerToDecimalConverter()});
 
   return ret;
 }
@@ -64,7 +55,7 @@ void
 setStyle()
 {
   ConnectionStyle::setConnectionStyle(
-  R"(
+    R"(
   {
     "ConnectionStyle": {
       "ConstructionColor": "gray",
@@ -99,17 +90,21 @@ main(int argc, char *argv[])
 
   QVBoxLayout *l = new QVBoxLayout(&mainWidget);
 
+  DataFlowGraphModel dataFlowGraphModel;
+
   l->addWidget(menuBar);
-  auto scene = new FlowScene(registerDataModels(), &mainWidget);
-  l->addWidget(new FlowView(scene));
+  auto scene = new DataFlowGraphicsScene(dataFlowGraphModel,
+                                         registerDataModels(),
+                                         &mainWidget);
+  l->addWidget(new GraphicsView(scene));
   l->setContentsMargins(0, 0, 0, 0);
   l->setSpacing(0);
 
   QObject::connect(saveAction, &QAction::triggered,
-                   scene, &FlowScene::save);
+                   scene, &DataFlowGraphicsScene::save);
 
   QObject::connect(loadAction, &QAction::triggered,
-                   scene, &FlowScene::load);
+                   scene, &DataFlowGraphicsScene::load);
 
   mainWidget.setWindowTitle("Dataflow tools: simplest calculator");
   mainWidget.resize(800, 600);
@@ -117,3 +112,4 @@ main(int argc, char *argv[])
 
   return app.exec();
 }
+

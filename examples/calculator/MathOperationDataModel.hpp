@@ -13,7 +13,6 @@ class DecimalData;
 using QtNodes::NodeData;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
 using QtNodes::PortIndex;
 using QtNodes::PortType;
 
@@ -46,12 +45,6 @@ public:
   QWidget *
   embeddedWidget() override { return nullptr; }
 
-  NodeValidationState
-  validationState() const override;
-
-  QString
-  validationMessage() const override;
-
 protected:
 
   virtual void
@@ -63,7 +56,4 @@ protected:
   std::weak_ptr<DecimalData> _number2;
 
   std::shared_ptr<DecimalData> _result;
-
-  NodeValidationState modelValidationState = NodeValidationState::Warning;
-  QString modelValidationError = QString("Missing or incorrect inputs");
 };

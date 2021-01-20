@@ -6,7 +6,6 @@
 using QtNodes::DataModelRegistry;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeDataType;
-using QtNodes::TypeConverter;
 
 std::unique_ptr<NodeDataModel>
 DataModelRegistry::
