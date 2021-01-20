@@ -46,9 +46,7 @@ DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
 
 DataFlowGraphicsScene::
 ~DataFlowGraphicsScene()
-{
-  clearScene();
-}
+{}
 
 
 DataModelRegistry &

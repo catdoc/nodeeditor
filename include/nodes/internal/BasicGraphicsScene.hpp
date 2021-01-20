@@ -34,20 +34,21 @@ public:
   BasicGraphicsScene(GraphModel & graphModel,
                      QObject *    parent = nullptr);
 
-  ~BasicGraphicsScene();
-
   // Scenes without models are not supported
   BasicGraphicsScene() = delete;
+
+  ~BasicGraphicsScene();
 
 public:
 
   GraphModel const & graphModel() const;
   GraphModel & graphModel();
 
+public:
+
   ConnectionGraphicsObject *
   draftConnection() const;
 
-public:
 
   /// Re-uses cached draft connection with the new Id.
   /** Function inserts a new ConnectionId into the GraphModel.
@@ -99,9 +100,16 @@ public:
   ConnectionGraphicsObject *
   connectionGraphicsObject(ConnectionId connectionId);
 
+public:
+
+  virtual
+  QMenu *
+  createSceneMenu() const;
+
 Q_SIGNALS:
 
   void beforeNodeDeleted(NodeId const nodeId);
+  void nodeDeleted(NodeId const nodeId);
 
   void connectionCreated(ConnectionId const connectionId);
   void connectionDeleted(ConnectionId const connectionID);

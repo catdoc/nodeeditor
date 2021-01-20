@@ -62,6 +62,191 @@ BasicGraphicsScene(GraphModel &graphModel,
 }
 
 
+BasicGraphicsScene::
+~BasicGraphicsScene()
+{
+  clearScene();
+}
+
+
+GraphModel const &
+BasicGraphicsScene::
+graphModel() const
+{
+  return _graphModel;
+}
+
+
+GraphModel &
+BasicGraphicsScene::
+graphModel()
+{
+  return _graphModel;
+}
+
+
+ConnectionGraphicsObject *
+BasicGraphicsScene::
+draftConnection() const
+{
+  return _draftConnection.get();
+}
+
+
+void
+BasicGraphicsScene::
+useDraftConnection(ConnectionId const newConnectionId)
+{
+  qDebug() << "Start creating connection";
+
+  Q_ASSERT(_draftConnection);
+
+  _draftConnection->setConnectionId(newConnectionId);
+  _connectionGraphicsObjects[newConnectionId] = std::move(_draftConnection);
+
+  _graphModel.addConnection(newConnectionId);
+
+  // trigger data propagation
+  //nodeOut.onDataUpdated(portIndexOut);
+  Q_EMIT connectionCreated(newConnectionId);
+}
+
+
+std::unique_ptr<ConnectionGraphicsObject>
+BasicGraphicsScene::
+deleteConnection(ConnectionId const connectionId)
+{
+  std::unique_ptr<ConnectionGraphicsObject> removed;
+
+  auto it = _connectionGraphicsObjects.find(connectionId);
+  if (it != _connectionGraphicsObjects.end())
+  {
+    _graphModel.deleteConnection(connectionId);
+
+    removed = std::move(it->second);
+
+    _connectionGraphicsObjects.erase(it);
+  }
+
+  if (_draftConnection &&
+      _draftConnection->connectionId() == connectionId)
+  {
+    removed = std::move(_draftConnection);
+  }
+
+  Q_EMIT connectionDeleted(connectionId);
+
+  return removed;
+}
+
+
+bool
+BasicGraphicsScene::
+makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
+                    ConnectionId const newConnectionId)
+{
+  if (!cgo)
+    cgo = std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
+
+  _draftConnection = std::move(cgo);
+
+  if (_draftConnection)
+  {
+    _draftConnection->setConnectionId(newConnectionId);
+    _draftConnection->grabMouse();
+
+    return true;
+  }
+
+  return false;
+}
+
+
+bool
+BasicGraphicsScene::
+makeDraftConnection(ConnectionId const newConnectionId)
+{
+  auto uniqueCgo =
+    std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
+
+  return makeDraftConnection(std::move(uniqueCgo), newConnectionId);
+}
+
+
+void
+BasicGraphicsScene::
+createNode(NodeId const nodeId)
+{
+  _nodeGraphicsObjects[nodeId] =
+    std::make_unique<NodeGraphicsObject>(*this, nodeId);
+}
+
+
+void
+BasicGraphicsScene::
+deleteNode(NodeId const nodeId)
+{
+  Q_EMIT beforeNodeDeleted(nodeId);
+
+  auto it = _nodeGraphicsObjects.find(nodeId);
+  if (it != _nodeGraphicsObjects.end())
+  {
+    _graphModel.deleteNode(nodeId);
+    _nodeGraphicsObjects.erase(it);
+  }
+
+  Q_EMIT nodeDeleted(nodeId);
+}
+
+
+void
+BasicGraphicsScene::
+clearScene()
+{
+  _connectionGraphicsObjects.clear();
+
+  _nodeGraphicsObjects.clear();
+}
+
+
+NodeGraphicsObject*
+BasicGraphicsScene::
+nodeGraphicsObject(NodeId nodeId)
+{
+  NodeGraphicsObject * ngo = nullptr;
+  auto it = _nodeGraphicsObjects.find(nodeId);
+  if (it != _nodeGraphicsObjects.end())
+  {
+    ngo = it->second.get();
+  }
+
+  return ngo;
+}
+
+
+ConnectionGraphicsObject*
+BasicGraphicsScene::
+connectionGraphicsObject(ConnectionId connectionId)
+{
+  ConnectionGraphicsObject * cgo = nullptr;
+  auto it = _connectionGraphicsObjects.find(connectionId);
+  if (it != _connectionGraphicsObjects.end())
+  {
+    cgo = it->second.get();
+  }
+
+  return cgo;
+}
+
+
+QMenu *
+BasicGraphicsScene::
+createSceneMenu() const
+{
+  return nullptr;
+}
+
+
 void
 BasicGraphicsScene::
 traverseGraphAndPopulateGraphicsObjects()
@@ -222,37 +407,6 @@ sendConnectionDeletedToNodes(ConnectionId const connectionId)
 }
 
 
-BasicGraphicsScene::
-~BasicGraphicsScene()
-{
-  clearScene();
-}
-
-
-GraphModel const &
-BasicGraphicsScene::
-graphModel() const
-{
-  return _graphModel;
-}
-
-
-GraphModel &
-BasicGraphicsScene::
-graphModel()
-{
-  return _graphModel;
-}
-
-
-ConnectionGraphicsObject *
-BasicGraphicsScene::
-draftConnection() const
-{
-  return _draftConnection.get();
-}
-
-
 //------------------------------------------------------------------------------
 
 #if 0
@@ -289,86 +443,6 @@ createConnection(NodeId const    nodeId,
 #endif
 
 
-void
-BasicGraphicsScene::
-useDraftConnection(ConnectionId const newConnectionId)
-{
-  qDebug() << "Start creating connection";
-
-  Q_ASSERT(_draftConnection);
-
-  _draftConnection->setConnectionId(newConnectionId);
-  _connectionGraphicsObjects[newConnectionId] = std::move(_draftConnection);
-
-  _graphModel.addConnection(newConnectionId);
-
-  // trigger data propagation
-  //nodeOut.onDataUpdated(portIndexOut);
-  Q_EMIT connectionCreated(newConnectionId);
-}
-
-
-std::unique_ptr<ConnectionGraphicsObject>
-BasicGraphicsScene::
-deleteConnection(ConnectionId const connectionId)
-{
-  std::unique_ptr<ConnectionGraphicsObject> removed;
-
-  auto it = _connectionGraphicsObjects.find(connectionId);
-  if (it != _connectionGraphicsObjects.end())
-  {
-    _graphModel.deleteConnection(connectionId);
-
-    removed = std::move(it->second);
-
-    _connectionGraphicsObjects.erase(it);
-  }
-
-  if (_draftConnection &&
-      _draftConnection->connectionId() == connectionId)
-  {
-    removed = std::move(_draftConnection);
-  }
-
-  Q_EMIT connectionDeleted(connectionId);
-
-  return removed;
-}
-
-
-bool
-BasicGraphicsScene::
-makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
-                    ConnectionId const newConnectionId)
-{
-  if (!cgo)
-    cgo = std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
-
-  _draftConnection = std::move(cgo);
-
-  if (_draftConnection)
-  {
-    _draftConnection->setConnectionId(newConnectionId);
-    _draftConnection->grabMouse();
-
-    return true;
-  }
-
-  return false;
-}
-
-
-bool
-BasicGraphicsScene::
-makeDraftConnection(ConnectionId const newConnectionId)
-{
-  auto uniqueCgo =
-    std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
-
-  return makeDraftConnection(std::move(uniqueCgo), newConnectionId);
-}
-
-
 //Node &
 //BasicGraphicsScene::
 //createNode(std::unique_ptr<NodeDataModel> && dataModel)
@@ -384,70 +458,6 @@ makeDraftConnection(ConnectionId const newConnectionId)
 //nodeCreated(*nodePtr);
 //return *nodePtr;
 //}
-
-
-void
-BasicGraphicsScene::
-createNode(NodeId const nodeId)
-{
-  _nodeGraphicsObjects[nodeId] =
-    std::make_unique<NodeGraphicsObject>(*this, nodeId);
-}
-
-
-void
-BasicGraphicsScene::
-deleteNode(NodeId const nodeId)
-{
-  Q_EMIT beforeNodeDeleted(nodeId);
-
-  auto it = _nodeGraphicsObjects.find(nodeId);
-  if (it != _nodeGraphicsObjects.end())
-  {
-    _graphModel.deleteNode(nodeId);
-    _nodeGraphicsObjects.erase(it);
-  }
-}
-
-
-void
-BasicGraphicsScene::
-clearScene()
-{
-  _connectionGraphicsObjects.clear();
-
-  _nodeGraphicsObjects.clear();
-}
-
-
-NodeGraphicsObject*
-BasicGraphicsScene::
-nodeGraphicsObject(NodeId nodeId)
-{
-  NodeGraphicsObject * ngo = nullptr;
-  auto it = _nodeGraphicsObjects.find(nodeId);
-  if (it != _nodeGraphicsObjects.end())
-  {
-    ngo = it->second.get();
-  }
-
-  return ngo;
-}
-
-
-ConnectionGraphicsObject*
-BasicGraphicsScene::
-connectionGraphicsObject(ConnectionId connectionId)
-{
-  ConnectionGraphicsObject * cgo = nullptr;
-  auto it = _connectionGraphicsObjects.find(connectionId);
-  if (it != _connectionGraphicsObjects.end())
-  {
-    cgo = it->second.get();
-  }
-
-  return cgo;
-}
 
 
 }
