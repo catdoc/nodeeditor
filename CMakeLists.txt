@@ -56,7 +56,6 @@ set(CMAKE_AUTOMOC ON)
 set(CPP_SOURCE_FILES
   #src/Connection.cpp
   #src/ConnectionGeometry.cpp
-  #src/DataModelRegistry.cpp
   #src/Node.cpp
   src/BasicGraphicsScene.cpp
   src/ConnectionBlurEffect.cpp
@@ -66,6 +65,7 @@ set(CPP_SOURCE_FILES
   src/ConnectionStyle.cpp
   src/DataFlowGraphModel.cpp
   src/DataFlowGraphicsScene.cpp
+  src/DataModelRegistry.cpp
   src/GraphModel.cpp
   src/GraphicsView.cpp
   src/GraphicsViewStyle.cpp

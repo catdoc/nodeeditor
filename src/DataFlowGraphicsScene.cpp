@@ -3,8 +3,12 @@
 #include <stdexcept>
 #include <utility>
 
-#include <QtWidgets/QGraphicsSceneMoveEvent>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGraphicsSceneMoveEvent>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QWidgetAction>
 
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>
@@ -87,6 +91,115 @@ selectedNodes() const
   }
 
   return result;
+}
+
+
+QMenu *
+DataFlowGraphicsScene::
+createSceneMenu() const
+{
+  QMenu * modelMenu = new QMenu();
+
+  auto skipText = QStringLiteral("skip me");
+
+  // Add filterbox to the context menu
+  auto * txtBox = new QLineEdit(modelMenu);
+  txtBox->setPlaceholderText(QStringLiteral("Filter"));
+  txtBox->setClearButtonEnabled(true);
+
+  auto *txtBoxAction = new QWidgetAction(modelMenu);
+  txtBoxAction->setDefaultWidget(txtBox);
+
+  // 1.
+  modelMenu->addAction(txtBoxAction);
+
+  // Add result treeview to the context menu
+  QTreeWidget *treeView = new QTreeWidget(modelMenu);
+  treeView->header()->close();
+
+  auto *treeViewAction = new QWidgetAction(modelMenu);
+  treeViewAction->setDefaultWidget(treeView);
+
+  // 2.
+  modelMenu->addAction(treeViewAction);
+
+  QMap<QString, QTreeWidgetItem*> topLevelItems;
+  for (auto const & cat : _modelRegistry->categories())
+  {
+    auto item = new QTreeWidgetItem(treeView);
+    item->setText(0, cat);
+    item->setData(0, Qt::UserRole, skipText);
+    topLevelItems[cat] = item;
+  }
+
+  for (auto const & assoc : _modelRegistry->registeredModelsCategoryAssociation())
+  {
+    auto parent = topLevelItems[assoc.second];
+    auto item   = new QTreeWidgetItem(parent);
+    item->setText(0, assoc.first);
+    item->setData(0, Qt::UserRole, assoc.first);
+  }
+
+  treeView->expandAll();
+
+#if 0
+  connect(treeView, &QTreeWidget::itemClicked,
+          [&](QTreeWidgetItem *item, int)
+          {
+            QString modelName = item->data(0, Qt::UserRole).toString();
+
+            if (modelName == skipText)
+            {
+              return;
+            }
+
+            auto type = _scene->registry().create(modelName);
+
+            if (type)
+            {
+              auto &node = _scene->createNode(std::move(type));
+
+              QPoint pos = event->pos();
+
+              QPointF posView = this->mapToScene(pos);
+
+              node.nodeGraphicsObject().setPos(posView);
+
+              _scene->nodePlaced(node);
+            }
+            else
+            {
+              qDebug() << "Model not found";
+            }
+
+            modelMenu.close();
+          });
+
+#endif
+
+  //Setup filtering
+  connect(txtBox, &QLineEdit::textChanged,
+          [&](const QString & text)
+          {
+            for (auto & topLvlItem : topLevelItems)
+            {
+              for (int i = 0; i < topLvlItem->childCount(); ++i)
+              {
+                auto child       = topLvlItem->child(i);
+                auto modelName   = child->data(0, Qt::UserRole).toString();
+                const bool match = (modelName.contains(text, Qt::CaseInsensitive));
+                child->setHidden(!match);
+              }
+            }
+          });
+
+  // make sure the text box gets focus so the user doesn't have to click on it
+  txtBox->setFocus();
+
+  // QMenu's instance auto-destruction
+  modelMenu->setAttribute(Qt::WA_DeleteOnClose);
+
+  return modelMenu;
 }
 
 
@@ -174,41 +287,42 @@ DataFlowGraphicsScene::
 save() const
 {
   //QString fileName =
-    //QFileDialog::getSaveFileName(nullptr,
-                                 //tr("Open Flow Scene"),
-                                 //QDir::homePath(),
-                                 //tr("Flow Scene Files (*.flow)"));
+  //QFileDialog::getSaveFileName(nullptr,
+  //tr("Open Flow Scene"),
+  //QDir::homePath(),
+  //tr("Flow Scene Files (*.flow)"));
 
   //if (!fileName.isEmpty())
   //{
-    //if (!fileName.endsWith("flow", Qt::CaseInsensitive))
-      //fileName += ".flow";
+  //if (!fileName.endsWith("flow", Qt::CaseInsensitive))
+  //fileName += ".flow";
 
-    //QFile file(fileName);
-    //if (file.open(QIODevice::WriteOnly))
-    //{
-      //file.write(saveToMemory());
-    //}
+  //QFile file(fileName);
+  //if (file.open(QIODevice::WriteOnly))
+  //{
+  //file.write(saveToMemory());
+  //}
   //}
 }
+
 
 void
 DataFlowGraphicsScene::
 load()
 {
   //QString fileName =
-    //QFileDialog::getOpenFileName(nullptr,
-                                 //tr("Open Flow Scene"),
-                                 //QDir::homePath(),
-                                 //tr("Flow Scene Files (*.flow)"));
+  //QFileDialog::getOpenFileName(nullptr,
+  //tr("Open Flow Scene"),
+  //QDir::homePath(),
+  //tr("Flow Scene Files (*.flow)"));
 
   //if (!QFileInfo::exists(fileName))
-    //return;
+  //return;
 
   //QFile file(fileName);
 
   //if (!file.open(QIODevice::ReadOnly))
-    //return;
+  //return;
 
   //clearScene();
 
@@ -216,6 +330,7 @@ load()
 
   //loadFromMemory(wholeFile);
 }
+
 
 #if 0
 

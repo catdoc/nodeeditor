@@ -2,6 +2,7 @@
 
 #include <QtCore/QUuid>
 #include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QMenu>
 
 #include <functional>
 #include <memory>
@@ -41,8 +42,11 @@ public:
 
 public:
 
-  GraphModel const & graphModel() const;
-  GraphModel & graphModel();
+  GraphModel const &
+  graphModel() const;
+
+  GraphModel &
+  graphModel();
 
 public:
 
@@ -53,7 +57,8 @@ public:
   /// Re-uses cached draft connection with the new Id.
   /** Function inserts a new ConnectionId into the GraphModel.
    */
-  void useDraftConnection(ConnectionId const connectionId);
+  void
+  useDraftConnection(ConnectionId const connectionId);
 
   /// Deletes the object from the main connection object set.
   /** The corresponding ConnectionId is removed from the GraphModel.
@@ -85,12 +90,15 @@ public:
 
 
   // NodeId must exist in GraphModel.
-  void createNode(NodeId const nodeId);
+  void
+  createNode(NodeId const nodeId);
 
   /// Removes the node from the ModelGraph and then from the Scene.
-  void deleteNode(NodeId const nodeId);
+  void
+  deleteNode(NodeId const nodeId);
 
-  void clearScene();
+  void
+  clearScene();
 
 public:
 
@@ -108,25 +116,35 @@ public:
 
 Q_SIGNALS:
 
-  void beforeNodeDeleted(NodeId const nodeId);
-  void nodeDeleted(NodeId const nodeId);
+  void
+  beforeNodeDeleted(NodeId const nodeId);
+  void
+  nodeDeleted(NodeId const nodeId);
 
-  void connectionCreated(ConnectionId const connectionId);
-  void connectionDeleted(ConnectionId const connectionID);
+  void
+  connectionCreated(ConnectionId const connectionId);
+  void
+  connectionDeleted(ConnectionId const connectionID);
 
   //void nodeMoved(Node& n, const QPointF& newLocation);
 
-  void nodeDoubleClicked(NodeId const nodeId);
+  void
+  nodeDoubleClicked(NodeId const nodeId);
 
-  void connectionHovered(ConnectionId const connectionId, QPoint const screenPos);
+  void
+  connectionHovered(ConnectionId const connectionId, QPoint const screenPos);
 
-  void nodeHovered(NodeId const nodeId, QPoint const screenPos);
+  void
+  nodeHovered(NodeId const nodeId, QPoint const screenPos);
 
-  void connectionHoverLeft(ConnectionId const connectionId);
+  void
+  connectionHoverLeft(ConnectionId const connectionId);
 
-  void nodeHoverLeft(NodeId const nodeId);
+  void
+  nodeHoverLeft(NodeId const nodeId);
 
-  void nodeContextMenu(NodeId const nodeId, QPointF const pos);
+  void
+  nodeContextMenu(NodeId const nodeId, QPointF const pos);
 
 private:
 
@@ -134,7 +152,8 @@ private:
   /** We perform depth-first graph traversal. The connections are
    * created by checking non-empyt node's Out ports.
    */
-  void traverseGraphAndPopulateGraphicsObjects();
+  void
+  traverseGraphAndPopulateGraphicsObjects();
 
 private Q_SLOTS:
 
@@ -158,11 +177,14 @@ private Q_SLOTS:
                   PortType const portType,
                   std::unordered_set<PortIndex> const & portIndexSet);
 
-  void setupConnectionSignals(ConnectionId const connectionId);
+  void
+  setupConnectionSignals(ConnectionId const connectionId);
 
-  void sendConnectionCreatedToNodes(ConnectionId const connectionId);
+  void
+  sendConnectionCreatedToNodes(ConnectionId const connectionId);
 
-  void sendConnectionDeletedToNodes(ConnectionId const connectionId);
+  void
+  sendConnectionDeletedToNodes(ConnectionId const connectionId);
 
 
 private:

@@ -23,19 +23,31 @@ public:
 
 public:
 
-  DataModelRegistry & registry() const;
-  void setRegistry(std::shared_ptr<DataModelRegistry> registry);
+  DataModelRegistry &
+  registry() const;
+
+  void
+  setRegistry(std::shared_ptr<DataModelRegistry> registry);
 
 public:
 
-  std::vector<NodeId> selectedNodes() const;
+  std::vector<NodeId>
+  selectedNodes() const;
+
+public:
+
+
+  QMenu *
+  createSceneMenu() const override;
 
 
 public Q_SLOTS:
 
-  void save() const;
+  void
+  save() const;
 
-  void load();
+  void
+  load();
 
 
   //std::shared_ptr<Connection> restoreConnection(QJsonObject const & connectionJson);

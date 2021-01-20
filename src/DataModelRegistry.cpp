@@ -44,22 +44,3 @@ categories() const
 {
   return _categories;
 }
-
-
-TypeConverter
-DataModelRegistry::
-getTypeConverter(NodeDataType const &d1,
-                 NodeDataType const &d2) const
-{
-  TypeConverterId converterId = std::make_pair(d1, d2);
-
-  auto it = _registeredTypeConverters.find(converterId);
-
-  if (it != _registeredTypeConverters.end())
-  {
-    return it->second;
-  }
-
-  return TypeConverter{};
-}
-

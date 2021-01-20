@@ -48,14 +48,16 @@ public:
 
   DataModelRegistry &
   operator=(DataModelRegistry const &) = delete;
+
   DataModelRegistry &
   operator=(DataModelRegistry &&) = default;
 
 public:
 
   template<typename ModelType>
-  void registerModel(RegistryItemCreator creator,
-                     QString const &category = "Nodes")
+  void
+  registerModel(RegistryItemCreator creator,
+                QString const &category = "Nodes")
   {
     QString const name = computeName<ModelType>(HasStaticMethodName<ModelType>{}, creator);
     if (!_registeredItemCreators.count(name))
@@ -67,34 +69,37 @@ public:
   }
 
   template<typename ModelType>
-  void registerModel(QString const &category = "Nodes")
+  void
+  registerModel(QString const &category = "Nodes")
   {
     RegistryItemCreator creator = [](){ return std::make_unique<ModelType>(); };
     registerModel<ModelType>(std::move(creator), category);
   }
 
-  //template<typename ModelType>
-  //void
-  //registerModel(RegistryItemCreator creator,
-                //QString const &category = "Nodes")
-  //{
-    //registerModel<ModelType>(std::move(creator), category);
-  //}
-
-  //template <typename ModelCreator>
-  //void registerModel(ModelCreator&& creator, QString const& category = "Nodes")
-  //{
-    //using ModelType = compute_model_type_t<decltype(creator())>;
-    //registerModel<ModelType>(std::forward<ModelCreator>(creator), category);
-  //}
-
-  //template <typename ModelCreator>
-  //void registerModel(QString const& category, ModelCreator&& creator)
-  //{
-    //registerModel(std::forward<ModelCreator>(creator), category);
-  //}
-
 #if 0
+  template<typename ModelType>
+  void
+  registerModel(RegistryItemCreator creator,
+                QString const &category = "Nodes")
+  {
+    registerModel<ModelType>(std::move(creator), category);
+  }
+
+  template <typename ModelCreator>
+  void
+  registerModel(ModelCreator&& creator, QString const& category = "Nodes")
+  {
+    using ModelType = compute_model_type_t<decltype(creator())>;
+    registerModel<ModelType>(std::forward<ModelCreator>(creator), category);
+  }
+
+  template <typename ModelCreator>
+  void
+  registerModel(QString const& category, ModelCreator&& creator)
+  {
+    registerModel(std::forward<ModelCreator>(creator), category);
+  }
+
   void
   registerTypeConverter(TypeConverterId const &id,
                         TypeConverter typeConverter)
@@ -138,13 +143,8 @@ private:
 private:
 
   // If the registered ModelType class has the static member method
-  //
-  //      static Qstring Name();
-  //
-  // use it. Otherwise use the non-static method:
-  //
-  //       virtual QString name() const;
-
+  // `static QString Name();`, use it. Otherwise use the non-static
+  // method: `virtual QString name() const;`
   template<typename T, typename = void>
   struct HasStaticMethodName
     : std::false_type
