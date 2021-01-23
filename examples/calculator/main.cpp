@@ -82,6 +82,8 @@ main(int argc, char *argv[])
 
   setStyle();
 
+  std::shared_ptr<DataModelRegistry> registry = registerDataModels();
+
   QWidget mainWidget;
 
   auto menuBar    = new QMenuBar();
@@ -90,11 +92,10 @@ main(int argc, char *argv[])
 
   QVBoxLayout *l = new QVBoxLayout(&mainWidget);
 
-  DataFlowGraphModel dataFlowGraphModel;
+  DataFlowGraphModel dataFlowGraphModel(registry);
 
   l->addWidget(menuBar);
   auto scene = new DataFlowGraphicsScene(dataFlowGraphModel,
-                                         registerDataModels(),
                                          &mainWidget);
   l->addWidget(new GraphicsView(scene));
   l->setContentsMargins(0, 0, 0, 0);

@@ -26,7 +26,46 @@ allNodeIds() const
 }
 
 
-std::unordered_set<std::pair<PortIndex, NodeId>>
+std::unordered_set<ConnectionId>
+GraphModel::
+allConnectionIds(NodeId const nodeId) const
+{
+  std::unordered_set<ConnectionId> result;
+
+  unsigned int nIn =
+    nodeData(nodeId, NodeRole::NumberOfInPorts).toUInt();
+
+  for (PortIndex i = 0; i < nIn; ++i)
+  {
+    auto const & connections =
+      connectedNodes(nodeId, PortType::In, i);
+
+    for (auto & cn : connections)
+    {
+      result.insert(std::make_tuple(cn.first, cn.second, nodeId, i));
+    }
+
+  }
+
+  unsigned int nOut =
+    nodeData(nodeId, NodeRole::NumberOfOutPorts).toUInt();
+
+  for (PortIndex i = 0; i < nOut; ++i)
+  {
+    auto const & connections =
+      connectedNodes(nodeId, PortType::Out, i);
+
+    for (auto & cn : connections)
+    {
+      result.insert(std::make_tuple(nodeId, i, cn.first, cn.second));
+    }
+  }
+
+  return result;
+}
+
+
+std::unordered_set<std::pair<NodeId, PortIndex>>
 GraphModel::
 connectedNodes(NodeId    nodeId,
                PortType  portType,
@@ -35,7 +74,6 @@ connectedNodes(NodeId    nodeId,
   Q_UNUSED(nodeId);
   Q_UNUSED(portType);
   Q_UNUSED(portIndex);
-
 
   // No connected nodes in the default implementation.
   return std::unordered_set<std::pair<PortIndex, NodeId>>();
@@ -49,6 +87,14 @@ connectionExists(ConnectionId const connectionId) const
   Q_UNUSED(connectionId);
 
   return false;
+}
+
+
+NodeId
+GraphModel::
+addNode(QString const nodeType)
+{
+  return InvalidNodeId;
 }
 
 
@@ -156,7 +202,7 @@ nodeFlags(NodeId nodeId) const
 {
   Q_UNUSED(nodeId);
 
-  return NodeFlag::Resizable;
+  return NodeFlag::NoFlags;
 }
 
 

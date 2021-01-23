@@ -31,11 +31,9 @@ namespace QtNodes
 
 DataFlowGraphicsScene::
 DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
-                      std::shared_ptr<DataModelRegistry> modelRegistry,
                       QObject * parent)
   : BasicGraphicsScene(graphModel, parent)
   , _graphModel(graphModel)
-  , _modelRegistry(modelRegistry)
 {
   setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -53,23 +51,7 @@ DataFlowGraphicsScene::
 {}
 
 
-DataModelRegistry &
-DataFlowGraphicsScene::
-registry() const
-{
-  return *_modelRegistry;
-}
-
-
-void
-DataFlowGraphicsScene::
-setRegistry(std::shared_ptr<DataModelRegistry> registry)
-{
-  _modelRegistry = registry;
-}
-
-
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 std::vector<NodeId>
 DataFlowGraphicsScene::
@@ -96,7 +78,7 @@ selectedNodes() const
 
 QMenu *
 DataFlowGraphicsScene::
-createSceneMenu() const
+createSceneMenu(QPointF const scenePos)
 {
   QMenu * modelMenu = new QMenu();
 
@@ -123,8 +105,10 @@ createSceneMenu() const
   // 2.
   modelMenu->addAction(treeViewAction);
 
+  auto registry = _graphModel.dataModelRegistry();
+
   QMap<QString, QTreeWidgetItem*> topLevelItems;
-  for (auto const & cat : _modelRegistry->categories())
+  for (auto const & cat : registry->categories())
   {
     auto item = new QTreeWidgetItem(treeView);
     item->setText(0, cat);
@@ -132,7 +116,7 @@ createSceneMenu() const
     topLevelItems[cat] = item;
   }
 
-  for (auto const & assoc : _modelRegistry->registeredModelsCategoryAssociation())
+  for (auto const & assoc : registry->registeredModelsCategoryAssociation())
   {
     auto parent = topLevelItems[assoc.second];
     auto item   = new QTreeWidgetItem(parent);
@@ -142,9 +126,11 @@ createSceneMenu() const
 
   treeView->expandAll();
 
-#if 0
   connect(treeView, &QTreeWidget::itemClicked,
-          [&](QTreeWidgetItem *item, int)
+          [this,
+           modelMenu,
+           &skipText,
+           &scenePos](QTreeWidgetItem *item, int)
           {
             QString modelName = item->data(0, Qt::UserRole).toString();
 
@@ -153,29 +139,27 @@ createSceneMenu() const
               return;
             }
 
-            auto type = _scene->registry().create(modelName);
+            qDebug() << "Creating model : " << modelName;
 
-            if (type)
+            NodeId nodeId = this->_graphModel.addNode(modelName);
+
+            if (nodeId != InvalidNodeId)
             {
-              auto &node = _scene->createNode(std::move(type));
+              _graphModel.setNodeData(nodeId,
+                                      NodeRole::Position,
+                                      scenePos);
 
-              QPoint pos = event->pos();
+              this->createNode(nodeId);
 
-              QPointF posView = this->mapToScene(pos);
-
-              node.nodeGraphicsObject().setPos(posView);
-
-              _scene->nodePlaced(node);
+              //_scene->nodePlaced(node);
             }
             else
             {
               qDebug() << "Model not found";
             }
 
-            modelMenu.close();
+            modelMenu->close();
           });
-
-#endif
 
   //Setup filtering
   connect(txtBox, &QLineEdit::textChanged,

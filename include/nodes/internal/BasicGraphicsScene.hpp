@@ -112,7 +112,7 @@ public:
 
   virtual
   QMenu *
-  createSceneMenu() const;
+  createSceneMenu(QPointF const scenePos);
 
 Q_SIGNALS:
 

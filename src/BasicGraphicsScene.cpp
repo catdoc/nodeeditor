@@ -241,8 +241,9 @@ connectionGraphicsObject(ConnectionId connectionId)
 
 QMenu *
 BasicGraphicsScene::
-createSceneMenu() const
+createSceneMenu(QPointF const scenePos)
 {
+  Q_UNUSED(scenePos);
   return nullptr;
 }
 
@@ -285,7 +286,7 @@ traverseGraphAndPopulateGraphicsObjects()
           fifo.push(cn.second);
           allNodeIds.erase(cn.second);
 
-          auto connectionId = std::make_tuple(nodeId, index, cn.second, cn.first);
+          auto connectionId = std::make_tuple(nodeId, index, cn.first, cn.second);
 
           _connectionGraphicsObjects[connectionId] =
             std::make_unique<ConnectionGraphicsObject>(*this,

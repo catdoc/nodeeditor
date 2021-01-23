@@ -131,7 +131,10 @@ drawConnectionPoints(QPainter * painter,
       QPointF p = geom.portNodePosition(portType, portIndex);
 
       auto const &dataType =
-        model.portData(nodeId, portType, portIndex, PortRole::DataType).value<NodeDataType>();
+        model.portData(nodeId,
+                       portType,
+                       portIndex,
+                       PortRole::DataType).value<NodeDataType>();
 
       auto const &connectedNodes =
         model.connectedNodes(nodeId, portType, portIndex);

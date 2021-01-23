@@ -34,13 +34,17 @@ public:
   std::unordered_set<NodeId>
   allNodeIds() const;
 
+  virtual
+  std::unordered_set<ConnectionId>
+  allConnectionIds(NodeId const nodeId) const;
+
   /// @brief Returns all connected Node Ids for given port.
   /**
    * The returned set of nodes and port indices correspond to the type
    * opposite to the given `portType`.
    */
   virtual
-  std::unordered_set<std::pair<PortIndex, NodeId>>
+  std::unordered_set<std::pair<NodeId, PortIndex>>
   connectedNodes(NodeId    nodeId,
                  PortType  portType,
                  PortIndex index) const;
@@ -49,6 +53,11 @@ public:
   virtual
   bool
   connectionExists(ConnectionId const connectionId) const;
+
+
+  virtual
+  NodeId
+  addNode(QString const nodeType = QString());
 
   /// Model decides if a conection with given connection Id possible.
   /**

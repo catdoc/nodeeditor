@@ -2,7 +2,6 @@
 
 #include "BasicGraphicsScene.hpp"
 #include "DataFlowGraphModel.hpp"
-#include "DataModelRegistry.hpp"
 #include "Export.hpp"
 
 
@@ -16,18 +15,9 @@ class NODE_EDITOR_PUBLIC DataFlowGraphicsScene
 public:
 
   DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
-                        std::shared_ptr<DataModelRegistry> modelRegistry,
                         QObject * parent = nullptr);
 
   ~DataFlowGraphicsScene();
-
-public:
-
-  DataModelRegistry &
-  registry() const;
-
-  void
-  setRegistry(std::shared_ptr<DataModelRegistry> registry);
 
 public:
 
@@ -38,7 +28,7 @@ public:
 
 
   QMenu *
-  createSceneMenu() const override;
+  createSceneMenu(QPointF const scenePos) override;
 
 
 public Q_SLOTS:
@@ -66,9 +56,6 @@ public Q_SLOTS:
 private:
 
   DataFlowGraphModel & _graphModel;
-
-  std::shared_ptr<DataModelRegistry> _modelRegistry;
-
 };
 
 }

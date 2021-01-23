@@ -92,7 +92,7 @@ setScene(BasicGraphicsScene *scene)
   _deleteSelectionAction = new QAction(QStringLiteral("Delete Selection"), this);
   _deleteSelectionAction->setShortcut(Qt::Key_Delete);
   connect(_deleteSelectionAction, &QAction::triggered,
-          this, &GraphicsView::deleteSelectedNodes);
+          this, &GraphicsView::deleteSelectedObjects);
   addAction(_deleteSelectionAction);
 }
 
@@ -128,7 +128,9 @@ contextMenuEvent(QContextMenuEvent *event)
     return;
   }
 
-  QMenu * menu = nodeScene()->createSceneMenu();
+  auto const scenePos = mapToScene(event->pos());
+
+  QMenu * menu = nodeScene()->createSceneMenu(scenePos);
 
   if (menu)
   {
@@ -187,7 +189,7 @@ scaleDown()
 
 void
 GraphicsView::
-deleteSelectedNodes()
+deleteSelectedObjects()
 {
   // Delete the selected connections first, ensuring that they won't be
   // automatically deleted when selected nodes are deleted (deleting a
@@ -195,6 +197,9 @@ deleteSelectedNodes()
   for (QGraphicsItem * item : scene()->selectedItems())
   {
     if (auto c = qgraphicsitem_cast<ConnectionGraphicsObject*>(item))
+    {
+      c->connectionId();
+    }
       nodeScene()->deleteConnection(c->connectionId());
   }
 

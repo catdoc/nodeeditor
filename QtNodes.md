@@ -143,3 +143,22 @@ enum class NodeRole
 
 ```
 
+Node Creation and Deleting
+======================================================================
+
+Creation
+----------------------------------------------------------------------
+
+
+We must manipulate the GraphModel first.
+
+Nodes are created when:
+  - Manipulating the underlying graph.
+    - Loading the data from outside.
+  - Manipulate the visualized scene.
+
+```
+scene::createNode() -> graph::createNode()
+```
+
+

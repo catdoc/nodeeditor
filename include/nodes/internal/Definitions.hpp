@@ -26,8 +26,10 @@ Q_ENUM_NS(NodeRole)
 
 enum NodeFlag
 {
-  Resizable = 0x0,
+  NoFlags   = 0x0,
+  Resizable = 0x1,
 };
+
 Q_DECLARE_FLAGS(NodeFlags, NodeFlag)
 Q_FLAG_NS(NodeFlags)
 Q_DECLARE_OPERATORS_FOR_FLAGS(NodeFlags)

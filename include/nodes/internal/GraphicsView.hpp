@@ -42,7 +42,7 @@ public Q_SLOTS:
   scaleDown();
 
   void
-  deleteSelectedNodes();
+  deleteSelectedObjects();
 
 protected:
 
