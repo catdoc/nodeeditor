@@ -58,6 +58,8 @@ public:
     // Create new node.
     _nodeIds.insert(newId);
 
+    Q_EMIT nodeCreated(newId);
+
     return newId;
   }
 
@@ -79,6 +81,8 @@ public:
 
     connect(PortType::Out);
     connect(PortType::In);
+
+    Q_EMIT connectionCreated(connectionId);
   }
 
   QVariant
@@ -138,10 +142,6 @@ public:
               NodeRole role,
               QVariant value) override
   {
-    Q_UNUSED(nodeId);
-    Q_UNUSED(role);
-    Q_UNUSED(value);
-
     bool result = false;
 
     switch (role)
@@ -151,6 +151,8 @@ public:
       case NodeRole::Position:
         {
           _nodeGeometryData[nodeId].pos = value.value<QPointF>();
+
+          Q_EMIT nodePositonUpdated(nodeId);
 
           result = true;
         }
@@ -271,6 +273,8 @@ public:
     disconnect(PortType::Out);
     disconnect(PortType::In);
 
+    Q_EMIT connectionDeleted(connectionId);
+
     return disconnected;
   }
 
@@ -281,10 +285,10 @@ public:
     auto connectionIds = allConnectionIds(nodeId);
     for (auto & cId : connectionIds)
     {
-      deleteConnection(connectionId);
+      deleteConnection(cId);
     }
 
-    _nodesIds.erase(nodeId);
+    _nodeIds.erase(nodeId);
     _nodeGeometryData.erase(nodeId);
 
     Q_EMIT nodeDeleted(nodeId);

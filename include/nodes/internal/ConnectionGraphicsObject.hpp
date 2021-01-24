@@ -24,10 +24,9 @@ class ConnectionGraphicsObject : public QGraphicsObject
 public:
 
   ConnectionGraphicsObject(BasicGraphicsScene &scene,
-                           ConnectionId const connectionId);
+                           ConnectionId const  connectionId);
 
-  virtual
-  ~ConnectionGraphicsObject();
+  ~ConnectionGraphicsObject() = default;
 
 public:
 
@@ -43,10 +42,6 @@ public:
   ConnectionId
   connectionId() const;
 
-  /// Needed when working with detached connection.
-  void
-  setConnectionId(ConnectionId const connectionId);
-
   QRectF
   boundingRect() const override;
 
@@ -55,8 +50,10 @@ public:
 
   QPointF const &
   endPoint(PortType portType) const;
+
   QPointF
   out() const { return _out; }
+
   QPointF
   in() const { return _in; }
 
@@ -65,10 +62,6 @@ public:
 
   void
   setEndPoint(PortType portType, QPointF const &point);
-
-  void
-  moveEndPointBy(PortType portType, QPointF const &offset);
-
 
   void
   setGeometryChanged();
@@ -119,9 +112,6 @@ private:
 
   QPointF _out;
   QPointF _in;
-
-  PortIndex _outPortIndex;
-  PortIndex _inPortIndex;
 };
 
 }

@@ -17,7 +17,7 @@ namespace QtNodes
 NodeConnectionInteraction::
 NodeConnectionInteraction(NodeGraphicsObject & ngo,
                           ConnectionGraphicsObject & cgo,
-                          BasicGraphicsScene &  scene)
+                          BasicGraphicsScene & scene)
   : _ngo(ngo)
   , _cgo(cgo)
   , _scene(scene)
@@ -109,27 +109,18 @@ tryConnect() const
                              _ngo.nodeId(),
                              targetPortIndex);
 
-  _ngo.nodeScene()->useDraftConnection(newConnectionId);
+  _ngo.nodeScene()->resetDraftConnection();
 
   // 4) Adjust Connection geometry
 
-  _ngo.moveConnections();
+  //_ngo.moveConnections();
   _ngo.nodeState().resetReactionToConnection();
 
-  // Repaint old connected Node
-  NodeGraphicsObject * oppositeNgo =
-    _scene.nodeGraphicsObject(getNodeId(oppositePort(requiredPort),
-                                        newConnectionId));
-  oppositeNgo->update();
+  GraphModel & model = _ngo.nodeScene()->graphModel();
+
+  model.addConnection(newConnectionId);
 
   // 5) Poke model to intiate data transfer
-
-  //auto outNode = _connectionId->getNode(PortType::Out);
-  //if (outNode)
-  //{
-  //PortIndex outPortIndex = _connectionId->getPortIndex(PortType::Out);
-  //outNode->onDataUpdated(outPortIndex);
-  //}
 
   return true;
 }
@@ -141,14 +132,26 @@ disconnect(PortType portToDisconnect) const
 {
   ConnectionId connectionId = _cgo.connectionId();
 
-  ConnectionId incompleteConnectionId =
-    makeIncompleteConnectionId(connectionId,
-                               portToDisconnect);
+  _scene.graphModel().deleteConnection(connectionId);
 
-  // Fetch connection from the scene.
-  // Connection is removed from the graph inside.
-  std::unique_ptr<ConnectionGraphicsObject> uniqueCgo =
-    _scene.deleteConnection(connectionId);
+  NodeGeometry nodeGeometry(_ngo);
+
+  QPointF scenePos =
+    nodeGeometry.portScenePosition(portToDisconnect,
+                                   getPortIndex(portToDisconnect,
+                                                connectionId),
+                                   _ngo.sceneTransform());
+
+  // Converted to "draft" connection with the new incomplete id.
+  ConnectionId incompleteConnectionId =
+    makeIncompleteConnectionId(connectionId, portToDisconnect);
+
+  auto const & draftConnection =
+    _scene.makeDraftConnection(incompleteConnectionId);
+
+  QPointF looseEndPos = draftConnection->mapFromScene(scenePos);
+
+  draftConnection->setEndPoint(portToDisconnect, looseEndPos);
 
   // Repaint connection points.
   NodeId connectedNodeId =
@@ -159,9 +162,7 @@ disconnect(PortType portToDisconnect) const
     getNodeId(portToDisconnect, connectionId);
   _scene.nodeGraphicsObject(disconnectedNodeId)->update();
 
-  // Converted to "draft" connection with the new incomplete id.
-  return _scene.makeDraftConnection(std::move(uniqueCgo),
-                                    incompleteConnectionId);
+  return true;
 }
 
 

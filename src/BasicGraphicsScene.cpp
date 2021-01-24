@@ -21,6 +21,7 @@
 #include <QtCore/QDebug>
 
 #include "ConnectionGraphicsObject.hpp"
+#include "ConnectionIdUtils.hpp"
 #include "GraphicsView.hpp"
 #include "NodeGraphicsObject.hpp"
 
@@ -34,6 +35,20 @@ BasicGraphicsScene(GraphModel &graphModel,
   : QGraphicsScene(parent)
   , _graphModel(graphModel)
 {
+  connect(&_graphModel, &GraphModel::connectionCreated,
+          this, &BasicGraphicsScene::onConnectionCreated);
+
+  connect(&_graphModel, &GraphModel::connectionDeleted,
+          this, &BasicGraphicsScene::onConnectionDeleted);
+
+  connect(&_graphModel, &GraphModel::nodeCreated,
+          this, &BasicGraphicsScene::onNodeCreated);
+
+  connect(&_graphModel, &GraphModel::nodeDeleted,
+          this, &BasicGraphicsScene::onNodeDeleted);
+
+  connect(&_graphModel, &GraphModel::nodePositonUpdated,
+          this, &BasicGraphicsScene::onNodePositionUpdated);
 
   connect(&_graphModel, &GraphModel::portsAboutToBeDeleted,
           this, &BasicGraphicsScene::onPortsAboutToBeDeleted);
@@ -46,17 +61,6 @@ BasicGraphicsScene(GraphModel &graphModel,
 
   connect(&_graphModel, &GraphModel::portsInserted,
           this, &BasicGraphicsScene::onPortsInserted);
-
-  // This connection should come first
-  connect(this, &BasicGraphicsScene::connectionCreated,
-          this, &BasicGraphicsScene::setupConnectionSignals);
-
-  connect(this, &BasicGraphicsScene::connectionCreated,
-          this, &BasicGraphicsScene::sendConnectionCreatedToNodes);
-
-  connect(this, &BasicGraphicsScene::connectionDeleted,
-          this, &BasicGraphicsScene::sendConnectionDeletedToNodes);
-
 
   traverseGraphAndPopulateGraphicsObjects();
 }
@@ -85,117 +89,25 @@ graphModel()
 }
 
 
-ConnectionGraphicsObject *
+std::unique_ptr<ConnectionGraphicsObject> const &
 BasicGraphicsScene::
-draftConnection() const
+makeDraftConnection(ConnectionId const incompleteConnectionId)
 {
-  return _draftConnection.get();
+  _draftConnection =
+    std::make_unique<ConnectionGraphicsObject>(*this,
+                                               incompleteConnectionId);
+
+  _draftConnection->grabMouse();
+
+  return _draftConnection;
 }
 
 
 void
 BasicGraphicsScene::
-useDraftConnection(ConnectionId const newConnectionId)
+resetDraftConnection()
 {
-  qDebug() << "Start creating connection";
-
-  Q_ASSERT(_draftConnection);
-
-  _draftConnection->setConnectionId(newConnectionId);
-  _connectionGraphicsObjects[newConnectionId] = std::move(_draftConnection);
-
-  _graphModel.addConnection(newConnectionId);
-
-  // trigger data propagation
-  //nodeOut.onDataUpdated(portIndexOut);
-  Q_EMIT connectionCreated(newConnectionId);
-}
-
-
-std::unique_ptr<ConnectionGraphicsObject>
-BasicGraphicsScene::
-deleteConnection(ConnectionId const connectionId)
-{
-  std::unique_ptr<ConnectionGraphicsObject> removed;
-
-  auto it = _connectionGraphicsObjects.find(connectionId);
-  if (it != _connectionGraphicsObjects.end())
-  {
-    _graphModel.deleteConnection(connectionId);
-
-    removed = std::move(it->second);
-
-    _connectionGraphicsObjects.erase(it);
-  }
-
-  if (_draftConnection &&
-      _draftConnection->connectionId() == connectionId)
-  {
-    removed = std::move(_draftConnection);
-  }
-
-  Q_EMIT connectionDeleted(connectionId);
-
-  return removed;
-}
-
-
-bool
-BasicGraphicsScene::
-makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> &&cgo,
-                    ConnectionId const newConnectionId)
-{
-  if (!cgo)
-    cgo = std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
-
-  _draftConnection = std::move(cgo);
-
-  if (_draftConnection)
-  {
-    _draftConnection->setConnectionId(newConnectionId);
-    _draftConnection->grabMouse();
-
-    return true;
-  }
-
-  return false;
-}
-
-
-bool
-BasicGraphicsScene::
-makeDraftConnection(ConnectionId const newConnectionId)
-{
-  auto uniqueCgo =
-    std::make_unique<ConnectionGraphicsObject>(*this, newConnectionId);
-
-  return makeDraftConnection(std::move(uniqueCgo), newConnectionId);
-}
-
-
-void
-BasicGraphicsScene::
-createNode(NodeId const nodeId)
-{
-  _nodeGraphicsObjects[nodeId] =
-    std::make_unique<NodeGraphicsObject>(*this, nodeId);
-}
-
-
-void
-BasicGraphicsScene::
-deleteNode(NodeId const nodeId)
-{
-  Q_EMIT beforeNodeDeleted(nodeId);
-
-  auto it = _nodeGraphicsObjects.find(nodeId);
-  if (it != _nodeGraphicsObjects.end())
-  {
-    _graphModel.deleteNode(nodeId);
-    _nodeGraphicsObjects.erase(it);
-  }
-
-  Q_EMIT nodeDeleted(nodeId);
+  _draftConnection.reset();
 }
 
 
@@ -203,9 +115,13 @@ void
 BasicGraphicsScene::
 clearScene()
 {
-  _connectionGraphicsObjects.clear();
+  auto const & allNodeIds =
+    graphModel().allNodeIds();
 
-  _nodeGraphicsObjects.clear();
+  for ( auto nodeId : allNodeIds)
+  {
+    graphModel().deleteNode(nodeId);
+  }
 }
 
 
@@ -300,30 +216,115 @@ traverseGraphAndPopulateGraphicsObjects()
 
 void
 BasicGraphicsScene::
+updateAttachedNodes(ConnectionId const connectionId,
+                    PortType const     portType)
+{
+  auto node =
+    nodeGraphicsObject(getNodeId(portType, connectionId));
+
+  if (node)
+  {
+    node->update();
+  }
+}
+
+
+void
+BasicGraphicsScene::
+onConnectionDeleted(ConnectionId const connectionId)
+{
+  auto it = _connectionGraphicsObjects.find(connectionId);
+  if (it != _connectionGraphicsObjects.end())
+  {
+    _connectionGraphicsObjects.erase(it);
+  }
+
+  // TODO: do we need it?
+  if (_draftConnection &&
+      _draftConnection->connectionId() == connectionId)
+  {
+    _draftConnection.reset();
+  }
+
+  updateAttachedNodes(connectionId, PortType::Out);
+  updateAttachedNodes(connectionId, PortType::In);
+}
+
+
+void
+BasicGraphicsScene::
+onConnectionCreated(ConnectionId const connectionId)
+{
+  _connectionGraphicsObjects[connectionId] =
+    std::make_unique<ConnectionGraphicsObject>(*this,
+                                               connectionId);
+
+  updateAttachedNodes(connectionId, PortType::Out);
+  updateAttachedNodes(connectionId, PortType::In);
+}
+
+
+void
+BasicGraphicsScene::
+onNodeDeleted(NodeId const nodeId)
+{
+  auto it = _nodeGraphicsObjects.find(nodeId);
+  if (it != _nodeGraphicsObjects.end())
+  {
+    _nodeGraphicsObjects.erase(it);
+  }
+}
+
+
+void
+BasicGraphicsScene::
+onNodeCreated(NodeId const nodeId)
+{
+  _nodeGraphicsObjects[nodeId] =
+    std::make_unique<NodeGraphicsObject>(*this, nodeId);
+}
+
+
+void
+BasicGraphicsScene::
+onNodePositionUpdated(NodeId const nodeId)
+{
+  auto node = nodeGraphicsObject(nodeId);
+  if (node)
+  {
+    node->setPos(_graphModel.nodeData(nodeId,
+                                      NodeRole::Position).value<QPointF>());
+    node->update();
+  }
+}
+
+
+void
+BasicGraphicsScene::
 onPortsAboutToBeDeleted(NodeId const   nodeId,
                         PortType const portType,
                         std::unordered_set<PortIndex> const & portIndexSet)
 {
-  NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
+  //NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
 
-  if (node)
-  {
-    for (auto portIndex : portIndexSet)
-    {
-      auto const connectedNodes =
-        _graphModel.connectedNodes(nodeId, portType, portIndex);
+  //if (node)
+  //{
+  //for (auto portIndex : portIndexSet)
+  //{
+  //auto const connectedNodes =
+  //_graphModel.connectedNodes(nodeId, portType, portIndex);
 
-      for (auto cn : connectedNodes)
-      {
-        ConnectionId connectionId =
-          (portType == PortType::In) ?
-          std::make_tuple(cn.first, cn.second, nodeId, portIndex) :
-          std::make_tuple(nodeId, portIndex, cn.first, cn.second);
+  //for (auto cn : connectedNodes)
+  //{
+  //ConnectionId connectionId =
+  //(portType == PortType::In) ?
+  //std::make_tuple(cn.first, cn.second, nodeId, portIndex) :
+  //std::make_tuple(nodeId, portIndex, cn.first, cn.second);
 
-        deleteConnection(connectionId);
-      }
-    }
-  }
+  //deleteConnection(connectionId);
+  //}
+  //}
+  //}
 }
 
 
@@ -361,54 +362,6 @@ onPortsInserted(NodeId const   nodeId,
   // TODO
 }
 
-
-void
-BasicGraphicsScene::
-setupConnectionSignals(ConnectionId const connectionId)
-{
-  ConnectionGraphicsObject * cgo =
-    connectionGraphicsObject(connectionId);
-
-  //if (cgo)
-  //{
-  //connect(cgo, &ConnectionGraphicsObject::connectionMadeIncomplete,
-  //this, &BasicGraphicsScene::connectionDeleted,
-  //Qt::UniqueConnection);
-  //}
-}
-
-
-void
-BasicGraphicsScene::
-sendConnectionCreatedToNodes(ConnectionId const connectionId)
-{
-  //Node* from = c.getNode(PortType::Out);
-  //Node* to   = c.getNode(PortType::In);
-
-  //Q_ASSERT(from != nullptr);
-  //Q_ASSERT(to != nullptr);
-
-  //from->nodeDataModel()->outputConnectionCreated(c);
-  //to->nodeDataModel()->inputConnectionCreated(c);
-}
-
-
-void
-BasicGraphicsScene::
-sendConnectionDeletedToNodes(ConnectionId const connectionId)
-{
-  //Node* from = c.getNode(PortType::Out);
-  //Node* to   = c.getNode(PortType::In);
-
-  //Q_ASSERT(from != nullptr);
-  //Q_ASSERT(to != nullptr);
-
-  //from->nodeDataModel()->outputConnectionDeleted(c);
-  //to->nodeDataModel()->inputConnectionDeleted(c);
-}
-
-
-//------------------------------------------------------------------------------
 
 #if 0
 ConnectionGraphicsObject &

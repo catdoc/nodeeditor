@@ -128,10 +128,19 @@ public:
 Q_SIGNALS:
 
   void
+  connectionCreated(ConnectionId const connectionId);
+
+  void
   connectionDeleted(ConnectionId const connectionId);
 
   void
-  nodeDeleted(NodeId const NodeId);
+  nodeCreated(NodeId const nodeId);
+
+  void
+  nodeDeleted(NodeId const nodeId);
+
+  void
+  nodePositonUpdated(NodeId const nodeId);
 
 
   /**

@@ -26,7 +26,7 @@ namespace QtNodes
 
 ConnectionGraphicsObject::
 ConnectionGraphicsObject(BasicGraphicsScene &scene,
-                         ConnectionId const connectionId)
+                         ConnectionId const  connectionId)
   : _connectionId(connectionId)
   , _graphModel(scene.graphModel())
   , _connectionState(*this)
@@ -47,11 +47,6 @@ ConnectionGraphicsObject(BasicGraphicsScene &scene,
 
   initializePosition();
 }
-
-
-ConnectionGraphicsObject::
-~ConnectionGraphicsObject()
-{}
 
 
 void
@@ -115,13 +110,6 @@ connectionId() const
   return _connectionId;
 }
 
-
-void
-ConnectionGraphicsObject::
-setConnectionId(ConnectionId const connectionId)
-{
-  _connectionId = connectionId;
-}
 
 
 QRectF
@@ -191,17 +179,6 @@ setEndPoint(PortType portType, QPointF const &point)
 
 void
 ConnectionGraphicsObject::
-moveEndPointBy(PortType portType, QPointF const &offset)
-{
-  if (portType == PortType::In)
-    _in += offset;
-  else
-    _out += offset;
-}
-
-
-void
-ConnectionGraphicsObject::
 setGeometryChanged()
 {
   prepareGeometryChange();
@@ -213,8 +190,10 @@ ConnectionGraphicsObject::
 move()
 {
   auto moveEnd =
-    [&](NodeId nodeId, PortType portType, PortIndex portIndex)
+    [this](ConnectionId cId, PortType portType)
     {
+      NodeId nodeId = getNodeId(portType, cId);
+
       if (nodeId == InvalidNodeId)
         return;
 
@@ -225,33 +204,21 @@ move()
 
       QPointF scenePos =
         nodeGeometry.portScenePosition(portType,
-                                       portIndex,
+                                       getPortIndex(portType, cId),
                                        ngo->sceneTransform());
 
-      QTransform sceneTransform = this->sceneTransform();
+      QPointF connectionPos = sceneTransform().inverted().map(scenePos);
 
-      QPointF connectionPos = sceneTransform.inverted().map(scenePos);
-
-      this->setEndPoint(portType, connectionPos);
-
+      setEndPoint(portType, connectionPos);
     };
 
-  moveEnd(std::get<0>(_connectionId), PortType::Out, std::get<1>(_connectionId));
-  moveEnd(std::get<2>(_connectionId), PortType::In, std::get<3>(_connectionId));
+  moveEnd(_connectionId, PortType::Out);
+  moveEnd(_connectionId, PortType::In);
 
   setGeometryChanged();
+
   update();
 }
-
-
-//void
-//ConnectionGraphicsObject::
-//lock(bool locked)
-//{
-//setFlag(QGraphicsItem::ItemIsMovable,    !locked);
-//setFlag(QGraphicsItem::ItemIsFocusable,  !locked);
-//setFlag(QGraphicsItem::ItemIsSelectable, !locked);
-//}
 
 
 ConnectionState const &
@@ -331,13 +298,11 @@ mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 
   //-------------------
 
-  QPointF offset = event->pos() - event->lastPos();
-
   auto requiredPort = _connectionState.requiredPort();
 
   if (requiredPort != PortType::None)
   {
-    this->moveEndPointBy(requiredPort, offset);
+    setEndPoint(requiredPort, event->pos());
   }
 
   //-------------------
@@ -375,7 +340,7 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
   if (_connectionState.requiresPort())
   {
     // Resulting unique_ptr is not used and automatically deleted.
-    nodeScene()->deleteConnection(_connectionId);
+    nodeScene()->resetDraftConnection();
   }
 }
 
@@ -461,5 +426,6 @@ addGraphicsEffect()
   //effect->setOffset(4, 4);
   //effect->setColor(QColor(Qt::gray).darker(800));
 }
+
 
 }

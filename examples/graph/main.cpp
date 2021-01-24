@@ -26,9 +26,9 @@ main(int argc, char *argv[])
   // Initialize two nodes.
   {
     NodeId id1 = graphModel.addNode();
-    NodeId id2 = graphModel.addNode();
-
     graphModel.setNodeData(id1, NodeRole::Position, QPointF(0, 0));
+
+    NodeId id2 = graphModel.addNode();
     graphModel.setNodeData(id2, NodeRole::Position, QPointF(300, 300));
   }
 
@@ -51,8 +51,6 @@ main(int argc, char *argv[])
                      graphModel.setNodeData(newId,
                                             NodeRole::Position,
                                             posView);
-
-                     scene->createNode(newId);
                    });
   view.insertAction(view.actions().front(), &createNodeAction);
 

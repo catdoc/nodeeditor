@@ -198,9 +198,8 @@ deleteSelectedObjects()
   {
     if (auto c = qgraphicsitem_cast<ConnectionGraphicsObject*>(item))
     {
-      c->connectionId();
+      nodeScene()->graphModel().deleteConnection(c->connectionId());
     }
-      nodeScene()->deleteConnection(c->connectionId());
   }
 
   // Delete the nodes; this will delete many of the connections.
@@ -211,7 +210,7 @@ deleteSelectedObjects()
   for (QGraphicsItem * item : scene()->selectedItems())
   {
     if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
-      nodeScene()->deleteNode(n->nodeId());
+      nodeScene()->graphModel().deleteNode(n->nodeId());
   }
 }
 

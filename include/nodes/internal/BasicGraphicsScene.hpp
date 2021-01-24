@@ -50,52 +50,22 @@ public:
 
 public:
 
-  ConnectionGraphicsObject *
-  draftConnection() const;
+  //ConnectionGraphicsObject *
+  //draftConnection() const;
 
-
-  /// Re-uses cached draft connection with the new Id.
-  /** Function inserts a new ConnectionId into the GraphModel.
-   */
-  void
-  useDraftConnection(ConnectionId const connectionId);
-
-  /// Deletes the object from the main connection object set.
-  /** The corresponding ConnectionId is removed from the GraphModel.
-   * The function returns a unique pointer to the graphics object. If
-   * the pointer is not stored somewhere, the object is automatically
-   * destroyed and removed from the scene.
-   */
-  std::unique_ptr<ConnectionGraphicsObject>
-  deleteConnection(ConnectionId const connectionId);
-
-  /// Caches ConnectionGraphicsObject to a "draft connection" variable.
+  /// Creates instance of "disconnected" ConnectionGraphicsObject.
   /**
-   * The cached variable is designed to store a "draft" connection
-   * which has not been attached to both nodes yes. After a proper
-   * attachemed the variable is cleared an the ConnectionGraphicsObject
-   * reseives some proper valid ConnectionId. After that the object is
-   * inserted into the main set with connectinos.
-   *
-   * If the passed connection pointer is empty, a new object is created
-   * automatically.
+   * We store a "draft" connection which has one loose end.
+   * After attachment the "draft" instance is removed and instead a
+   * normal "full" connection is created.
+   * Function @returns the "draft" instance for further geometry
+   * manipulations.
    */
-  bool
-  makeDraftConnection(std::unique_ptr<ConnectionGraphicsObject> && cgo,
-                      ConnectionId const newConnectionId);
-
-  /// Same function as before but creates Graphics object inside.
-  bool
+  std::unique_ptr<ConnectionGraphicsObject> const &
   makeDraftConnection(ConnectionId const newConnectionId);
 
-
-  // NodeId must exist in GraphModel.
   void
-  createNode(NodeId const nodeId);
-
-  /// Removes the node from the ModelGraph and then from the Scene.
-  void
-  deleteNode(NodeId const nodeId);
+  resetDraftConnection();
 
   void
   clearScene();
@@ -117,14 +87,7 @@ public:
 Q_SIGNALS:
 
   void
-  beforeNodeDeleted(NodeId const nodeId);
-  void
-  nodeDeleted(NodeId const nodeId);
-
-  void
   connectionCreated(ConnectionId const connectionId);
-  void
-  connectionDeleted(ConnectionId const connectionID);
 
   //void nodeMoved(Node& n, const QPointF& newLocation);
 
@@ -155,7 +118,33 @@ private:
   void
   traverseGraphAndPopulateGraphicsObjects();
 
+  void
+  updateAttachedNodes(ConnectionId const connectionId,
+                      PortType const     portType);
+
 private Q_SLOTS:
+
+
+  /// Deletes the object from the main connection object set.
+  /**
+   * The function returns a unique pointer to the graphics object. If
+   * the pointer is not stored somewhere, the object is automatically
+   * destroyed and removed from the scene.
+   */
+  void
+  onConnectionDeleted(ConnectionId const connectionId);
+
+  void
+  onConnectionCreated(ConnectionId const connectionId);
+
+  void
+  onNodeDeleted(NodeId const nodeId);
+
+  void
+  onNodeCreated(NodeId const nodeId);
+
+  void
+  onNodePositionUpdated(NodeId const nodeId);
 
   void
   onPortsAboutToBeDeleted(NodeId const   nodeId,
@@ -176,15 +165,6 @@ private Q_SLOTS:
   onPortsInserted(NodeId const   nodeId,
                   PortType const portType,
                   std::unordered_set<PortIndex> const & portIndexSet);
-
-  void
-  setupConnectionSignals(ConnectionId const connectionId);
-
-  void
-  sendConnectionCreatedToNodes(ConnectionId const connectionId);
-
-  void
-  sendConnectionDeletedToNodes(ConnectionId const connectionId);
 
 
 private:

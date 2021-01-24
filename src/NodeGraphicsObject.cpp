@@ -250,9 +250,6 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
                       *nodeScene);
 
         interaction.disconnect(portToCheck);
-
-        if (nodeScene->draftConnection())
-          nodeScene->draftConnection()->update();
       }
       else // initialize new Connection
       {
@@ -270,9 +267,9 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
             for (auto &cn : connectedNodes)
             {
               ConnectionId connectionId =
-                std::make_tuple(cn.first, cn.second, _nodeId, portIndex);
+                std::make_tuple(_nodeId, portIndex, cn.first, cn.second);
 
-              nodeScene->deleteConnection(connectionId);
+              _graphModel.deleteConnection(connectionId);
             }
           }
         } // if port == out
@@ -284,17 +281,6 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
       }
     }
   }
-
-  //auto pos     = event->pos();
-  //auto & geom  = _node.nodeGeometry();
-  //auto & state = _node.nodeState();
-
-  //if (_node.nodeDataModel()->resizable() &&
-  //geom.resizeRect().contains(QPoint(pos.x(),
-  //pos.y())))
-  //{
-  //state.setResizing(true);
-  //}
 }
 
 

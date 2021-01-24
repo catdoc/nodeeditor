@@ -149,7 +149,7 @@ createSceneMenu(QPointF const scenePos)
                                       NodeRole::Position,
                                       scenePos);
 
-              this->createNode(nodeId);
+              //this->createNode(nodeId);
 
               //_scene->nodePlaced(node);
             }
