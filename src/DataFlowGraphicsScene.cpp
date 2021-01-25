@@ -46,11 +46,6 @@ DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
 // TODO constructor for an empyt scene?
 
 
-DataFlowGraphicsScene::
-~DataFlowGraphicsScene()
-{}
-
-
 //---------------------------------------------------------------------
 
 std::vector<NodeId>
@@ -129,8 +124,8 @@ createSceneMenu(QPointF const scenePos)
   connect(treeView, &QTreeWidget::itemClicked,
           [this,
            modelMenu,
-           &skipText,
-           &scenePos](QTreeWidgetItem *item, int)
+           skipText,
+           scenePos](QTreeWidgetItem *item, int)
           {
             QString modelName = item->data(0, Qt::UserRole).toString();
 
@@ -139,8 +134,6 @@ createSceneMenu(QPointF const scenePos)
               return;
             }
 
-            qDebug() << "Creating model : " << modelName;
-
             NodeId nodeId = this->_graphModel.addNode(modelName);
 
             if (nodeId != InvalidNodeId)
@@ -148,14 +141,6 @@ createSceneMenu(QPointF const scenePos)
               _graphModel.setNodeData(nodeId,
                                       NodeRole::Position,
                                       scenePos);
-
-              //this->createNode(nodeId);
-
-              //_scene->nodePlaced(node);
-            }
-            else
-            {
-              qDebug() << "Model not found";
             }
 
             modelMenu->close();

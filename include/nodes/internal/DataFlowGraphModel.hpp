@@ -72,6 +72,8 @@ public:
       NodeId newId = newNodeId();
       _models[newId] = std::move(model);
 
+      Q_EMIT nodeCreated(newId);
+
       return newId;
     }
 
@@ -96,6 +98,8 @@ public:
 
     connect(PortType::Out);
     connect(PortType::In);
+
+    Q_EMIT connectionCreated(connectionId);
   }
 
   QVariant
@@ -172,6 +176,8 @@ public:
       case NodeRole::Position:
         {
           _nodeGeometryData[nodeId].pos = value.value<QPointF>();
+
+          Q_EMIT nodePositonUpdated(nodeId);
 
           result = true;
         }
@@ -301,19 +307,33 @@ public:
     disconnect(PortType::Out);
     disconnect(PortType::In);
 
+    Q_EMIT connectionDeleted(connectionId);
+
     return disconnected;
   }
 
   bool
   deleteNode(NodeId const nodeId) override
   {
-    return false;
+    // Delete connections to this node first.
+    auto connectionIds = allConnectionIds(nodeId);
+    for (auto & cId : connectionIds)
+    {
+      deleteConnection(cId);
+    }
+
+    _nodeGeometryData.erase(nodeId);
+    _models.erase(nodeId);
+
+    Q_EMIT nodeDeleted(nodeId);
+
+    return true;
   }
 
 private:
 
   NodeId
-  newNodeId() { return _nextNodeId; }
+  newNodeId() { return _nextNodeId++; }
 
 private:
 

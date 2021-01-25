@@ -68,9 +68,7 @@ BasicGraphicsScene(GraphModel &graphModel,
 
 BasicGraphicsScene::
 ~BasicGraphicsScene()
-{
-  clearScene();
-}
+{ }
 
 
 GraphModel const &
@@ -107,6 +105,7 @@ void
 BasicGraphicsScene::
 resetDraftConnection()
 {
+  qDebug() << "DRAFT CONNECTION RESET";
   _draftConnection.reset();
 }
 

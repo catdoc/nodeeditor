@@ -17,7 +17,7 @@ public:
   DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
                         QObject * parent = nullptr);
 
-  ~DataFlowGraphicsScene();
+  ~DataFlowGraphicsScene() = default;
 
 public:
 
