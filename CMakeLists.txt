@@ -76,7 +76,6 @@ set(CPP_SOURCE_FILES
   src/NodePainter.cpp
   src/NodeState.cpp
   src/NodeStyle.cpp
-  src/Properties.cpp
   src/StyleCollection.cpp
   src/locateNode.cpp
 )
