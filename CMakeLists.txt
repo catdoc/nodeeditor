@@ -54,9 +54,6 @@ qt5_add_resources(RESOURCES ./resources/resources.qrc)
 set(CMAKE_AUTOMOC ON)
 
 set(CPP_SOURCE_FILES
-  #src/Connection.cpp
-  #src/ConnectionGeometry.cpp
-  #src/Node.cpp
   src/BasicGraphicsScene.cpp
   src/ConnectionBlurEffect.cpp
   src/ConnectionGraphicsObject.cpp

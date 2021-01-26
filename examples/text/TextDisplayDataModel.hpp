@@ -52,10 +52,10 @@ public:
   dataType(PortType portType, PortIndex portIndex) const override;
 
   std::shared_ptr<NodeData>
-  outData(PortIndex port) override;
+  outData(PortIndex const port) override;
 
   void
-  setInData(std::shared_ptr<NodeData> data, int) override
+  setInData(std::shared_ptr<NodeData> data, PortIndex const portIndex) override
   {
     auto textData = std::dynamic_pointer_cast<TextData>(data);
 
@@ -70,6 +70,7 @@ public:
 
     _label->adjustSize();
   }
+
 
   QWidget *
   embeddedWidget() override { return _label; }

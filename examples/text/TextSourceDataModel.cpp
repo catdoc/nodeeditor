@@ -52,7 +52,8 @@ dataType(PortType, PortIndex) const
 
 std::shared_ptr<NodeData>
 TextSourceDataModel::
-outData(PortIndex)
+outData(PortIndex const portIndex)
 {
+  Q_UNUSED(portIndex);
   return std::make_shared<TextData>(_lineEdit->text());
 }

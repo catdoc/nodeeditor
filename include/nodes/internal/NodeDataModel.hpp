@@ -99,11 +99,11 @@ public:
   virtual
   void
   setInData(std::shared_ptr<NodeData> nodeData,
-            PortIndex port) = 0;
+            PortIndex const port) = 0;
 
   virtual
   std::shared_ptr<NodeData>
-  outData(PortIndex port) = 0;
+  outData(PortIndex const port) = 0;
 
   virtual
   QWidget *

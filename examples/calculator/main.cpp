@@ -9,12 +9,12 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QMenuBar>
 
-#include "NumberSourceDataModel.hpp"
-#include "NumberDisplayDataModel.hpp"
 #include "AdditionModel.hpp"
-#include "SubtractionModel.hpp"
-#include "MultiplicationModel.hpp"
 #include "DivisionModel.hpp"
+#include "MultiplicationModel.hpp"
+#include "NumberDisplayDataModel.hpp"
+#include "NumberSourceDataModel.hpp"
+#include "SubtractionModel.hpp"
 
 using QtNodes::ConnectionStyle;
 using QtNodes::DataFlowGraphModel;

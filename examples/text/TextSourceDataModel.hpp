@@ -52,11 +52,10 @@ public:
   dataType(PortType portType, PortIndex portIndex) const override;
 
   std::shared_ptr<NodeData>
-  outData(PortIndex port) override;
+  outData(PortIndex const portIndex) override;
 
   void
-  setInData(std::shared_ptr<NodeData>, int) override
-  { }
+  setInData(std::shared_ptr<NodeData>, PortIndex const) override { }
 
   QWidget *
   embeddedWidget() override { return _lineEdit; }
