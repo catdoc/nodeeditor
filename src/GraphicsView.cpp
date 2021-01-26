@@ -210,7 +210,9 @@ deleteSelectedObjects()
   for (QGraphicsItem * item : scene()->selectedItems())
   {
     if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
+    {
       nodeScene()->graphModel().deleteNode(n->nodeId());
+    }
   }
 }
 

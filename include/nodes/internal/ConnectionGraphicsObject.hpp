@@ -20,6 +20,12 @@ class GraphModel;
 class ConnectionGraphicsObject : public QGraphicsObject
 {
   Q_OBJECT
+public:
+  // Needed for qgraphicsitem_cast
+  enum { Type = UserType + 2 };
+
+  int
+  type() const override { return Type; }
 
 public:
 

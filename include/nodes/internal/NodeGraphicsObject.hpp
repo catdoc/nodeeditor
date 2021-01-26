@@ -16,6 +16,12 @@ class GraphModel;
 class NodeGraphicsObject : public QGraphicsObject
 {
   Q_OBJECT
+public:
+  // Needed for qgraphicsitem_cast
+  enum { Type = UserType + 1 };
+
+  int
+  type() const override { return Type; }
 
 public:
   NodeGraphicsObject(BasicGraphicsScene &scene,
@@ -52,16 +58,11 @@ public:
   void
   moveConnections() const;
 
-  enum { Type = UserType + 1 };
-
-  int
-  type() const override { return Type; }
-
 protected:
   void
-  paint(QPainter*                       painter,
+  paint(QPainter* painter,
         QStyleOptionGraphicsItem const* option,
-        QWidget*                        widget = 0) override;
+        QWidget*  widget = 0) override;
 
   QVariant
   itemChange(GraphicsItemChange change, const QVariant &value) override;

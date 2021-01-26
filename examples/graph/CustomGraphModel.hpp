@@ -273,7 +273,8 @@ public:
     disconnect(PortType::Out);
     disconnect(PortType::In);
 
-    Q_EMIT connectionDeleted(connectionId);
+    if (disconnected)
+      Q_EMIT connectionDeleted(connectionId);
 
     return disconnected;
   }
