@@ -22,8 +22,7 @@ class NumberDisplayDataModel : public NodeDataModel
 public:
   NumberDisplayDataModel();
 
-  virtual
-  ~NumberDisplayDataModel() {}
+  ~NumberDisplayDataModel() = default;
 
 public:
 
@@ -45,14 +44,15 @@ public:
   nPorts(PortType portType) const override;
 
   NodeDataType
-  dataType(PortType portType,
+  dataType(PortType  portType,
            PortIndex portIndex) const override;
 
   std::shared_ptr<NodeData>
   outData(PortIndex port) override;
 
   void
-  setInData(std::shared_ptr<NodeData> data, PortIndex portIndex) override;
+  setInData(std::shared_ptr<NodeData> data,
+            PortIndex portIndex) override;
 
   QWidget *
   embeddedWidget() override { return _label; }

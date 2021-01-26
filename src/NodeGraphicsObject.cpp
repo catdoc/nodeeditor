@@ -60,23 +60,12 @@ NodeGraphicsObject(BasicGraphicsScene &scene,
   NodeGeometry geometry(*this);
   geometry.recalculateSize();
 
-  //
+
   QPointF const pos =
     _graphModel.nodeData(_nodeId, NodeRole::Position).value<QPointF>();
 
   setPos(pos);
-
-  // connect to the move signals to emit the move signals in BasicGraphicsScene
-  //auto onMoveSlot = [this] { _scene.nodeMoved(_nodeId, pos()); };
-
-  //connect(this, &QGraphicsObject::xChanged, this, onMoveSlot);
-  //connect(this, &QGraphicsObject::yChanged, this, onMoveSlot);
 }
-
-
-NodeGraphicsObject::
-~NodeGraphicsObject()
-{}
 
 
 GraphModel &
@@ -101,13 +90,16 @@ embedQWidget()
 {
   NodeGeometry geom(*this);
 
-  if (auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget*>())
+  if (auto w = _graphModel.nodeData(_nodeId,
+                                    NodeRole::Widget).value<QWidget*>())
   {
     _proxyWidget = new QGraphicsProxyWidget(this);
 
     _proxyWidget->setWidget(w);
 
     _proxyWidget->setPreferredWidth(5);
+
+    NodeGeometry(*this).recalculateSize();
 
     if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag)
     {
@@ -118,7 +110,7 @@ embedQWidget()
 
     _proxyWidget->setPos(geom.widgetPosition());
 
-    update();
+    //update();
 
     _proxyWidget->setOpacity(1.0);
     _proxyWidget->setFlag(QGraphicsItem::ItemIgnoresParentOpacity);

@@ -332,18 +332,17 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 
   if (ngo)
   {
-    qDebug() << "Node located : " << ngo;
     NodeConnectionInteraction interaction(*ngo, *this, *nodeScene());
 
     interaction.tryConnect();
   }
 
-  //if (_connectionState.requiresPort())
-  //{
-    //qDebug() << "About to reset draft connection ";
-    //// Resulting unique_ptr is not used and automatically deleted.
-    //nodeScene()->resetDraftConnection();
-  //}
+  // If connection attempt was unsuccessful
+  if (_connectionState.requiresPort())
+  {
+    // Resulting unique_ptr is not used and automatically deleted.
+    nodeScene()->resetDraftConnection();
+  }
 }
 
 

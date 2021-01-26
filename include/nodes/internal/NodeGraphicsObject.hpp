@@ -21,8 +21,7 @@ public:
   NodeGraphicsObject(BasicGraphicsScene &scene,
                      NodeId node);
 
-  virtual
-  ~NodeGraphicsObject();
+  ~NodeGraphicsObject() override = default;
 
 public:
 

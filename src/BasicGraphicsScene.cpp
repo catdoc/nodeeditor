@@ -105,7 +105,6 @@ void
 BasicGraphicsScene::
 resetDraftConnection()
 {
-  qDebug() << "DRAFT CONNECTION RESET";
   _draftConnection.reset();
 }
 

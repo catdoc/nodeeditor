@@ -66,7 +66,8 @@ public:
   {}
 
   QWidget *
-  embeddedWidget() override { return _lineEdit; }
+  embeddedWidget() override
+  { return _lineEdit; }
 
 private Q_SLOTS:
 

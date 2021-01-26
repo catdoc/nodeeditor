@@ -48,9 +48,5 @@ public:
   static
   void drawResizeRect(QPainter * painter,
                       NodeGraphicsObject const & ngo);
-
-  //static
-  //void drawValidationRect(QPainter * painter,
-  //NodeGraphicsObject const & ngo);
 };
 }

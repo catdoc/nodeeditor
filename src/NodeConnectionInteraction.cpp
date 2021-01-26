@@ -81,7 +81,6 @@ bool
 NodeConnectionInteraction::
 tryConnect() const
 {
-  qDebug() << "TRY CONNECT";
   // 1) Check conditions from 'canConnect'
 
   //TypeConverter converter;

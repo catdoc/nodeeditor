@@ -151,7 +151,10 @@ public:
         break;
 
       case NodeRole::Widget:
-        result = QVariant();
+        {
+          auto w = model->embeddedWidget();
+          result = QVariant::fromValue(w);
+        }
         break;
     }
 
@@ -256,7 +259,6 @@ public:
     return result;
   }
 
-
   bool
   setPortData(NodeId    nodeId,
               PortType  portType,
@@ -270,7 +272,6 @@ public:
 
     return false;
   }
-
 
   bool
   deleteConnection(ConnectionId const connectionId) override

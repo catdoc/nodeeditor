@@ -301,12 +301,6 @@ widgetPosition() const
     }
     else
     {
-      //if (_dataModel->validationState() != NodeValidationState::Valid)
-      //{
-      //return QPointF(_verticalSpacing + portWidth(PortType::In),
-      //(captionHeight() + _height - validationHeight() - _verticalSpacing - w->height()) / 2.0);
-      //}
-
       return QPointF(_verticalSpacing + portWidth(PortType::In),
                      (captionHeight() + size.height() - w->height()) / 2.0);
     }
@@ -325,7 +319,6 @@ equivalentWidgetHeight() const
   //{
   //return height() - captionHeight() + validationHeight();
   //}
-
   return size.height() - captionHeight();
 }
 
