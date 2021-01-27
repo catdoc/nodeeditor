@@ -118,6 +118,32 @@ embedQWidget()
 }
 
 
+
+#if 0
+void
+NodeGraphicsObject::
+onNodeSizeUpdated()
+{
+  if (nodeDataModel()->embeddedWidget())
+  {
+    nodeDataModel()->embeddedWidget()->adjustSize();
+  }
+  nodeGeometry().recalculateSize();
+  for (PortType type: {PortType::In, PortType::Out})
+  {
+    for (auto & conn_set : nodeState().getEntries(type))
+    {
+      for (auto & pair: conn_set)
+      {
+        Connection* conn = pair.second;
+        conn->getConnectionGraphicsObject().move();
+      }
+    }
+  }
+}
+#endif
+
+
 QRectF
 NodeGraphicsObject::
 boundingRect() const

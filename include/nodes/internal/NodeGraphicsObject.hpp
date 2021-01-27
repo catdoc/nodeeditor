@@ -96,6 +96,10 @@ private:
   void
   embedQWidget();
 
+//private Q_SLOTS:
+
+  //void onNodeSizeUpdated();
+
 private:
 
   NodeId _nodeId;
