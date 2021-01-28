@@ -40,8 +40,8 @@ public:
    */
   virtual
   std::unordered_set<std::pair<NodeId, PortIndex>>
-  connectedNodes(NodeId    nodeId,
-                 PortType  portType,
+  connectedNodes(NodeId nodeId,
+                 PortType portType,
                  PortIndex index) const;
 
 
@@ -100,17 +100,17 @@ public:
    */
   virtual
   QVariant
-  portData(NodeId    nodeId,
-           PortType  portType,
+  portData(NodeId nodeId,
+           PortType portType,
            PortIndex index,
-           PortRole  role) const;
+           PortRole role) const;
 
   virtual
   bool
-  setPortData(NodeId    nodeId,
-              PortType  portType,
+  setPortData(NodeId nodeId,
+              PortType portType,
               PortIndex index,
-              PortRole  role) const;
+              PortRole role) const;
 
   virtual
   bool
@@ -137,33 +137,37 @@ Q_SIGNALS:
   void
   nodePositonUpdated(NodeId const nodeId);
 
+  void
+  portDataSet(NodeId const nodeId,
+              PortType const portType,
+              PortIndex const portIndex);
 
   /**
    * Signal emitted when model is about to remove port-related data.
    * Clients must destroy existing connections to these ports.
    */
   void
-  portsAboutToBeDeleted(NodeId const   nodeId,
+  portsAboutToBeDeleted(NodeId const nodeId,
                         PortType const portType,
-                        std::unordered_set<PortIndex> const & portIndexSet);
+                        std::unordered_set<PortIndex> const &portIndexSet);
 
   /**
    * Signal emitted when model no longer has the old data associated
    * with the given port indices.
    */
   void
-  portsDeleted(NodeId const   nodeId,
+  portsDeleted(NodeId const nodeId,
                PortType const portType,
-               std::unordered_set<PortIndex> const & portIndexSet);
+               std::unordered_set<PortIndex> const &portIndexSet);
 
   /**
    * Signal emitted when model is about to create new port-related
    * data.
    */
   void
-  portsAboutToBeInserted(NodeId const   nodeId,
+  portsAboutToBeInserted(NodeId const nodeId,
                          PortType const portType,
-                         std::unordered_set<PortIndex> const & portIndexSet);
+                         std::unordered_set<PortIndex> const &portIndexSet);
 
   /**
    * Signal emitted when model is ready to provide the new data for
@@ -171,9 +175,9 @@ Q_SIGNALS:
    * conection ends to their new positions.
    */
   void
-  portsInserted(NodeId const   nodeId,
+  portsInserted(NodeId const nodeId,
                 PortType const portType,
-                std::unordered_set<PortIndex> const & portIndexSet);
+                std::unordered_set<PortIndex> const &portIndexSet);
 };
 
 }

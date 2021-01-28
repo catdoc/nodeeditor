@@ -35,6 +35,9 @@ BasicGraphicsScene(GraphModel &graphModel,
   : QGraphicsScene(parent)
   , _graphModel(graphModel)
 {
+  setItemIndexMethod(QGraphicsScene::NoIndex);
+
+
   connect(&_graphModel, &GraphModel::connectionCreated,
           this, &BasicGraphicsScene::onConnectionCreated);
 
@@ -68,7 +71,7 @@ BasicGraphicsScene(GraphModel &graphModel,
 
 BasicGraphicsScene::
 ~BasicGraphicsScene()
-{ }
+{}
 
 
 GraphModel const &
@@ -113,7 +116,7 @@ void
 BasicGraphicsScene::
 clearScene()
 {
-  auto const & allNodeIds =
+  auto const &allNodeIds =
     graphModel().allNodeIds();
 
   for ( auto nodeId : allNodeIds)
@@ -215,7 +218,7 @@ traverseGraphAndPopulateGraphicsObjects()
 void
 BasicGraphicsScene::
 updateAttachedNodes(ConnectionId const connectionId,
-                    PortType const     portType)
+                    PortType const portType)
 {
   auto node =
     nodeGraphicsObject(getNodeId(portType, connectionId));
@@ -299,9 +302,9 @@ onNodePositionUpdated(NodeId const nodeId)
 
 void
 BasicGraphicsScene::
-onPortsAboutToBeDeleted(NodeId const   nodeId,
+onPortsAboutToBeDeleted(NodeId const nodeId,
                         PortType const portType,
-                        std::unordered_set<PortIndex> const & portIndexSet)
+                        std::unordered_set<PortIndex> const &portIndexSet)
 {
   //NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
 
@@ -328,9 +331,9 @@ onPortsAboutToBeDeleted(NodeId const   nodeId,
 
 void
 BasicGraphicsScene::
-onPortsDeleted(NodeId const   nodeId,
+onPortsDeleted(NodeId const nodeId,
                PortType const portType,
-               std::unordered_set<PortIndex> const & portIndexSet)
+               std::unordered_set<PortIndex> const &portIndexSet)
 {
   NodeGraphicsObject * node = nodeGraphicsObject(nodeId);
 
@@ -343,9 +346,9 @@ onPortsDeleted(NodeId const   nodeId,
 
 void
 BasicGraphicsScene::
-onPortsAboutToBeInserted(NodeId const   nodeId,
+onPortsAboutToBeInserted(NodeId const nodeId,
                          PortType const portType,
-                         std::unordered_set<PortIndex> const & portIndexSet)
+                         std::unordered_set<PortIndex> const &portIndexSet)
 {
   // TODO
 }
@@ -353,9 +356,9 @@ onPortsAboutToBeInserted(NodeId const   nodeId,
 
 void
 BasicGraphicsScene::
-onPortsInserted(NodeId const   nodeId,
+onPortsInserted(NodeId const nodeId,
                 PortType const portType,
-                std::unordered_set<PortIndex> const & portIndexSet)
+                std::unordered_set<PortIndex> const &portIndexSet)
 {
   // TODO
 }
@@ -364,8 +367,8 @@ onPortsInserted(NodeId const   nodeId,
 #if 0
 ConnectionGraphicsObject &
 BasicGraphicsScene::
-createConnection(NodeId const    nodeId,
-                 PortType const  connectedPort,
+createConnection(NodeId const nodeId,
+                 PortType const connectedPort,
                  PortIndex const portIndex)
 {
   // Construct an incomplete ConnectionId with one dangling end.

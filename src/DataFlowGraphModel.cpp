@@ -17,7 +17,7 @@ allNodeIds() const
 {
   std::unordered_set<NodeId> nodeIds;
   for_each(_models.begin(), _models.end(),
-           [&nodeIds](auto const & p)
+           [&nodeIds](auto const &p)
            {
              nodeIds.insert(p.first);
 
@@ -29,8 +29,8 @@ allNodeIds() const
 
 std::unordered_set<std::pair<NodeId, PortIndex>>
 DataFlowGraphModel::
-connectedNodes(NodeId    nodeId,
-               PortType  portType,
+connectedNodes(NodeId nodeId,
+               PortType portType,
                PortIndex portIndex) const
 {
   std::unordered_set<std::pair<NodeId, PortIndex>> result;
@@ -106,7 +106,7 @@ nodeData(NodeId nodeId, NodeRole role) const
   if (it == _models.end())
     return result;
 
-  auto & model = it->second;
+  auto &model = it->second;
 
   switch (role)
   {
@@ -131,11 +131,11 @@ nodeData(NodeId nodeId, NodeRole role) const
       break;
 
     case NodeRole::Style:
-      {
-        auto style = StyleCollection::nodeStyle();
-        result = style.toJson().toVariant();
-      }
-      break;
+    {
+      auto style = StyleCollection::nodeStyle();
+      result = style.toJson().toVariant();
+    }
+    break;
 
     case NodeRole::NumberOfInPorts:
       result = model->nPorts(PortType::In);
@@ -146,11 +146,11 @@ nodeData(NodeId nodeId, NodeRole role) const
       break;
 
     case NodeRole::Widget:
-      {
-        auto w = model->embeddedWidget();
-        result = QVariant::fromValue(w);
-      }
-      break;
+    {
+      auto w = model->embeddedWidget();
+      result = QVariant::fromValue(w);
+    }
+    break;
   }
 
   return result;
@@ -159,7 +159,7 @@ nodeData(NodeId nodeId, NodeRole role) const
 
 bool
 DataFlowGraphModel::
-setNodeData(NodeId   nodeId,
+setNodeData(NodeId nodeId,
             NodeRole role,
             QVariant value)
 {
@@ -174,21 +174,21 @@ setNodeData(NodeId   nodeId,
     case NodeRole::Type:
       break;
     case NodeRole::Position:
-      {
-        _nodeGeometryData[nodeId].pos = value.value<QPointF>();
+    {
+      _nodeGeometryData[nodeId].pos = value.value<QPointF>();
 
-        Q_EMIT nodePositonUpdated(nodeId);
+      Q_EMIT nodePositonUpdated(nodeId);
 
-        result = true;
-      }
-      break;
+      result = true;
+    }
+    break;
 
     case NodeRole::Size:
-      {
-        _nodeGeometryData[nodeId].size = value.value<QSize>();
-        result = true;
-      }
-      break;
+    {
+      _nodeGeometryData[nodeId].size = value.value<QSize>();
+      result = true;
+    }
+    break;
 
     case NodeRole::CaptionVisible:
       break;
@@ -215,10 +215,10 @@ setNodeData(NodeId   nodeId,
 
 QVariant
 DataFlowGraphModel::
-portData(NodeId    nodeId,
-         PortType  portType,
+portData(NodeId nodeId,
+         PortType portType,
          PortIndex portIndex,
-         PortRole  role) const
+         PortRole role) const
 {
   QVariant result;
 
@@ -226,7 +226,7 @@ portData(NodeId    nodeId,
   if (it == _models.end())
     return result;
 
-  auto & model = it->second;
+  auto &model = it->second;
 
   switch (role)
   {
@@ -262,10 +262,10 @@ portData(NodeId    nodeId,
 
 bool
 DataFlowGraphModel::
-setPortData(NodeId    nodeId,
-            PortType  portType,
+setPortData(NodeId nodeId,
+            PortType portType,
             PortIndex portIndex,
-            PortRole  role) const
+            PortRole role) const
 {
   Q_UNUSED(nodeId);
   Q_UNUSED(portType);
@@ -325,7 +325,7 @@ deleteNode(NodeId const nodeId)
 {
   // Delete connections to this node first.
   auto connectionIds = allConnectionIds(nodeId);
-  for (auto & cId : connectionIds)
+  for (auto &cId : connectionIds)
   {
     deleteConnection(cId);
   }
@@ -341,31 +341,33 @@ deleteNode(NodeId const nodeId)
 
 void
 DataFlowGraphModel::
-onNodeDataUpdated(NodeId const    nodeId,
+onNodeDataUpdated(NodeId const nodeId,
                   PortIndex const portIndex)
 {
   qDebug() << "Data updated :" << nodeId << portIndex;
 
 
 
-  auto const & connected =
+  auto const &connected =
     connectedNodes(nodeId, PortType::Out, portIndex);
 
   // TODO: Should we pull the data through the model?
   //auto outPortData =
-    //portData(nodeId,
-             //PortType::Out,
-             //portIndex,
-             //PortRole::Data).value<std::shared_ptr<NodeData>>();
+  //portData(nodeId,
+  //PortType::Out,
+  //portIndex,
+  //PortRole::Data).value<std::shared_ptr<NodeData>>();
 
 
   auto const outPortData =
     _models[nodeId]->outData(portIndex);
 
 
-  for (auto const & cn : connected)
+  for (auto const &cn : connected)
   {
     _models[cn.first]->setInData(outPortData, cn.second);
+
+    Q_EMIT portDataSet(cn.first, PortType::In, cn.second);
   }
 }
 

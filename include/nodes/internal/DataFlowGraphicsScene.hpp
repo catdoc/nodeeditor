@@ -14,7 +14,7 @@ class NODE_EDITOR_PUBLIC DataFlowGraphicsScene
   Q_OBJECT
 public:
 
-  DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
+  DataFlowGraphicsScene(DataFlowGraphModel &graphModel,
                         QObject * parent = nullptr);
 
   ~DataFlowGraphicsScene() = default;
@@ -39,6 +39,11 @@ public Q_SLOTS:
   void
   load();
 
+  void
+  onPortDataSet(NodeId const nodeId,
+                PortType const portType,
+                PortIndex const portIndex);
+
 
   //std::shared_ptr<Connection> restoreConnection(QJsonObject const & connectionJson);
 
@@ -55,7 +60,7 @@ public Q_SLOTS:
 
 private:
 
-  DataFlowGraphModel & _graphModel;
+  DataFlowGraphModel &_graphModel;
 };
 
 }

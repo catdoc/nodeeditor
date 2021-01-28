@@ -23,6 +23,7 @@
 #include "ConnectionGraphicsObject.hpp"
 #include "DataModelRegistry.hpp"
 #include "GraphicsView.hpp"
+#include "NodeGeometry.hpp"
 #include "NodeGraphicsObject.hpp"
 
 namespace QtNodes
@@ -30,13 +31,13 @@ namespace QtNodes
 
 
 DataFlowGraphicsScene::
-DataFlowGraphicsScene(DataFlowGraphModel & graphModel,
+DataFlowGraphicsScene(DataFlowGraphModel &graphModel,
                       QObject * parent)
   : BasicGraphicsScene(graphModel, parent)
   , _graphModel(graphModel)
 {
-  setItemIndexMethod(QGraphicsScene::NoIndex);
-
+  connect(&_graphModel, &GraphModel::portDataSet,
+          this, &DataFlowGraphicsScene::onPortDataSet);
 }
 
 
@@ -103,7 +104,7 @@ createSceneMenu(QPointF const scenePos)
   auto registry = _graphModel.dataModelRegistry();
 
   QMap<QString, QTreeWidgetItem*> topLevelItems;
-  for (auto const & cat : registry->categories())
+  for (auto const &cat : registry->categories())
   {
     auto item = new QTreeWidgetItem(treeView);
     item->setText(0, cat);
@@ -111,7 +112,7 @@ createSceneMenu(QPointF const scenePos)
     topLevelItems[cat] = item;
   }
 
-  for (auto const & assoc : registry->registeredModelsCategoryAssociation())
+  for (auto const &assoc : registry->registeredModelsCategoryAssociation())
   {
     auto parent = topLevelItems[assoc.second];
     auto item   = new QTreeWidgetItem(parent);
@@ -148,9 +149,9 @@ createSceneMenu(QPointF const scenePos)
 
   //Setup filtering
   connect(txtBox, &QLineEdit::textChanged,
-          [&](const QString & text)
+          [&](const QString &text)
           {
-            for (auto & topLvlItem : topLevelItems)
+            for (auto &topLvlItem : topLevelItems)
             {
               for (int i = 0; i < topLvlItem->childCount(); ++i)
               {
@@ -200,7 +201,7 @@ restoreConnection(QJsonObject const &connectionJson)
                           NodeDataType outType { converterJson["out"].toObject()["id"].toString(),
                                                  converterJson["out"].toObject()["name"].toString() };
 
-                          auto converter  =
+                          auto converter =
                             registry().getTypeConverter(outType, inType);
 
                           if (converter)
@@ -222,9 +223,9 @@ restoreConnection(QJsonObject const &connectionJson)
 }
 
 
-Node&
+Node &
 DataFlowGraphicsScene::
-restoreNode(QJsonObject const& nodeJson)
+restoreNode(QJsonObject const &nodeJson)
 {
   QString modelName = nodeJson["model"].toObject()["name"].toString();
 
@@ -312,7 +313,7 @@ saveToMemory() const
 
   QJsonArray nodesJsonArray;
 
-  for (auto const & pair : _nodes)
+  for (auto const &pair : _nodes)
   {
     auto const &node = pair.second;
 
@@ -322,7 +323,7 @@ saveToMemory() const
   sceneJson["nodes"] = nodesJsonArray;
 
   QJsonArray connectionJsonArray;
-  for (auto const & pair : _connections)
+  for (auto const &pair : _connections)
   {
     auto const &connection = pair.second;
 
@@ -342,7 +343,7 @@ saveToMemory() const
 
 void
 DataFlowGraphicsScene::
-loadFromMemory(const QByteArray& data)
+loadFromMemory(const QByteArray &data)
 {
   QJsonObject const jsonDocument = QJsonDocument::fromJson(data).object();
 
@@ -363,6 +364,26 @@ loadFromMemory(const QByteArray& data)
 
 
 #endif
+
+void
+DataFlowGraphicsScene::
+onPortDataSet(NodeId const nodeId,
+              PortType const portType,
+              PortIndex const portIndex)
+{
+  auto node = nodeGraphicsObject(nodeId);
+
+  if (node)
+  {
+    node->setGeometryChanged();
+
+    NodeGeometry geometry(*node);
+    geometry.recalculateSize();
+
+    node->update();
+    node->moveConnections();
+  }
+}
 
 
 }
