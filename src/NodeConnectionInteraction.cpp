@@ -120,8 +120,6 @@ tryConnect() const
 
   model.addConnection(newConnectionId);
 
-  // 5) Poke model to intiate data transfer
-
   return true;
 }
 

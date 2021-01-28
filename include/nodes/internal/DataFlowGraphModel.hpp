@@ -37,8 +37,8 @@ public:
   allNodeIds() const override;
 
   std::unordered_set<std::pair<NodeId, PortIndex>>
-  connectedNodes(NodeId    nodeId,
-                 PortType  portType,
+  connectedNodes(NodeId nodeId,
+                 PortType portType,
                  PortIndex portIndex) const override;
 
   NodeId
@@ -51,21 +51,21 @@ public:
   nodeData(NodeId nodeId, NodeRole role) const override;
 
   bool
-  setNodeData(NodeId   nodeId,
+  setNodeData(NodeId nodeId,
               NodeRole role,
               QVariant value) override;
 
   QVariant
-  portData(NodeId    nodeId,
-           PortType  portType,
+  portData(NodeId nodeId,
+           PortType portType,
            PortIndex portIndex,
-           PortRole  role) const override;
+           PortRole role) const override;
 
   bool
-  setPortData(NodeId    nodeId,
-              PortType  portType,
+  setPortData(NodeId nodeId,
+              PortType portType,
               PortIndex portIndex,
-              PortRole  role) const override;
+              PortRole role) const override;
 
   bool
   deleteConnection(ConnectionId const connectionId) override;
@@ -81,8 +81,13 @@ private:
 private Q_SLOTS:
 
   void
-  onNodeDataUpdated(NodeId const    nodeId,
+  onNodeDataUpdated(NodeId const nodeId,
                     PortIndex const portIndex);
+
+
+  void
+  propagateEmptyDataTo(NodeId const nodeId,
+                       PortIndex const portIndex);
 
 private:
 

@@ -15,8 +15,7 @@ class AdditionModel : public MathOperationDataModel
 {
 public:
 
-  virtual
-  ~AdditionModel() {}
+  ~AdditionModel() = default;
 
 public:
 
@@ -50,4 +49,6 @@ private:
 
     Q_EMIT dataUpdated(outPortIndex);
   }
+
+
 };

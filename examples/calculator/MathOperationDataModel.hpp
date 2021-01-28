@@ -24,8 +24,7 @@ class MathOperationDataModel : public NodeDataModel
 
 public:
 
-  virtual
-  ~MathOperationDataModel() {}
+  ~MathOperationDataModel() = default;
 
 public:
 

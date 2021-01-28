@@ -61,6 +61,10 @@ addNode(QString const nodeType)
             [newId, this](PortIndex const portIndex)
             { onNodeDataUpdated(newId, portIndex); });
 
+    //connect(model.get(), &NodeDataModel::dataInvalidated,
+    //[newId, this](PortIndex const portIndex)
+    //{ propagateEmptyDataTo(newId, portIndex); });
+
     _models[newId] = std::move(model);
 
     Q_EMIT nodeCreated(newId);
@@ -93,6 +97,9 @@ addConnection(ConnectionId const connectionId)
   connect(PortType::In);
 
   Q_EMIT connectionCreated(connectionId);
+
+  onNodeDataUpdated(getNodeId(PortType::Out, connectionId),
+                    getPortIndex(PortType::Out, connectionId));
 }
 
 
@@ -313,7 +320,13 @@ deleteConnection(ConnectionId const connectionId)
   disconnect(PortType::In);
 
   if (disconnected)
+  {
     Q_EMIT connectionDeleted(connectionId);
+
+    propagateEmptyDataTo(getNodeId(PortType::In, connectionId),
+                         getPortIndex(PortType::In, connectionId));
+
+  }
 
   return disconnected;
 }
@@ -344,19 +357,18 @@ DataFlowGraphModel::
 onNodeDataUpdated(NodeId const nodeId,
                   PortIndex const portIndex)
 {
-  qDebug() << "Data updated :" << nodeId << portIndex;
-
-
 
   auto const &connected =
     connectedNodes(nodeId, PortType::Out, portIndex);
 
   // TODO: Should we pull the data through the model?
-  //auto outPortData =
-  //portData(nodeId,
-  //PortType::Out,
-  //portIndex,
-  //PortRole::Data).value<std::shared_ptr<NodeData>>();
+  /*
+     auto outPortData =
+     portData(nodeId,
+     PortType::Out,
+     portIndex,
+     PortRole::Data).value<std::shared_ptr<NodeData>>();
+   */
 
 
   auto const outPortData =
@@ -369,6 +381,20 @@ onNodeDataUpdated(NodeId const nodeId,
 
     Q_EMIT portDataSet(cn.first, PortType::In, cn.second);
   }
+}
+
+
+void
+
+DataFlowGraphModel::
+propagateEmptyDataTo(NodeId const nodeId,
+                     PortIndex const portIndex)
+{
+  auto const emptyData = std::shared_ptr<NodeData>();
+
+  _models[nodeId]->setInData(emptyData, portIndex);
+
+  Q_EMIT portDataSet(nodeId, PortType::In, portIndex);
 }
 
 
