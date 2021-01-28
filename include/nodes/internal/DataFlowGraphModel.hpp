@@ -53,7 +53,7 @@ public:
   bool
   setNodeData(NodeId   nodeId,
               NodeRole role,
-              QVariant value) override :
+              QVariant value) override;
 
   QVariant
   portData(NodeId    nodeId,
@@ -77,6 +77,12 @@ private:
 
   NodeId
   newNodeId() { return _nextNodeId++; }
+
+private Q_SLOTS:
+
+  void
+  onNodeDataUpdated(NodeId const    nodeId,
+                    PortIndex const portIndex);
 
 private:
 

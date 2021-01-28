@@ -10,6 +10,7 @@ using ConnectionPolicy = QtNodes::ConnectionPolicy;
 using NodeFlag        = QtNodes::NodeFlag;
 using NodeFlags       = QtNodes::NodeFlags;
 using NodeId          = QtNodes::NodeId;
+using NodeRole        = QtNodes::NodeRole;
 using PortIndex       = QtNodes::PortIndex;
 using PortRole        = QtNodes::PortRole;
 using PortType        = QtNodes::PortType;

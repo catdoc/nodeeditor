@@ -19,11 +19,6 @@ class NODE_EDITOR_PUBLIC GraphModel : public QObject
 {
   Q_OBJECT
 public:
-
-  using NodeId    = QtNodes::NodeId;
-  using NodeRole  = QtNodes::NodeRole;
-  using PortIndex = QtNodes::PortIndex;
-
   /// @brief Returns the full set of unique Node Ids.
   /**
    * Users are responsible for generating unique unsigned int Ids for

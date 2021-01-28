@@ -11,6 +11,7 @@
 #include <QtCore/QString>
 
 #include "Export.hpp"
+#include "NodeData.hpp"
 #include "NodeDataModel.hpp"
 #include "QStringStdHash.hpp"
 
@@ -19,8 +20,8 @@ namespace QtNodes
 
 inline
 bool
-operator<(QtNodes::NodeDataType const &d1,
-          QtNodes::NodeDataType const &d2)
+operator<(NodeDataType const &d1,
+          NodeDataType const &d2)
 {
   return d1.id < d2.id;
 }

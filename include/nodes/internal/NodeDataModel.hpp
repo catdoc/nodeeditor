@@ -7,20 +7,11 @@
 #include "Definitions.hpp"
 #include "Export.hpp"
 #include "NodeData.hpp"
-#include "NodeGeometry.hpp"
-//#include "NodePainterDelegate.hpp"
 #include "NodeStyle.hpp"
 #include "Serializable.hpp"
 
 namespace QtNodes
 {
-
-//enum class NodeValidationState
-//{
-//Valid,
-//Warning,
-//Error
-//};
 
 class StyleCollection;
 
@@ -150,10 +141,10 @@ public Q_SLOTS:
 Q_SIGNALS:
 
   void
-  dataUpdated(PortIndex index);
+  dataUpdated(PortIndex const index);
 
   void
-  dataInvalidated(PortIndex index);
+  dataInvalidated(PortIndex const index);
 
   void
   computingStarted();
@@ -168,4 +159,6 @@ private:
 
   NodeStyle _nodeStyle;
 };
+
+
 }

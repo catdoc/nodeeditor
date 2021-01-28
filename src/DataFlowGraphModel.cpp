@@ -33,9 +33,16 @@ connectedNodes(NodeId    nodeId,
                PortType  portType,
                PortIndex portIndex) const
 {
-  return _connectivity[std::make_tuple(nodeId,
-                                       portType,
-                                       portIndex)];
+  std::unordered_set<std::pair<NodeId, PortIndex>> result;
+
+  auto const key = std::make_tuple(nodeId, portType, portIndex);
+
+  auto it = _connectivity.find(key);
+
+  if (it != _connectivity.end())
+    result = it->second;
+
+  return result;
 }
 
 
@@ -43,17 +50,17 @@ NodeId
 DataFlowGraphModel::
 addNode(QString const nodeType)
 {
-
   std::unique_ptr<NodeDataModel> model =
     _registry->create(nodeType);
 
   if (model)
   {
+    NodeId newId = newNodeId();
 
     connect(model.get(), &NodeDataModel::dataUpdated,
-            this, &DataFlowGraphModel::onNodeDataUpdated);
+            [newId, this](PortIndex const portIndex)
+            { onNodeDataUpdated(newId, portIndex); });
 
-    NodeId newId = newNodeId();
     _models[newId] = std::move(model);
 
     Q_EMIT nodeCreated(newId);
@@ -150,8 +157,6 @@ nodeData(NodeId nodeId, NodeRole role) const
 }
 
 
-}
-
 bool
 DataFlowGraphModel::
 setNodeData(NodeId   nodeId,
@@ -226,7 +231,8 @@ portData(NodeId    nodeId,
   switch (role)
   {
     case PortRole::Data:
-      result = QVariant();
+      if (portType == PortType::Out)
+        result = QVariant::fromValue(model->outData(portIndex));
       break;
 
     case PortRole::DataType:
@@ -330,5 +336,39 @@ deleteNode(NodeId const nodeId)
   Q_EMIT nodeDeleted(nodeId);
 
   return true;
+}
+
+
+void
+DataFlowGraphModel::
+onNodeDataUpdated(NodeId const    nodeId,
+                  PortIndex const portIndex)
+{
+  qDebug() << "Data updated :" << nodeId << portIndex;
+
+
+
+  auto const & connected =
+    connectedNodes(nodeId, PortType::Out, portIndex);
+
+  // TODO: Should we pull the data through the model?
+  //auto outPortData =
+    //portData(nodeId,
+             //PortType::Out,
+             //portIndex,
+             //PortRole::Data).value<std::shared_ptr<NodeData>>();
+
+
+  auto const outPortData =
+    _models[nodeId]->outData(portIndex);
+
+
+  for (auto const & cn : connected)
+  {
+    _models[cn.first]->setInData(outPortData, cn.second);
+  }
+}
+
+
 }
 
