@@ -6,8 +6,9 @@
 #include <nodes/NodeData>
 
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AdditionModel.hpp"
 #include "DivisionModel.hpp"
@@ -21,6 +22,7 @@ using QtNodes::DataFlowGraphModel;
 using QtNodes::DataFlowGraphicsScene;
 using QtNodes::DataModelRegistry;
 using QtNodes::GraphicsView;
+
 
 static std::shared_ptr<DataModelRegistry>
 registerDataModels()
@@ -37,14 +39,6 @@ registerDataModels()
   ret->registerModel<MultiplicationModel>("Operators");
 
   ret->registerModel<DivisionModel>("Operators");
-
-  //ret->registerTypeConverter(std::make_pair(DecimalData().type(),
-  //IntegerData().type()),
-  //TypeConverter{DecimalToIntegerConverter()});
-
-  //ret->registerTypeConverter(std::make_pair(IntegerData().type(),
-  //DecimalData().type()),
-  //TypeConverter{IntegerToDecimalConverter()});
 
   return ret;
 }
@@ -107,8 +101,10 @@ main(int argc, char *argv[])
   QObject::connect(loadAction, &QAction::triggered,
                    scene, &DataFlowGraphicsScene::load);
 
-  mainWidget.setWindowTitle("Dataflow tools: simplest calculator");
+  mainWidget.setWindowTitle("Data Flow: simplest calculator");
   mainWidget.resize(800, 600);
+  // Center window.
+  mainWidget.move(QApplication::desktop()->screen()->rect().center() - mainWidget.rect().center());
   mainWidget.showNormal();
 
   return app.exec();
