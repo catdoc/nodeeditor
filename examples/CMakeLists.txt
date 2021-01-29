@@ -7,7 +7,6 @@ add_subdirectory(text)
 add_subdirectory(images)
 
 add_subdirectory(styles)
-#add_subdirectory(connection_colors)
 
-
+add_subdirectory(connection_colors)
 

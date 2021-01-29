@@ -38,10 +38,9 @@ main(int argc, char *argv[])
 
   DataFlowGraphModel dataFlowGraphModel(registry);
 
-  DataFlowGraphicsScene * scene =
-    new DataFlowGraphicsScene(dataFlowGraphModel);
+  DataFlowGraphicsScene scene(dataFlowGraphModel);
 
-  GraphicsView view(scene);
+  GraphicsView view(&scene);
 
   view.setWindowTitle("Data Flow: Resizable Images");
   view.resize(800, 600);

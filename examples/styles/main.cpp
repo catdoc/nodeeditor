@@ -35,7 +35,7 @@ void
 setStyle()
 {
   GraphicsViewStyle::setStyle(
-  R"(
+    R"(
   {
     "GraphicsViewStyle": {
       "BackgroundColor": [255, 255, 240],
@@ -46,7 +46,7 @@ setStyle()
   )");
 
   NodeStyle::setNodeStyle(
-  R"(
+    R"(
   {
     "NodeStyle": {
       "NormalBoundaryColor": "darkgray",
@@ -68,7 +68,7 @@ setStyle()
   )");
 
   ConnectionStyle::setConnectionStyle(
-  R"(
+    R"(
   {
     "ConnectionStyle": {
       "ConstructionColor": "gray",
@@ -87,8 +87,6 @@ setStyle()
   )");
 }
 
-
-//------------------------------------------------------------------------------
 
 int
 main(int argc, char* argv[])
@@ -110,3 +108,4 @@ main(int argc, char* argv[])
 
   return app.exec();
 }
+

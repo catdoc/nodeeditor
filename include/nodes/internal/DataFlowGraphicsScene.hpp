@@ -40,8 +40,8 @@ public Q_SLOTS:
   load();
 
   void
-  onPortDataSet(NodeId const nodeId,
-                PortType const portType,
+  onPortDataSet(NodeId const    nodeId,
+                PortType const  portType,
                 PortIndex const portIndex);
 
 
