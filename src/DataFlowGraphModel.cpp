@@ -61,10 +61,6 @@ addNode(QString const nodeType)
             [newId, this](PortIndex const portIndex)
             { onNodeDataUpdated(newId, portIndex); });
 
-    //connect(model.get(), &NodeDataModel::dataInvalidated,
-    //[newId, this](PortIndex const portIndex)
-    //{ propagateEmptyDataTo(newId, portIndex); });
-
     _models[newId] = std::move(model);
 
     Q_EMIT nodeCreated(newId);
