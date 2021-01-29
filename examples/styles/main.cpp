@@ -1,21 +1,23 @@
-#include <QtWidgets/QApplication>
-
-#include <nodes/NodeData>
-#include <nodes/FlowScene>
-#include <nodes/FlowView>
-#include <nodes/DataModelRegistry>
-#include <nodes/NodeStyle>
-#include <nodes/FlowViewStyle>
 #include <nodes/ConnectionStyle>
+#include <nodes/DataFlowGraphModel>
+#include <nodes/DataFlowGraphicsScene>
+#include <nodes/DataModelRegistry>
+#include <nodes/GraphicsView>
+#include <nodes/GraphicsViewStyle>
+#include <nodes/NodeData>
+#include <nodes/NodeStyle>
+
+#include <QtWidgets/QApplication>
 
 #include "models.hpp"
 
-using QtNodes::DataModelRegistry;
-using QtNodes::FlowScene;
-using QtNodes::FlowView;
-using QtNodes::FlowViewStyle;
-using QtNodes::NodeStyle;
 using QtNodes::ConnectionStyle;
+using QtNodes::DataFlowGraphModel;
+using QtNodes::DataFlowGraphicsScene;
+using QtNodes::DataModelRegistry;
+using QtNodes::GraphicsView;
+using QtNodes::GraphicsViewStyle;
+using QtNodes::NodeStyle;
 
 static std::shared_ptr<DataModelRegistry>
 registerDataModels()
@@ -32,10 +34,10 @@ static
 void
 setStyle()
 {
-  FlowViewStyle::setStyle(
+  GraphicsViewStyle::setStyle(
   R"(
   {
-    "FlowViewStyle": {
+    "GraphicsViewStyle": {
       "BackgroundColor": [255, 255, 240],
       "FineGridColor": [245, 245, 230],
       "CoarseGridColor": [235, 235, 220]
@@ -95,9 +97,12 @@ main(int argc, char* argv[])
 
   setStyle();
 
-  FlowScene scene(registerDataModels());
+  std::shared_ptr<DataModelRegistry> registry = registerDataModels();
+  DataFlowGraphModel dataFlowGraphModel(registry);
 
-  FlowView view(&scene);
+  DataFlowGraphicsScene scene(dataFlowGraphModel);
+
+  GraphicsView view(&scene);
 
   view.setWindowTitle("Style example");
   view.resize(800, 600);
