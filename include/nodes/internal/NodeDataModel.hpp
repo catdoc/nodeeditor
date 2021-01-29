@@ -104,18 +104,6 @@ public:
   bool
   resizable() const { return false; }
 
-  //virtual
-  //NodeValidationState
-  //validationState() const { return NodeValidationState::Valid; }
-
-  //virtual
-  //QString
-  //validationMessage() const { return QString(""); }
-
-  //virtual
-  //NodePainterDelegate*
-  //painterDelegate() const { return nullptr; }
-
 public Q_SLOTS:
 
   virtual void

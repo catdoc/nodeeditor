@@ -118,7 +118,6 @@ embedQWidget()
 }
 
 
-
 #if 0
 void
 NodeGraphicsObject::
@@ -141,6 +140,8 @@ onNodeSizeUpdated()
     }
   }
 }
+
+
 #endif
 
 
@@ -299,6 +300,15 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
       }
     }
   }
+
+  if (_graphModel.nodeFlags(_nodeId) & NodeFlag::Resizable)
+  {
+    NodeGeometry geometry(*this);
+
+    auto pos = event->pos();
+    bool const hit = geometry.resizeRect().contains(QPoint(pos.x(), pos.y()));
+    _nodeState.setResizing(hit);
+  }
 }
 
 
@@ -306,33 +316,35 @@ void
 NodeGraphicsObject::
 mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
-  //NodeGeometry geometry(*this);
-
   if (_nodeState.resizing())
   {
-    //auto diff = event->pos() - event->lastPos();
+    auto diff = event->pos() - event->lastPos();
 
-    //if (auto w = _node.nodeDataModel()->embeddedWidget())
-    //{
-    //prepareGeometryChange();
+    if (auto w = _graphModel.nodeData(_nodeId,
+                                      NodeRole::Widget).value<QWidget*>())
+    {
+      prepareGeometryChange();
 
-    //auto oldSize = w->size();
+      auto oldSize = w->size();
 
-    //oldSize += QSize(diff.x(), diff.y());
+      oldSize += QSize(diff.x(), diff.y());
 
-    //w->setFixedSize(oldSize);
+      w->setFixedSize(oldSize);
 
-    //_proxyWidget->setMinimumSize(oldSize);
-    //_proxyWidget->setMaximumSize(oldSize);
-    //_proxyWidget->setPos(geom.widgetPosition());
+      NodeGeometry geometry(*this);
 
-    //geom.recalculateSize();
-    //update();
+      _proxyWidget->setMinimumSize(oldSize);
+      _proxyWidget->setMaximumSize(oldSize);
+      _proxyWidget->setPos(geometry.widgetPosition());
 
-    //moveConnections();
+      geometry.recalculateSize();
 
-    //event->accept();
-    //}
+      update();
+
+      moveConnections();
+
+      event->accept();
+    }
   }
   else
   {
